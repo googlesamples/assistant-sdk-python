@@ -79,7 +79,7 @@ python samples/simple_assistant.py --client_secrets client_secret.json
 License
 =======
 
-Copyright 2016 The Android Open Source Project, Inc.
+Copyright (C) 2016 Google Inc.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
 license agreements.  See the NOTICE file distributed with this work for
