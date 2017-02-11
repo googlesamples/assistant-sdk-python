@@ -71,7 +71,7 @@ Run the sample
 
 - Run the following command.
 ```
-python samples/simple_assistant.py --client_secrets client_secret.json
+python embedded_assistant.py --client_secrets client_secret.json
 ```
 - Follow the authorization instructions.
 - Record your voice query and the sample should play back the assistant answer.
