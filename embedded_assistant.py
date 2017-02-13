@@ -18,7 +18,12 @@ from __future__ import division
 
 import argparse
 import contextlib
-import cStringIO
+try:
+  # python 2.x
+  from cStringIO import StringIO
+except ImportError:
+  # python 3.x
+  from io import StringIO
 import functools
 import signal
 import sys
@@ -125,7 +130,7 @@ def _fill_buffer(buff, in_data, frame_count, time_info, status_flags):
 def record_or_read_audio(rate, chunk, stop_sending_audio, filename=None):
     """Opens a file or recording stream in a context manager."""
     if filename:
-        print 'Reading audio from file:', filename
+        print('Reading audio from file:', filename)
         yield read_audio_from_file(filename, rate, chunk, stop_sending_audio)
         return
 
@@ -134,8 +139,8 @@ def record_or_read_audio(rate, chunk, stop_sending_audio, filename=None):
 
     audio_interface = pyaudio.PyAudio()
     # For troubleshooting purposes, print out which input device PyAudio chose.
-    print 'PyAudio INPUT device: {}'.format(
-        audio_interface.get_default_input_device_info()['name'])
+    print('PyAudio INPUT device: {}'.format(
+        audio_interface.get_default_input_device_info()['name']))
     audio_stream = audio_interface.open(
         format=pyaudio.paInt16,
         # The API currently only supports 1-channel (mono) audio
@@ -148,7 +153,7 @@ def record_or_read_audio(rate, chunk, stop_sending_audio, filename=None):
         stream_callback=functools.partial(_fill_buffer, buff),
     )
 
-    print '---------- RECORDING STARTED ----------'
+    print('---------- RECORDING STARTED ----------')
 
     yield _audio_data_generator(buff)
 
@@ -157,7 +162,7 @@ def record_or_read_audio(rate, chunk, stop_sending_audio, filename=None):
     # Signal the _audio_data_generator to finish
     buff.put(None)
     audio_interface.terminate()
-    print '---------- RECORDING FINISHED ----------'
+    print('---------- RECORDING FINISHED ----------')
 # [END audio_stream]
 
 
@@ -173,7 +178,7 @@ def request_stream(data_stream, rate, stop_sending_audio, token=''):
         token: OAuth2 access token as from OAuth2 Playground
     """
     if not token:
-        print 'No access token provided; Assistant responses are disabled.'
+        print('No access token provided; Assistant responses are disabled.')
     # The initial request must contain metadata about the stream, so the
     # server knows how to interpret it.
     audio_in_config = embedded_assistant_pb2.AudioInConfig(
@@ -200,7 +205,7 @@ def request_stream(data_stream, rate, stop_sending_audio, token=''):
 
     for data in data_stream:
         if stop_sending_audio.is_set():
-            print 'request stream stopping at request of server'
+            print('request stream stopping at request of server')
             break
         # Subsequent requests can all just have the content
         yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
@@ -219,8 +224,8 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
     frames_per_buffer = OUTPUT_RATE
     audio_interface = pyaudio.PyAudio()
     # For troubleshooting purposes, print out which output device PyAudio chose.
-    print 'PyAudio OUTPUT device: {}'.format(
-        audio_interface.get_default_output_device_info()['name'])
+    print('PyAudio OUTPUT device: {}'.format(
+        audio_interface.get_default_output_device_info()['name']))
 
     out_stream = audio_interface.open(
         format=pyaudio.paInt16,
@@ -236,11 +241,11 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
             raise RuntimeError('Server error: ' + resp.error.message)
 
         if resp.event_type == 1:  # END_OF_UTTERANCE
-            print 'server reported END_OF_UTTERANCE'
+            print('server reported END_OF_UTTERANCE')
             stop_sending_audio.set()
 
         if len(resp.assistant_text) > 0:
-            print 'assistant_text: ', resp.assistant_text
+            print('assistant_text: ', resp.assistant_text)
 
         if len(resp.audio_out.audio_data) > 0:
             # This example plays audio bytes from the server as soon as the
@@ -259,8 +264,8 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
     # add some silence to the end of the audio playback.
     out_stream.write(b'\x00' * frames_per_buffer * 2)
 
-    print ''
-    print 'audio_out', total_bytes, 'total bytes from', total_chunks, 'chunks.'
+    print('')
+    print('audio_out', total_bytes, 'total bytes from', total_chunks, 'chunks.')
 
     out_stream.stop_stream()
     out_stream.close()
