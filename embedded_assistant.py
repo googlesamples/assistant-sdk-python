@@ -19,11 +19,11 @@ from __future__ import division
 import argparse
 import contextlib
 try:
-  # python 2.x
-  from cStringIO import StringIO
+    # python 2.x
+    from cStringIO import StringIO
 except ImportError:
-  # python 3.x
-  from io import StringIO
+    # python 3.x
+    from io import StringIO
 import functools
 import signal
 import sys
@@ -54,13 +54,16 @@ DEADLINE_SECS = 60 * 3 + 5
 SPEECH_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
 ACTIONS_SCOPE = 'https://www.googleapis.com/auth/search-actions'
 
+
 class read_stream_from_string(object):
     """A read-only stream sourced from a string"""
+
     def __init__(self, data):
-        self._io = cStringIO.StringIO(data)
+        self._io = StringIO(data)
 
     def read(self, *args):
         return self._io.read(*args)
+
 
 def read_audio_from_file(filename, rate, chunk, stop_sending_audio):
     # Yields bytearrays from file of chunk size at sample rate in Hz.
@@ -71,10 +74,12 @@ def read_audio_from_file(filename, rate, chunk, stop_sending_audio):
             data = f.read(chunk)
             # If file ends with partial chunk, pad with zeroes.
             yield data + b'\x00' * (chunk - len(data))
-            # Print an '.' for each frame sent. (Helps to illustrate streaming.)
+            # Print an '.' for each frame sent. (Helps to illustrate
+            # streaming.)
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(float(chunk) / float(rate))
+
 
 def make_channel(host, port):
     """Creates a secure channel with auth credentials from the environment."""
@@ -173,8 +178,8 @@ def request_stream(data_stream, rate, stop_sending_audio, token=''):
     Args:
         data_stream: A generator that yields raw audio data to send.
         rate: The sampling rate in hertz.
-        stop_sending_audio: A threading.Event that should be set once the server
-            decides that we should stop sending input audio bytes.
+        stop_sending_audio: A threading.Event that should be set once the
+            server decides that we should stop sending input audio bytes.
         token: OAuth2 access token as from OAuth2 Playground
     """
     if not token:
@@ -223,7 +228,8 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
     # PyAudio and snd_bcm2835 if this value is too small.
     frames_per_buffer = OUTPUT_RATE
     audio_interface = pyaudio.PyAudio()
-    # For troubleshooting purposes, print out which output device PyAudio chose.
+    # For troubleshooting purposes, print out which output device PyAudio
+    # chose.
     print('PyAudio OUTPUT device: {}'.format(
         audio_interface.get_default_output_device_info()['name']))
 
@@ -259,13 +265,13 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
             sys.stdout.write('*')
             sys.stdout.flush()
 
-
     # PyAudio sometimes chops off the end of the audio. As a workaround, we
     # add some silence to the end of the audio playback.
     out_stream.write(b'\x00' * frames_per_buffer * 2)
 
     print('')
-    print('audio_out', total_bytes, 'total bytes from', total_chunks, 'chunks.')
+    print('audio_out', total_bytes,
+          'total bytes from', total_chunks, 'chunks.')
 
     out_stream.stop_stream()
     out_stream.close()
@@ -280,12 +286,12 @@ def main():
                         'If missing, no Assistant responses will be returned.')
     parser.add_argument('-s', '--client_secrets', type=str, default=None,
                         help='Path to the client secrets JSON file. '
-                       'It can be downloaded from the API Manager section '
-                       'of the Google Developers console. '
-                       'If provided, starts on the appropriate flow '
-                       'to acquire OAuth2 access tokens. '
-                       'If missing, the `access_token` flag will be used '
-                       'if present')
+                        'It can be downloaded from the API Manager section '
+                        'of the Google Developers console. '
+                        'If provided, starts on the appropriate flow '
+                        'to acquire OAuth2 access tokens. '
+                        'If missing, the `access_token` flag will be used '
+                        'if present')
     parser.add_argument('-i', '--input_audio_file', type=str, default=None,
                         help='Path to input audio file. '
                         'If missing, uses pyaudio capture (usually a mic)')
@@ -293,8 +299,9 @@ def main():
 
     access_token = None
     if args.client_secrets:
-        credentials = get_credentials_flow(args.client_secrets,
-                                           scopes=[SPEECH_SCOPE, ACTIONS_SCOPE])
+        credentials = get_credentials_flow(
+            args.client_secrets,
+            scopes=[SPEECH_SCOPE, ACTIONS_SCOPE])
         # TODO(proppy): remove when gRPC authorization is implemented.
         access_token = credentials.token
     else:
