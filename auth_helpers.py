@@ -51,15 +51,17 @@ class DeviceFlow(google.oauth2.flow.Flow):
   def __init__(self, client_config, scopes, **kwargs):
     """
     Args:
-    client_secrets: The client configuration
+    client_config: The client configuration
       in the Google `client secrets` format.
     scopes: The list of scopes to request during the flow.
     """
-    client_id = DeviceClient(client_config['installed']['client_id'])
-    super(DeviceFlow, self).__init__(client_config,
-                                     scopes,
-                                     client=client_id,
-                                     **kwargs)
+    client = DeviceClient(client_config['installed']['client_id'])
+    session, client_config = (
+        google.oauth2.oauthlib.session_from_client_config(
+            client_config, scopes, client=client, **kwargs))
+    super(DeviceFlow, self).__init__(session,
+                                     client_type='installed',
+                                     client_config=client_config)
   def device_code(self):
     r = self.oauth2session.post(
         'https://accounts.google.com/o/oauth2/device/code',
@@ -110,8 +112,12 @@ def webflow_interactive(client_secrets, scopes):
       in the Google `client secrets` format.
     scopes: The list of scopes to request during the flow.
   """
-  flow = google.oauth2.flow.Flow(client_secrets, scopes,
-                                 redirect_uri='http://localhost:8000')
+  session, client_config = (
+      google.oauth2.oauthlib.session_from_client_config(
+          client_secrets, scopes, redirect_uri='http://localhost:8000'))
+  flow = google.oauth2.flow.Flow(session,
+                                 client_type='web',
+                                 client_config=client_config)
   auth_url, _ = flow.authorization_url(prompt='consent')
   print("visit: '%s'" % auth_url)
 
