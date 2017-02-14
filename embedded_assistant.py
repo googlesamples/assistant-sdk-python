@@ -18,12 +18,6 @@ from __future__ import division
 
 import argparse
 import contextlib
-try:
-    # python 2.x
-    from cStringIO import StringIO
-except ImportError:
-    # python 3.x
-    from io import StringIO
 import functools
 import signal
 import sys
@@ -38,6 +32,7 @@ from google.rpc import code_pb2
 from grpc.framework.interfaces.face import face
 import pyaudio
 from six.moves import queue
+from six import StringIO
 
 from auth_helpers import get_credentials_flow
 

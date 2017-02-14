@@ -17,10 +17,7 @@
 import sys
 import json
 from time import sleep
-try:
-    from urllib.parse import parse_qsl
-except ImportError:
-    from urlparse import parse_qsl
+from six.moves.urllib.parse import parse_qsl
 from wsgiref.simple_server import make_server, WSGIRequestHandler
 
 from oauthlib.oauth2.rfc6749.clients.base import Client
@@ -89,7 +86,7 @@ def deviceflow_interactive(client_secrets, scopes):
     """
     flow = DeviceFlow(client_secrets, scopes)
     user_code, url, device_code = flow.device_code()
-    print("visit: '%s' and enter code: '%s'" % (url, user_code))
+    print("visit: %s and enter code: %s" % (url, user_code))
 
     while True:
         try:
@@ -123,7 +120,7 @@ def webflow_interactive(client_secrets, scopes):
                                    client_type='web',
                                    client_config=client_config)
     auth_url, _ = flow.authorization_url(prompt='consent')
-    print("visit: '%s'" % auth_url)
+    print("visit: %s" % auth_url)
 
     def wait_for_request(message):
         result = {}
@@ -176,4 +173,4 @@ if __name__ == '__main__':
         sys.stderr.write(usage)
         sys.exit(-1)
     credentials = get_credentials_flow(sys.argv[1], scopes=sys.argv[2:])
-    print("access_token: '%s'" % credentials.token)
+    print("access_token: %s" % credentials.token)
