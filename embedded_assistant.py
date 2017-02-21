@@ -14,15 +14,10 @@
 # limitations under the License.
 """Sample that implements GRPC client for Embedded Google Assistant API."""
 
-from __future__ import division
-
 import argparse
-import contextlib
-import functools
 import signal
 import sys
 import threading
-import time
 
 import google.auth
 import google.auth.transport.grpc
@@ -31,15 +26,19 @@ import embedded_assistant_pb2
 from google.rpc import code_pb2
 from grpc.framework.interfaces.face import face
 import pyaudio
-from six.moves import queue
-from six import StringIO
 
 from auth_helpers import get_credentials_flow
 
-# Audio recording parameters
-INPUT_RATE = 16000
-OUTPUT_RATE = 24000
-CHUNK = int(INPUT_RATE / 10)  # 100ms
+# Audio parameters
+# Audio Input sample rate in Hertz.
+AUDIO_INPUT_SAMPLE_RATE = 16000
+# Audio Output sample rate in Hertz.
+# Note: API supports higher freqs but using the same sample rate
+# allows us to share the same audio stream for input and output.
+# TODO(proppy): check error message when different sample rate returned.
+AUDIO_OUTPUT_SAMPLE_RATE = 16000
+# Audio I/O chunk size in bytes.
+AUDIO_CHUNK_BYTES = 1024
 
 # The API has a streaming limit of 60 seconds of audio*, so keep the
 # connection alive for that long, plus some more to give the API time to figure
@@ -48,32 +47,6 @@ CHUNK = int(INPUT_RATE / 10)  # 100ms
 DEADLINE_SECS = 60 * 3 + 5
 SPEECH_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
 ACTIONS_SCOPE = 'https://www.googleapis.com/auth/search-actions'
-
-
-class read_stream_from_string(object):
-    """A read-only stream sourced from a string"""
-
-    def __init__(self, data):
-        self._io = StringIO(data)
-
-    def read(self, *args):
-        return self._io.read(*args)
-
-
-def read_audio_from_file(filename, rate, chunk, stop_sending_audio):
-    # Yields bytearrays from file of chunk size at sample rate in Hz.
-    # After end-of-file, yields zeroes until stop_sending_audio is set.
-    # File must be LINEAR16 (raw, no header) mono, recorded at sample rate.
-    with open(filename, 'rb') as f:
-        while not stop_sending_audio.is_set():
-            data = f.read(chunk)
-            # If file ends with partial chunk, pad with zeroes.
-            yield data + b'\x00' * (chunk - len(data))
-            # Print an '.' for each frame sent. (Helps to illustrate
-            # streaming.)
-            sys.stdout.write('.')
-            sys.stdout.flush()
-            time.sleep(float(chunk) / float(rate))
 
 
 def make_channel(host, port):
@@ -89,84 +62,8 @@ def make_channel(host, port):
         credentials, http_request, target)
 
 
-def _audio_data_generator(buff):
-    """A generator that yields all available data in the given buffer.
-
-    Args:
-        buff - a Queue object, where each element is a chunk of data.
-    Yields:
-        A chunk of data that is the aggregate of all chunks of data in `buff`.
-        The function will block until at least one data chunk is available.
-    """
-    stop = False
-    while not stop:
-        # Use a blocking get() to ensure there's at least one chunk of data.
-        data = [buff.get()]
-
-        # Now consume whatever other data's still buffered.
-        while True:
-            try:
-                data.append(buff.get(block=False))
-            except queue.Empty:
-                break
-
-        # `None` in the buffer signals that the audio stream is closed. Yield
-        # the final bit of the buffer and exit the loop.
-        if None in data:
-            stop = True
-            data.remove(None)
-
-        yield b''.join(data)
-
-
-def _fill_buffer(buff, in_data, frame_count, time_info, status_flags):
-    """Continuously collect data from the audio stream, into the buffer."""
-    buff.put(in_data)
-    return None, pyaudio.paContinue
-
-
-# [START audio_stream]
-@contextlib.contextmanager
-def record_or_read_audio(rate, chunk, stop_sending_audio, filename=None):
-    """Opens a file or recording stream in a context manager."""
-    if filename:
-        print('Reading audio from file:', filename)
-        yield read_audio_from_file(filename, rate, chunk, stop_sending_audio)
-        return
-
-    # Create a thread-safe buffer of audio data
-    buff = queue.Queue()
-
-    audio_interface = pyaudio.PyAudio()
-    # For troubleshooting purposes, print out which input device PyAudio chose.
-    print('PyAudio INPUT device: {}'.format(
-        audio_interface.get_default_input_device_info()['name']))
-    audio_stream = audio_interface.open(
-        format=pyaudio.paInt16,
-        # The API currently only supports 1-channel (mono) audio
-        # https://goo.gl/z757pE
-        channels=1, rate=rate,
-        input=True, frames_per_buffer=chunk,
-        # Run the audio stream asynchronously to fill the buffer object.
-        # This is necessary so that the input device's buffer doesn't overflow
-        # while the calling thread makes network requests, etc.
-        stream_callback=functools.partial(_fill_buffer, buff),
-    )
-
-    print('---------- RECORDING STARTED ----------')
-
-    yield _audio_data_generator(buff)
-
-    audio_stream.stop_stream()
-    audio_stream.close()
-    # Signal the _audio_data_generator to finish
-    buff.put(None)
-    audio_interface.terminate()
-    print('---------- RECORDING FINISHED ----------')
-# [END audio_stream]
-
-
-def request_stream(data_stream, rate, stop_sending_audio, token=''):
+def request_stream(input_stream, rate, chunk,
+                   stop_sending_audio, start_playback, token=''):
     """Yields `ConverseRequest`s constructed from a recording audio
     stream.
 
@@ -185,7 +82,7 @@ def request_stream(data_stream, rate, stop_sending_audio, token=''):
         # There are a bunch of config options you can specify. See
         # https://goo.gl/KPZn97 for the full list.
         encoding='LINEAR16',  # raw 16-bit signed little-endian samples
-        sample_rate_hertz=rate,  # the rate in hertz
+        sample_rate_hertz=rate,  # the sample rate in hertz
         # See http://g.co/cloud/speech/docs/languages
         # for a list of supported languages.
         language_code='en-US',  # a BCP-47 language tag
@@ -193,7 +90,7 @@ def request_stream(data_stream, rate, stop_sending_audio, token=''):
     )
     audio_out_config = embedded_assistant_pb2.AudioOutConfig(
         encoding='LINEAR16',  # raw 16-bit signed little-endian samples
-        sample_rate_hertz=OUTPUT_RATE,  # the rate in hertz
+        sample_rate_hertz=AUDIO_OUTPUT_SAMPLE_RATE,  # the sample rate in hertz
         volume_percentage=50,
     )
     converse_config = embedded_assistant_pb2.ConverseConfig(
@@ -202,16 +99,20 @@ def request_stream(data_stream, rate, stop_sending_audio, token=''):
     )
 
     yield embedded_assistant_pb2.ConverseRequest(config=converse_config)
-
-    for data in data_stream:
-        if stop_sending_audio.is_set():
-            print('request stream stopping at request of server')
-            break
+    print('---------- RECORDING STARTED ----------')
+    while not stop_sending_audio.is_set():
+        data = input_stream.read(chunk).ljust(chunk, b'\x00')
         # Subsequent requests can all just have the content
         yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
+        # TODO(proppy): when sending audio from file w/o timing the
+        # backend sometimes hangs or fails with the following error:
+        # `Client called HalfClose before end-of-data`.
+    print('---------- RECORDING FINISHED ----------')
+    start_playback.set()
 
 
-def listen_print_loop(recognize_stream, stop_sending_audio):
+def listen_print_loop(recognize_stream, audio_stream,
+                      stop_sending_audio, start_playback):
     """Iterates through server responses and prints them.
 
     The recognize_stream passed is a generator that will block until a response
@@ -219,23 +120,6 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
     """
     total_bytes = 0
     total_chunks = 0
-    # Raspberry Pi headphone-jack audio-output may be choppy with
-    # PyAudio and snd_bcm2835 if this value is too small.
-    frames_per_buffer = OUTPUT_RATE
-    audio_interface = pyaudio.PyAudio()
-    # For troubleshooting purposes, print out which output device PyAudio
-    # chose.
-    print('PyAudio OUTPUT device: {}'.format(
-        audio_interface.get_default_output_device_info()['name']))
-
-    out_stream = audio_interface.open(
-        format=pyaudio.paInt16,
-        channels=1,
-        rate=OUTPUT_RATE,
-        output=True,
-        frames_per_buffer=frames_per_buffer
-    )
-    out_stream.start_stream()
 
     for resp in recognize_stream:
         if resp.error.code != code_pb2.OK:
@@ -249,28 +133,21 @@ def listen_print_loop(recognize_stream, stop_sending_audio):
             print('assistant_text: ', resp.assistant_text)
 
         if len(resp.audio_out.audio_data) > 0:
+            start_playback.wait()
             # This example plays audio bytes from the server as soon as the
             # bytes are received. This is a simple and naive approach; a better
             # approach might involve buffering some of the audio bytes based on
             # network speed and available memory.
-            out_stream.write(resp.audio_out.audio_data)
+            audio_stream.write(resp.audio_out.audio_data)
             total_bytes += len(resp.audio_out.audio_data)
             total_chunks += 1
             # Print '*' for each frame received. (Helps illustrate streaming.)
             sys.stdout.write('*')
             sys.stdout.flush()
 
-    # PyAudio sometimes chops off the end of the audio. As a workaround, we
-    # add some silence to the end of the audio playback.
-    out_stream.write(b'\x00' * frames_per_buffer * 2)
-
     print('')
     print('audio_out', total_bytes,
           'total bytes from', total_chunks, 'chunks.')
-
-    out_stream.stop_stream()
-    out_stream.close()
-    audio_interface.terminate()
 
 
 def main():
@@ -308,29 +185,44 @@ def main():
 
     # We set this Event when the server tells us to stop sending audio.
     stop_sending_audio = threading.Event()
+    # We set this Event when it is safe to play audio.
+    start_playback = threading.Event()
 
-    # For streaming audio from the microphone, there are three threads.
-    # First, a thread that collects audio data as it comes in
-    with record_or_read_audio(
-            INPUT_RATE, CHUNK, stop_sending_audio,
-            args.input_audio_file) as buffered_audio_data:
-        # Second, a thread that sends requests with that data
-        requests = request_stream(buffered_audio_data, INPUT_RATE,
-                                  stop_sending_audio, token=access_token)
-        # Third, a thread that listens for transcription responses
-        recognize_stream = service.Converse(requests, DEADLINE_SECS)
+    audio_interface = pyaudio.PyAudio()
+    # For troubleshooting purposes, print out which input device PyAudio chose.
+    print('PyAudio device: {}'.format(
+        audio_interface.get_default_input_device_info()['name']))
+    audio_stream = audio_interface.open(
+        format=pyaudio.paInt16,
+        # The API currently only supports 1-channel (mono) audio
+        # https://goo.gl/z757pE
+        channels=1, rate=AUDIO_INPUT_SAMPLE_RATE, frames_per_buffer=AUDIO_CHUNK_BYTES,
+        input=True, output=True
+    )
 
-        # Exit things cleanly on interrupt
-        signal.signal(signal.SIGINT, lambda *_: recognize_stream.cancel())
+    input_stream = (open(args.input_audio_file, 'rb') if args.input_audio_file
+                    else audio_stream)
+    # thread that sends requests with that data
+    requests = request_stream(input_stream, AUDIO_INPUT_SAMPLE_RATE, AUDIO_CHUNK_BYTES,
+                              stop_sending_audio, start_playback,
+                              token=access_token)
+    # thread that listens for transcription responses
+    recognize_stream = service.Converse(requests, DEADLINE_SECS)
 
-        # Now, put the transcription responses to use.
-        try:
-            listen_print_loop(recognize_stream, stop_sending_audio)
+    # Exit things cleanly on interrupt
+    signal.signal(signal.SIGINT, lambda *_: recognize_stream.cancel())
 
-            recognize_stream.cancel()
-        except face.CancellationError:
-            # This happens because of the interrupt handler
-            pass
+    # Now, put the transcription responses to use.
+    try:
+        listen_print_loop(recognize_stream, audio_stream,
+                          stop_sending_audio, start_playback)
+        recognize_stream.cancel()
+    except face.CancellationError:
+        # This happens because of the interrupt handler
+        pass
+
+    input_stream.close()
+    audio_interface.terminate()
 
 
 if __name__ == '__main__':
