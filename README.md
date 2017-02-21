@@ -21,7 +21,9 @@ API Setup
 - Enable `Google Cloud Speech API`.
 - Go to `API Manager / Credentials`.
 - Click `Create credentials / OAuth Client ID`.
-- Select `Other` and click `Create`.
+- Select `Web`.
+- Add `http://localhost:8080` and `http://raspberrypi.local:8080` as the `Authorized redirect URIs`.
+- Click `Create`.
 - Click `⬇` to download the `client_secret_XXXX.json` file.
 
 Hardware setup
@@ -53,17 +55,19 @@ git clone sso://devrel/samples/assistant/embedded-sdk-python embedded-assistant-
 cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secret.json
 ```
 
-- Copy this directory to the Raspberry Pi using scp:
+- Copy this directory to the Raspberry Pi using `scp`:
 
 ```
-scp -r embedded-assistant-sdk-python pi@raspberry:/home/pi
+scp -r embedded-assistant-sdk-python pi@raspberrypi.local:/home/pi
 ```
 
-- SSH into the Raspberry Pi:
+- SSH into the Raspberry Pi and install the sample dependencies:
 
 ```
-ssh pi@raspberry
+ssh pi@raspberrypi.local
 cd embedded-assistant-sdk-python
+python -m venv env
+env/bin/python -m pip install -r requirements.txt
 ```
 
 Run the sample
