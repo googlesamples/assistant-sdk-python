@@ -45,14 +45,13 @@ AUDIO_CHUNK_BYTES = 1024
 # out the transcription.
 # * https://g.co/cloud/speech/limits#content
 DEADLINE_SECS = 60 * 3 + 5
-SPEECH_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
-ACTIONS_SCOPE = 'https://www.googleapis.com/auth/search-actions'
+ASSISTANT_SCOPE = 'https://www.googleapis.com/auth/assistant'
 
 
 def make_channel(host, port):
     """Creates a secure channel with auth credentials from the environment."""
     # Grab application default credentials from the environment
-    credentials, _ = google.auth.default(scopes=[SPEECH_SCOPE])
+    credentials, _ = google.auth.default(scopes=[ASSISTANT_SCOPE])
 
     # Create a secure channel using the credentials.
     http_request = google.auth.transport.requests.Request()
@@ -173,7 +172,7 @@ def main():
     if args.client_secrets:
         credentials = get_credentials_flow(
             args.client_secrets,
-            scopes=[SPEECH_SCOPE, ACTIONS_SCOPE])
+            scopes=[ASSISTANT_SCOPE])
         # TODO(proppy): remove when gRPC authorization is implemented.
         access_token = credentials.token
     else:
