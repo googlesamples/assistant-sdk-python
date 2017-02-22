@@ -15,60 +15,72 @@
 """auth_helpers implements Device and Web authorization flow."""
 
 import sys
-import json
-from time import sleep
-from six.moves.urllib.parse import parse_qsl
-from wsgiref.simple_server import make_server, WSGIRequestHandler
 
-from oauthlib.oauth2.rfc6749.clients.base import Client
-from oauthlib.oauth2.rfc6749.parameters import prepare_token_request
-from oauthlib.oauth2.rfc6749.errors import MissingTokenError
 import google.oauth2.flow
+import google.oauth2.credentials
 
 
-def oobflow_interactive(client_secrets, scopes):
+def credentials_flow_interactive(client_secrets_file, scopes):
     """Initiate an interactive OAuth2InstalledApp flow.
 
     - Display a URL for the user to visit.
     - URL displays a code for the user to copy.
     - Wait on standard input for the user to enter the provided code.
     - Exchange OAuth2 tokens.
-    - Return credentials.
-
-    Args:
-      client_secrets: The client configuration
-        in the Google `client secrets` format.
-      scopes: The list of scopes to request during the flow.
-    """
-    session, client_config = (
-        google.oauth2.oauthlib.session_from_client_config(
-            client_secrets, scopes, redirect_uri='urn:ietf:wg:oauth:2.0:oob'))
-    flow = google.oauth2.flow.Flow(session,
-                                   client_type='installed',
-                                   client_config=client_config)
-    auth_url, _ = flow.authorization_url(prompt='consent')
-    print('visit: %s' % auth_url)
-    code = input('enter the code: ')
-    flow.fetch_token(code=code)
-    return flow.credentials
-
-
-def get_credentials_flow(client_secrets_file, scopes):
-    """Initiate an interactive OAuth2InstalledApp flow.
 
     Args:
       client_secrets_file: The path to the client secrets JSON file.
       scopes: The list of scopes to request during the flow.
+    Returns: serializable credentials.
     """
-    with open(client_secrets_file, 'r') as json_file:
-        client_config = json.load(json_file)
-    return oobflow_interactive(client_config, scopes)
+    flow = google.oauth2.flow.Flow.from_client_secrets_file(
+        client_secrets_file,
+        scopes=scopes,
+        redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+    auth_url, _ = flow.authorization_url(prompt='consent')
+    print('Please go to this URL: %s' % auth_url)
+    code = input('Enter the authorization code: ')
+    flow.fetch_token(code=code)
+    credentials = flow.credentials
+    return {'access_token': credentials.token,
+            'refresh_token': credentials._refresh_token,
+            'token_uri': credentials._token_uri,
+            'client_id': credentials._client_id,
+            'client_secret': credentials._client_secret}
+
+
+def refresh_credentials(credentials, scopes):
+    """Refresh OAuth credentials from serialized value.
+
+    Args:
+      credentials: serialized credentials.
+      scopes: The list of scopes to use the credentials with.
+    Returns: OAuth2 credentials instance.
+    """
+    credentials = google.oauth2.credentials.Credentials(
+        credentials['access_token'],
+        credentials['refresh_token'],
+        credentials['token_uri'],
+        credentials['client_id'],
+        credentials['client_secret'],
+        scopes=scopes)
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    return {'access_token': credentials.token,
+            'refresh_token': credentials._refresh_token,
+            'token_uri': credentials._token_uri,
+            'client_id': credentials._client_id,
+            'client_secret': credentials._client_secret}
 
 
 if __name__ == '__main__':
-    usage = 'usage: auth_helpers.py path/to/client_secrets.json SCOPES...\n'
-    if len(sys.argv) < 3:
-        sys.stderr.write(usage)
-        sys.exit(-1)
-    credentials = get_credentials_flow(sys.argv[1], scopes=sys.argv[2:])
-    print('access_token: %s' % credentials.token)
+    import argparse
+    parser = argparse.ArgumentParser(description='helper script to generate OAuth2 credentials')
+    parser.add_argument('client_secrets', type=str,
+                        help='Path to OAuth2 client secret JSON file. ')
+    parser.add_argument('scopes', type=str, nargs='+',
+                        help='API scopes to authorize access for.')
+    args = parser.parse_args()
+    credentials = credentials_flow_interactive(args.client_secrets,
+                                               args.scopes)
+    print('access_token: %s' % credentials['access_token'])

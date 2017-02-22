@@ -3,3 +3,4 @@ env/
 env2/
 *~
 *.pyc
+.embedded_assistant_credentials.json

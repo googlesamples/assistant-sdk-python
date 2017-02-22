@@ -73,11 +73,15 @@ cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secr
 Run the sample
 ==============
 
-- Run the following command.
+- Initialize new OAuth2 credentials by running the following command
+  and follow its instructions.
 ```
-env/bin/python embedded_assistant.py --client_secrets client_secret.json
+env/bin/python embedded_assistant.py --authorize client_secret.json
 ```
-- Follow the authorization instructions.
+- Start the Embedded Assistant sample.
+```
+env/bin/python embedded_assistant.py
+```
 - Record your voice query and the sample should play back the Google
   Assistant answer.
 

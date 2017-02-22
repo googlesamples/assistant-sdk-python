@@ -15,6 +15,7 @@
 """Sample that implements GRPC client for Embedded Google Assistant API."""
 
 import argparse
+import json
 import signal
 from six import print_
 import sys
@@ -23,14 +24,15 @@ import threading
 import google.auth
 import google.auth.transport.grpc
 import google.auth.transport.requests
+import google.oauth2.credentials
 import embedded_assistant_pb2
 from google.rpc import code_pb2
 from grpc.framework.interfaces.face import face
 
-from auth_helpers import get_credentials_flow
 from audio_helpers import (SampleRateLimiter,
                            SharedAudioStream,
                            WaveStreamWriter)
+from auth_helpers import credentials_flow_interactive, refresh_credentials
 
 # Audio parameters
 
@@ -153,37 +155,76 @@ def listen_print_loop(recognize_stream, output_stream,
           'total bytes from', total_chunks, 'chunks.')
 
 
+EPILOG = """examples:
+  # embedded_assistant.py --authorize /path/to/client_secret.json
+  Initialize new OAuth2 credentials with the given client secret file:
+  (can be downloaded from the API Manager in Google Developers console)
+  - start an interactive OAuth2 authorization flow
+  - save new OAuth2 credentials locally
+  (location can be specific with the --credentials flag)
+  - exit
+
+  # embedded_assistant.py
+  Run the Embedded Assistant sample with microphone input:
+  - use the credentials created with the --authorize flag
+  - record voice query from microphone
+  - play assistant response on speaker
+  - exit
+
+  # embedded_assistant.py -i /path/to/query.riff
+  Run the Embedded Assistant sample with file input:
+  - use the credentials created with the --authorize flag
+  - read voice query from the given file
+  (using the -i flag)
+  - play assistant response on speaker
+  - exit
+"""
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('access_token', type=str, nargs='?', default='',
-                        help='Access token from OAuth2 Playground. '
-                        'If provided, enables Assistant audio responses. '
-                        'If missing, no Assistant responses will be returned.')
-    parser.add_argument('-s', '--client_secrets', type=str, default=None,
-                        help='Path to the client secrets JSON file. '
-                        'It can be downloaded from the API Manager section '
-                        'of the Google Developers console. '
-                        'If provided, starts on the appropriate flow '
-                        'to acquire OAuth2 access tokens. '
-                        'If missing, the `access_token` flag will be used '
-                        'if present')
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog=EPILOG)
+    # TODO(proppy): refactor flag documentation
+    parser.add_argument('--authorize', type=str,
+                        metavar='CLIENT_SECRET_JSON_FILE', default=None,
+                        help='Initialize the embedded assistant credentials. '
+                        'If missing, existing credentials will be used.')
     parser.add_argument('-i', '--input_audio_file', type=str, default=None,
                         help='Path to input audio file. '
                         'If missing, uses pyaudio capture')
     parser.add_argument('-o', '--output_audio_file', type=str, default=None,
                         help='Path to output audio file. '
                         'If missing, uses pyaudio playback')
+    parser.add_argument('--credentials', type=str,
+                        metavar='OAUTH2_CREDENTIALS_FILE',
+                        default='.embedded_assistant_credentials.json',
+                        help='Path to store and read OAuth2 credentials '
+                        'generated with the `--authorize` flag.')
     args = parser.parse_args()
+    if args.authorize:
+        credentials = credentials_flow_interactive(args.authorize,
+                                                   scopes=[ASSISTANT_SCOPE])
+        with open(args.credentials, 'w') as f:
+            json.dump(credentials, f)
+            print('OAuth credentials initialized:', args.credentials)
+            print('Run the sample without the `--authorize` flag '
+                  'to start the embedded assistant')
+        return
 
-    access_token = None
-    if args.client_secrets:
-        credentials = get_credentials_flow(
-            args.client_secrets,
-            scopes=[ASSISTANT_SCOPE])
-        # TODO(proppy): remove when gRPC authorization is implemented.
-        access_token = credentials.token
-    else:
-        access_token = args.access_token
+    try:
+        with open(args.credentials, 'r') as f:
+            credentials = json.load(f)
+            credentials = refresh_credentials(credentials,
+                                              scopes=[ASSISTANT_SCOPE])
+            # TODO(proppy): remove when gRPC authorization is implemented.
+            access_token = credentials['access_token']
+    except Exception as e:
+        print('Error loading credentials:', e,
+              file=sys.stderr)
+        print('Run the sample with the `--authorize` flag '
+              'to initialize new OAuth2 credentials.',
+              file=sys.stderr)
+        return
 
     # TODO(proppy): construct gRPC channel with credentials.
     service = embedded_assistant_pb2.EmbeddedAssistantStub(
