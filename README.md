@@ -7,8 +7,7 @@ API.
 Pre-requisites
 --------------
 
-- Raspberry Pi 3 running Raspbian
-- USB audio adapter
+- Python >= 3.4
 - Microphone
 - Speaker
 
@@ -22,7 +21,7 @@ API Setup
 - Go to `API Manager / Credentials`.
 - Click `Create credentials / OAuth Client ID`.
 - Select `Web`.
-- Add `http://localhost:8080` and `http://raspberrypi.local:8080` as the `Authorized redirect URIs`.
+- Add `http://localhost:8000` as the `Authorized redirect URIs`.
 - Click `Create`.
 - Click `⬇` to download the `client_secret_XXXX.json` file.
 
@@ -40,8 +39,8 @@ arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
 aplay --format=S16_LE --rate=16k out.raw
 ```
 
-R Setup
-==================
+Setup
+=====
 
 - Clone this repository:
 
@@ -55,19 +54,14 @@ git clone sso://devrel/samples/assistant/embedded-sdk-python embedded-assistant-
 cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secret.json
 ```
 
-- Copy this directory to the Raspberry Pi using `scp`:
+- Install the sample dependencies:
 
 ```
-scp -r embedded-assistant-sdk-python pi@raspberrypi.local:/home/pi
-```
-
-- SSH into the Raspberry Pi and install the sample dependencies:
-
-```
-ssh pi@raspberrypi.local
+PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
+sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv
 cd embedded-assistant-sdk-python
-python -m venv env
-env/bin/python -m pip install -r requirements.txt
+python3 -m venv env
+env/bin/python3 -m pip install -r requirements.txt
 ```
 
 Run the sample
@@ -75,7 +69,7 @@ Run the sample
 
 - Run the following command.
 ```
-python embedded_assistant.py --client_secrets client_secret.json
+env/bin/python3 embedded_assistant.py --client_secrets client_secret.json
 ```
 - Follow the authorization instructions.
 - Record your voice query and the sample should play back the assistant answer.
