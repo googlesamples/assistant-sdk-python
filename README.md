@@ -20,8 +20,7 @@ API Setup
 - Enable `Google Cloud Speech API`.
 - Go to `API Manager / Credentials`.
 - Click `Create credentials / OAuth Client ID`.
-- Select `Web`.
-- Add `http://localhost:8000` as the `Authorized redirect URIs`.
+- Select `Other`.
 - Click `Create`.
 - Click `⬇` to download the `client_secret_XXXX.json` file.
 
