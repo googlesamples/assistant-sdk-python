@@ -7,7 +7,7 @@ API.
 Pre-requisites
 --------------
 
-- Python >= 3.4
+- Python >= 2.7 or >= 3.4
 - Microphone
 - Speaker
 
@@ -27,10 +27,7 @@ API Setup
 Hardware setup
 ==============
 
-- Connect the Microphone and the Speaker to the USB audio adapter.
-- Connect the USB audio adapter to one of the Raspberry Pi USB port.
 - Verify that the Microphone and the Speaker are working:
-
 ```
 # record a short audio clip
 arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
@@ -38,8 +35,8 @@ arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
 aplay --format=S16_LE --rate=16k out.raw
 ```
 
-Setup
-=====
+Sample Setup
+============
 
 - Clone this repository:
 
@@ -54,24 +51,35 @@ cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secr
 ```
 
 - Install the sample dependencies:
+    - If you're using python 3:
 
-```
-PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
-sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv
-cd embedded-assistant-sdk-python
-python3 -m venv env
-env/bin/python3 -m pip install -r requirements.txt
-```
+        ```
+        PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
+        sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv
+        cd embedded-assistant-sdk-python
+        python3 -m venv env
+        env/bin/python3 -m pip install -r requirements.txt
+        ```
+
+  - If you're using python 2:
+
+        ```
+        sudo apt-get install python-dev python-virtualenv
+        cd embedded-assistant-sdk-python
+        virtualenv env --no-site-packages
+        env/bin/pip install -r requirements.txt
+        ```
 
 Run the sample
 ==============
 
 - Run the following command.
 ```
-env/bin/python3 embedded_assistant.py --client_secrets client_secret.json
+env/bin/python embedded_assistant.py --client_secrets client_secret.json
 ```
 - Follow the authorization instructions.
-- Record your voice query and the sample should play back the assistant answer.
+- Record your voice query and the sample should play back the Google
+  Assistant answer.
 
 License
 =======
