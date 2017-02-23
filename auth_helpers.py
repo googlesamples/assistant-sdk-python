@@ -14,6 +14,7 @@
 # limitations under the License.
 """auth_helpers implements Device and Web authorization flow."""
 
+import json
 import sys
 
 import google.oauth2.flow
@@ -27,11 +28,14 @@ def credentials_flow_interactive(client_secrets_file, scopes):
     - URL displays a code for the user to copy.
     - Wait on standard input for the user to enter the provided code.
     - Exchange OAuth2 tokens.
+    - Returns credentials.
 
     Args:
       client_secrets_file: The path to the client secrets JSON file.
       scopes: The list of scopes to request during the flow.
-    Returns: serializable credentials.
+    Returns:
+      google.oauth2.credentials.Credentials: new OAuth2 credentials authorized
+        with the given scopes.
     """
     flow = google.oauth2.flow.Flow.from_client_secrets_file(
         client_secrets_file,
@@ -41,7 +45,10 @@ def credentials_flow_interactive(client_secrets_file, scopes):
     print('Please go to this URL: %s' % auth_url)
     code = input('Enter the authorization code: ')
     flow.fetch_token(code=code)
-    credentials = flow.credentials
+    return flow.credentials
+
+
+def credentials_to_dict(credentials):
     return {'access_token': credentials.token,
             'refresh_token': credentials._refresh_token,
             'token_uri': credentials._token_uri,
@@ -49,28 +56,37 @@ def credentials_flow_interactive(client_secrets_file, scopes):
             'client_secret': credentials._client_secret}
 
 
-def refresh_credentials(credentials, scopes):
-    """Refresh OAuth credentials from serialized value.
-
-    Args:
-      credentials: serialized credentials.
-      scopes: The list of scopes to use the credentials with.
-    Returns: OAuth2 credentials instance.
-    """
-    credentials = google.oauth2.credentials.Credentials(
+def credentials_from_dict(credentials, scopes):
+    return google.oauth2.credentials.Credentials(
         credentials['access_token'],
         credentials['refresh_token'],
         credentials['token_uri'],
         credentials['client_id'],
         credentials['client_secret'],
         scopes=scopes)
-    request = google.auth.transport.requests.Request()
-    credentials.refresh(request)
-    return {'access_token': credentials.token,
-            'refresh_token': credentials._refresh_token,
-            'token_uri': credentials._token_uri,
-            'client_id': credentials._client_id,
-            'client_secret': credentials._client_secret}
+
+
+def save_credentials(path, credentials):
+    """Write credentials to the given file.
+    Args:
+      path(str): path to the credentials file.
+      credentials(google.oauth2.credentials.Credentials): OAuth2 credentials.
+    """
+    with open(path, 'w') as f:
+        json.dump(credentials_to_dict(credentials), f)
+
+
+def load_credentials(path, scopes):
+    """Load credentials from the given file.
+    Args:
+      path(str): path to the credentials file.
+      scopes: scope for the given credentials.
+    Returns:
+      google.oauth2.credentials.Credentials: OAuth2 credentials.
+    """
+    with open(path, 'r') as f:
+        return credentials_from_dict(json.load(f),
+                                     scopes=scopes)
 
 
 if __name__ == '__main__':

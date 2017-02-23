@@ -15,7 +15,6 @@
 """Sample that implements GRPC client for Embedded Google Assistant API."""
 
 import argparse
-import json
 import signal
 from six import print_
 import sys
@@ -32,7 +31,9 @@ from grpc.framework.interfaces.face import face
 from audio_helpers import (SampleRateLimiter,
                            SharedAudioStream,
                            WaveStreamWriter)
-from auth_helpers import credentials_flow_interactive, refresh_credentials
+from auth_helpers import (credentials_flow_interactive,
+                          save_credentials,
+                          load_credentials)
 
 # Audio parameters
 
@@ -53,19 +54,6 @@ AUDIO_CHUNK_BYTES = 1024
 # * https://g.co/cloud/speech/limits#content
 DEADLINE_SECS = 60 * 3 + 5
 ASSISTANT_SCOPE = 'https://www.googleapis.com/auth/assistant'
-
-
-def make_channel(host, port):
-    """Creates a secure channel with auth credentials from the environment."""
-    # Grab application default credentials from the environment
-    credentials, _ = google.auth.default(scopes=[ASSISTANT_SCOPE])
-
-    # Create a secure channel using the credentials.
-    http_request = google.auth.transport.requests.Request()
-    target = '{}:{}'.format(host, port)
-
-    return google.auth.transport.grpc.secure_authorized_channel(
-        credentials, http_request, target)
 
 
 def request_stream(input_stream, rate, chunk,
@@ -204,20 +192,15 @@ def main():
     if args.authorize:
         credentials = credentials_flow_interactive(args.authorize,
                                                    scopes=[ASSISTANT_SCOPE])
-        with open(args.credentials, 'w') as f:
-            json.dump(credentials, f)
-            print('OAuth credentials initialized:', args.credentials)
-            print('Run the sample without the `--authorize` flag '
-                  'to start the embedded assistant')
+        save_credentials(args.credentials, credentials)
+        print('OAuth credentials initialized:', args.credentials)
+        print('Run the sample without the `--authorize` flag '
+              'to start the embedded assistant')
         return
 
     try:
-        with open(args.credentials, 'r') as f:
-            credentials = json.load(f)
-            credentials = refresh_credentials(credentials,
-                                              scopes=[ASSISTANT_SCOPE])
-            # TODO(proppy): remove when gRPC authorization is implemented.
-            access_token = credentials['access_token']
+        credentials = load_credentials(args.credentials,
+                                       scopes=[ASSISTANT_SCOPE])
     except Exception as e:
         print('Error loading credentials:', e,
               file=sys.stderr)
@@ -226,9 +209,13 @@ def main():
               file=sys.stderr)
         return
 
-    # TODO(proppy): construct gRPC channel with credentials.
-    service = embedded_assistant_pb2.EmbeddedAssistantStub(
-        make_channel('internal-assistant-api', 443))
+    http_request = google.auth.transport.requests.Request()
+    channel = google.auth.transport.grpc.secure_authorized_channel(
+        credentials, http_request, 'internal-assistant-api')
+    service = embedded_assistant_pb2.EmbeddedAssistantStub(channel)
+    # TODO(proppy): remove when gRPC auth is implemented in the backend.
+    credentials.refresh(http_request)
+    access_token = credentials.token
 
     # We set this Event when the server tells us to stop sending audio.
     stop_sending_audio = threading.Event()
