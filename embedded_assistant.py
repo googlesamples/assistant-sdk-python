@@ -26,19 +26,20 @@ import google.auth.transport.requests
 import embedded_assistant_pb2
 from google.rpc import code_pb2
 from grpc.framework.interfaces.face import face
-import pyaudio
 
 from auth_helpers import get_credentials_flow
-from audio_helpers import SampleRateLimiter
+from audio_helpers import (SampleRateLimiter,
+                           SharedAudioStream,
+                           WaveStreamWriter)
 
 # Audio parameters
-# Audio Input sample rate in Hertz.
-AUDIO_INPUT_SAMPLE_RATE = 16000
-# Audio Output sample rate in Hertz.
-# Note: API supports higher freqs but using the same sample rate
-# allows us to share the same audio stream for input and output.
+
+# Audio sample rate in Hertz.
+# Note: API supports higher freqs but using the same sample rate for
+# input and output allows us to share the same audio stream for input
+# and output.
 # TODO(proppy): check error message when different sample rate returned.
-AUDIO_OUTPUT_SAMPLE_RATE = 16000
+AUDIO_SAMPLE_RATE = 16000
 # Audio sample size in bytes.
 AUDIO_BYTES_PER_SAMPLE = 2
 # Audio I/O chunk size in bytes.
@@ -93,7 +94,7 @@ def request_stream(input_stream, rate, chunk,
     )
     audio_out_config = embedded_assistant_pb2.AudioOutConfig(
         encoding='LINEAR16',  # raw 16-bit signed little-endian samples
-        sample_rate_hertz=AUDIO_OUTPUT_SAMPLE_RATE,  # the sample rate in hertz
+        sample_rate_hertz=AUDIO_SAMPLE_RATE,  # the sample rate in hertz
         volume_percentage=50,
     )
     converse_config = embedded_assistant_pb2.ConverseConfig(
@@ -113,7 +114,7 @@ def request_stream(input_stream, rate, chunk,
     start_playback.set()
 
 
-def listen_print_loop(recognize_stream, audio_stream,
+def listen_print_loop(recognize_stream, output_stream,
                       stop_sending_audio, start_playback):
     """Iterates through server responses and prints them.
 
@@ -140,7 +141,7 @@ def listen_print_loop(recognize_stream, audio_stream,
             # bytes are received. This is a simple and naive approach; a better
             # approach might involve buffering some of the audio bytes based on
             # network speed and available memory.
-            audio_stream.write(resp.audio_out.audio_data)
+            output_stream.write(resp.audio_out.audio_data)
             total_bytes += len(resp.audio_out.audio_data)
             total_chunks += 1
             # Print '*' for each frame received. (Helps illustrate streaming.)
@@ -168,7 +169,10 @@ def main():
                         'if present')
     parser.add_argument('-i', '--input_audio_file', type=str, default=None,
                         help='Path to input audio file. '
-                        'If missing, uses pyaudio capture (usually a mic)')
+                        'If missing, uses pyaudio capture')
+    parser.add_argument('-o', '--output_audio_file', type=str, default=None,
+                        help='Path to output audio file. '
+                        'If missing, uses pyaudio playback')
     args = parser.parse_args()
 
     access_token = None
@@ -190,28 +194,24 @@ def main():
     # We set this Event when it is safe to play audio.
     start_playback = threading.Event()
 
-    audio_interface = pyaudio.PyAudio()
-    # For troubleshooting purposes, print out which input device PyAudio chose.
-    print('PyAudio device: {}'.format(
-        audio_interface.get_default_input_device_info()['name']))
-    audio_stream = audio_interface.open(
-        format=pyaudio.paInt16,
-        # The API currently only supports 1-channel (mono) audio
-        # https://goo.gl/z757pE
-        channels=1,
-        rate=AUDIO_INPUT_SAMPLE_RATE,
-        frames_per_buffer=AUDIO_CHUNK_BYTES,
-        input=True, output=True
-    )
-
     input_stream = (SampleRateLimiter(open(args.input_audio_file, 'rb'),
-                                      AUDIO_INPUT_SAMPLE_RATE,
+                                      AUDIO_SAMPLE_RATE,
                                       AUDIO_BYTES_PER_SAMPLE)
                     if args.input_audio_file
-                    else audio_stream)
+                    else SharedAudioStream(AUDIO_SAMPLE_RATE,
+                                           AUDIO_BYTES_PER_SAMPLE,
+                                           AUDIO_CHUNK_BYTES))
+    output_stream = (WaveStreamWriter(open(args.output_audio_file, 'wb'),
+                                      AUDIO_SAMPLE_RATE,
+                                      AUDIO_BYTES_PER_SAMPLE)
+                     if args.output_audio_file
+                     else SharedAudioStream(AUDIO_SAMPLE_RATE,
+                                            AUDIO_BYTES_PER_SAMPLE,
+                                            AUDIO_CHUNK_BYTES))
+
     # thread that sends requests with that data
     requests = request_stream(input_stream,
-                              AUDIO_INPUT_SAMPLE_RATE, AUDIO_CHUNK_BYTES,
+                              AUDIO_SAMPLE_RATE, AUDIO_CHUNK_BYTES,
                               stop_sending_audio, start_playback,
                               token=access_token)
     # thread that listens for transcription responses
@@ -222,7 +222,7 @@ def main():
 
     # Now, put the transcription responses to use.
     try:
-        listen_print_loop(recognize_stream, audio_stream,
+        listen_print_loop(recognize_stream, output_stream,
                           stop_sending_audio, start_playback)
         recognize_stream.cancel()
     except face.CancellationError:
@@ -230,7 +230,7 @@ def main():
         pass
 
     input_stream.close()
-    audio_interface.terminate()
+    output_stream.close()
 
 
 if __name__ == '__main__':
