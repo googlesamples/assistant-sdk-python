@@ -29,6 +29,7 @@ from grpc.framework.interfaces.face import face
 import pyaudio
 
 from auth_helpers import get_credentials_flow
+from audio_helpers import SampleRateLimiter
 
 # Audio parameters
 # Audio Input sample rate in Hertz.
@@ -38,6 +39,8 @@ AUDIO_INPUT_SAMPLE_RATE = 16000
 # allows us to share the same audio stream for input and output.
 # TODO(proppy): check error message when different sample rate returned.
 AUDIO_OUTPUT_SAMPLE_RATE = 16000
+# Audio sample size in bytes.
+AUDIO_BYTES_PER_SAMPLE = 2
 # Audio I/O chunk size in bytes.
 AUDIO_CHUNK_BYTES = 1024
 
@@ -101,12 +104,11 @@ def request_stream(input_stream, rate, chunk,
     yield embedded_assistant_pb2.ConverseRequest(config=converse_config)
     print('---------- RECORDING STARTED ----------')
     while not stop_sending_audio.is_set():
-        data = input_stream.read(chunk).ljust(chunk, b'\x00')
+        data = input_stream.read(chunk)
         # Subsequent requests can all just have the content
         yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
-        # TODO(proppy): when sending audio from file w/o timing the
-        # backend sometimes hangs or fails with the following error:
-        # `Client called HalfClose before end-of-data`.
+        sys.stdout.write('.')
+        sys.stdout.flush()
     print('---------- RECORDING FINISHED ----------')
     start_playback.set()
 
@@ -196,14 +198,20 @@ def main():
         format=pyaudio.paInt16,
         # The API currently only supports 1-channel (mono) audio
         # https://goo.gl/z757pE
-        channels=1, rate=AUDIO_INPUT_SAMPLE_RATE, frames_per_buffer=AUDIO_CHUNK_BYTES,
+        channels=1,
+        rate=AUDIO_INPUT_SAMPLE_RATE,
+        frames_per_buffer=AUDIO_CHUNK_BYTES,
         input=True, output=True
     )
 
-    input_stream = (open(args.input_audio_file, 'rb') if args.input_audio_file
+    input_stream = (SampleRateLimiter(open(args.input_audio_file, 'rb'),
+                                      AUDIO_INPUT_SAMPLE_RATE,
+                                      AUDIO_BYTES_PER_SAMPLE)
+                    if args.input_audio_file
                     else audio_stream)
     # thread that sends requests with that data
-    requests = request_stream(input_stream, AUDIO_INPUT_SAMPLE_RATE, AUDIO_CHUNK_BYTES,
+    requests = request_stream(input_stream,
+                              AUDIO_INPUT_SAMPLE_RATE, AUDIO_CHUNK_BYTES,
                               stop_sending_audio, start_playback,
                               token=access_token)
     # thread that listens for transcription responses
