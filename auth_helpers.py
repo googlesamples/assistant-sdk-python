@@ -15,7 +15,7 @@
 """auth_helpers implements Device and Web authorization flow."""
 
 import json
-import sys
+import logging
 
 import google.oauth2.flow
 import google.oauth2.credentials
@@ -99,4 +99,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     credentials = credentials_flow_interactive(args.client_secrets,
                                                args.scopes)
-    print('access_token: %s' % credentials['access_token'])
+    logging.info('access_token: %s' % credentials['access_token'])

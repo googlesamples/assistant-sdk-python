@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import time
 import pyaudio
 import wave
@@ -160,24 +159,32 @@ if __name__ == '__main__':
     - Record 5 seconds of 16-bit samples at 16khz.
     - Playback the recorded samples.
     """
+    import logging
+    from tqdm import tqdm
+
     sample_rate_hz = 16000
     bytes_per_sample = 2
     buffer_size = 1024
+    record_time = 5
+    end_time = time.time() + record_time
     stream = SharedAudioStream(sample_rate_hz,
                                bytes_per_sample,
                                buffer_size)
-    end_time = time.time() + 5
     samples = []
-    print('Recording sample for 5 seconds:')
-    while time.time() < end_time:
-        samples.append(stream.read(buffer_size))
-        sys.stdout.write('.')
-        sys.stdout.flush()
-    print()
-    print('Playing sample:')
-    while len(samples):
-        stream.write(samples.pop(0))
-        sys.stdout.write('#')
-        sys.stdout.flush()
-    print()
+    logging.basicConfig(level=logging.INFO)
+    logging.info('Starting audio test.')
+    with tqdm(unit='s', total=sample_rate_hz*record_time,
+              position=0) as t:
+        t.set_description('Recording samples: ')
+        while time.time() < end_time:
+            samples.append(stream.read(buffer_size))
+            t.update(buffer_size)
+
+    with tqdm(unit='s', total=sample_rate_hz*record_time, position=1) as t:
+        t.set_description('Playing samples: ')
+        while len(samples):
+            stream.write(samples.pop(0))
+            t.update(buffer_size)
+
     stream.close()
+    logging.info('audio test completed.')

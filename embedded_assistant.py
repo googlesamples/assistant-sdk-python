@@ -15,18 +15,17 @@
 """Sample that implements GRPC client for Embedded Google Assistant API."""
 
 import argparse
+import logging
 import signal
-from six import print_
-import sys
 import threading
 
 import google.auth
 import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.credentials
-import embedded_assistant_pb2
 from google.rpc import code_pb2
 from grpc.framework.interfaces.face import face
+from tqdm import tqdm
 
 from audio_helpers import (SampleRateLimiter,
                            SharedAudioStream,
@@ -34,6 +33,7 @@ from audio_helpers import (SampleRateLimiter,
 from auth_helpers import (credentials_flow_interactive,
                           save_credentials,
                           load_credentials)
+import embedded_assistant_pb2
 
 # Audio parameters
 
@@ -69,7 +69,8 @@ def request_stream(input_stream, rate, chunk,
         token: OAuth2 access token as from OAuth2 Playground
     """
     if not token:
-        print('No access token provided; Assistant responses are disabled.')
+        logging.warning('No access token provided; '
+                        'Assistant responses are disabled.')
     # The initial request must contain metadata about the stream, so the
     # server knows how to interpret it.
     audio_in_config = embedded_assistant_pb2.AudioInConfig(
@@ -91,17 +92,16 @@ def request_stream(input_stream, rate, chunk,
         audio_in_config=audio_in_config,
         audio_out_config=audio_out_config
     )
-
+    t = tqdm(unit='B', unit_scale=True, position=0)
     yield embedded_assistant_pb2.ConverseRequest(config=converse_config)
-    print('---------- RECORDING STARTED ----------')
+    t.set_description('Recording: ')
     while not stop_sending_audio.is_set():
         data = input_stream.read(chunk)
+        t.update(len(data))
         # Subsequent requests can all just have the content
         yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
-        sys.stdout.write('.')
-        sys.stdout.flush()
-    print('---------- RECORDING FINISHED ----------')
     start_playback.set()
+    t.close()
 
 
 def listen_print_loop(recognize_stream, output_stream,
@@ -111,19 +111,18 @@ def listen_print_loop(recognize_stream, output_stream,
     The recognize_stream passed is a generator that will block until a response
     is provided by the server. When the transcription response comes, print it.
     """
-    total_bytes = 0
-    total_chunks = 0
-
+    t = tqdm(unit='B', unit_scale=True, position=1)
+    t.set_description('Playing: ')
     for resp in recognize_stream:
         if resp.error.code != code_pb2.OK:
             raise RuntimeError('Server error: ' + resp.error.message)
 
         if resp.event_type == 1:  # END_OF_UTTERANCE
-            print('server reported END_OF_UTTERANCE')
+            logging.debug('server reported END_OF_UTTERANCE')
             stop_sending_audio.set()
 
         if len(resp.assistant_text) > 0:
-            print('assistant_text: ', resp.assistant_text)
+            logging.debug('assistant_text: %s', resp.assistant_text)
 
         if len(resp.audio_out.audio_data) > 0:
             start_playback.wait()
@@ -132,15 +131,8 @@ def listen_print_loop(recognize_stream, output_stream,
             # approach might involve buffering some of the audio bytes based on
             # network speed and available memory.
             output_stream.write(resp.audio_out.audio_data)
-            total_bytes += len(resp.audio_out.audio_data)
-            total_chunks += 1
-            # Print '*' for each frame received. (Helps illustrate streaming.)
-            sys.stdout.write('*')
-            sys.stdout.flush()
-
-    print('')
-    print('audio_out', total_bytes,
-          'total bytes from', total_chunks, 'chunks.')
+            t.update(len(resp.audio_out.audio_data))
+    t.close()
 
 
 EPILOG = """examples:
@@ -188,25 +180,31 @@ def main():
                         default='.embedded_assistant_credentials.json',
                         help='Path to store and read OAuth2 credentials '
                         'generated with the `--authorize` flag.')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='Verbose logging.')
     args = parser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     if args.authorize:
         credentials = credentials_flow_interactive(args.authorize,
                                                    scopes=[ASSISTANT_SCOPE])
         save_credentials(args.credentials, credentials)
-        print('OAuth credentials initialized:', args.credentials)
-        print('Run the sample without the `--authorize` flag '
-              'to start the embedded assistant')
+        logging.info('OAuth credentials initialized: %s', args.credentials)
+        logging.info('Run the sample without the `--authorize` flag '
+                     'to start the embedded assistant')
         return
 
     try:
         credentials = load_credentials(args.credentials,
                                        scopes=[ASSISTANT_SCOPE])
     except Exception as e:
-        print('Error loading credentials:', e,
-              file=sys.stderr)
-        print('Run the sample with the `--authorize` flag '
-              'to initialize new OAuth2 credentials.',
-              file=sys.stderr)
+        logging.error('Error loading credentials: %s', e)
+        logging.error('Run the sample with the `--authorize` flag '
+                      'to initialize new OAuth2 credentials.')
         return
 
     http_request = google.auth.transport.requests.Request()

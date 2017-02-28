@@ -6,3 +6,4 @@ requests==2.13.0
 requests-oauthlib==0.8.0
 six==1.10.0
 urllib3[secure]==1.20
+tqdm==4.11.2
