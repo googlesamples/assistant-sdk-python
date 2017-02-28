@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#
 # Copyright (C) 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,10 +33,10 @@ class SampleRateLimiter(object):
       bytes_per_sample: sample size in bytes.
     """
     def __init__(self, fp, sample_rate, bytes_per_sample):
-        self.fp = fp
-        self.sample_rate = float(sample_rate)
-        self.bytes_per_sample = float(bytes_per_sample)
-        self.sleep_until = 0
+        self._fp = fp
+        self._sample_rate = float(sample_rate)
+        self._bytes_per_sample = float(bytes_per_sample)
+        self._sleep_until = 0
 
     def read(self, size):
         """Read bytes from the stream and block until sample rate is achieved.
@@ -45,26 +45,36 @@ class SampleRateLimiter(object):
           size: number of bytes to read from the stream.
         """
         now = time.time()
-        missing_dt = self.sleep_until - now
+        missing_dt = self._sleep_until - now
         if missing_dt > 0:
             time.sleep(missing_dt)
-        self.sleep_until = time.time() + self.sleep_time(size)
-        data = self.fp.read(size)
+        self._sleep_until = time.time() + self._sleep_time(size)
+        data = self._fp.read(size)
         #  When reach end of audio stream, pad remainder with silence (zeros).
         return data.ljust(size, b'\x00')
 
-    def sleep_time(self, size):
+    @property
+    def sample_rate(self):
+        """Return the sample rate of the underlying audio stream."""
+        return self._sample_rate
+
+    @property
+    def bytes_per_sample(self):
+        """Return the sample width of the underlying audio stream."""
+        return self._bytes_per_sample
+
+    def _sleep_time(self, size):
         sample_count = size / self.bytes_per_sample
         sample_rate_dt = sample_count / self.sample_rate
         return sample_rate_dt
 
     @property
     def name(self):
-        return self.fp.name
+        return self._fp.name
 
     def close(self):
         """Close the underlying stream."""
-        self.fp.close()
+        self._fp.close()
 
 
 class WaveStreamWriter(object):
@@ -76,11 +86,23 @@ class WaveStreamWriter(object):
       bytes_per_sample: sample size in bytes.
     """
     def __init__(self, fp, sample_rate, bytes_per_sample):
-        self.fp = fp
-        self.wavep = wave.open(self.fp)
-        self.wavep.setsampwidth(bytes_per_sample)
-        self.wavep.setnchannels(1)
-        self.wavep.setframerate(sample_rate)
+        self._fp = fp
+        self._sample_rate = float(sample_rate)
+        self._bytes_per_sample = float(bytes_per_sample)
+        self._wavep = wave.open(self.fp)
+        self._wavep.setsampwidth(bytes_per_sample)
+        self._wavep.setnchannels(1)
+        self._wavep.setframerate(sample_rate)
+
+    @property
+    def sample_rate(self):
+        """Return the sample rate of the underlying audio stream."""
+        return self._sample_rate
+
+    @property
+    def bytes_per_sample(self):
+        """Return the sample width of the underlying audio stream."""
+        return self._bytes_per_sample
 
     def write(self, data):
         """Read frame bytes to the WAV stream.
@@ -88,12 +110,12 @@ class WaveStreamWriter(object):
         Args:
           data: frame data to write.
         """
-        self.wavep.writeframes(data)
+        self._wavep.writeframes(data)
 
     def close(self):
         """Close the underlying stream."""
-        self.wavep.close()
-        self.fp.close()
+        self._wavep.close()
+        self._fp.close()
 
 
 # TODO(proppy): split payaudio helper in separate file.
@@ -109,19 +131,22 @@ class SharedAudioStream(object):
       bytes_per_sample: sample size in bytes.
       buffer_size: size in bytes of each audio I/O buffer.
     """
-    audio_interface = None
-    audio_stream = None
+    _audio_interface = None
+    _audio_stream = None
 
     def __init__(self, sample_rate, bytes_per_sample, buffer_size):
-        if SharedAudioStream.audio_interface:
+        self._sample_rate = sample_rate
+        self._bytes_per_sample = bytes_per_sample
+
+        if SharedAudioStream._audio_interface:
             return
 
         if bytes_per_sample == 2:
             audio_format = pyaudio.paInt16
         else:
             raise Exception('unsupported sample size:', bytes_per_sample)
-        SharedAudioStream.audio_interface = pyaudio.PyAudio()
-        SharedAudioStream.audio_stream = self.audio_interface.open(
+        SharedAudioStream._audio_interface = pyaudio.PyAudio()
+        SharedAudioStream._audio_stream = self._audio_interface.open(
             format=audio_format,
             # The API currently only supports 1-channel (mono) audio
             # https://goo.gl/z757pE
@@ -134,24 +159,34 @@ class SharedAudioStream(object):
     @property
     def name(self):
         """Returns the name of the underlying audio device."""
-        return self.audio_interface.get_default_input_device_info()['name']
+        return self._audio_interface.get_default_input_device_info()['name']
+
+    @property
+    def sample_rate(self):
+        """Return the sample rate of the underlying audio stream."""
+        return self._sample_rate
+
+    @property
+    def bytes_per_sample(self):
+        """Return the sample width of the underlying audio stream."""
+        return self._bytes_per_sample
 
     def read(self, size):
         """Read the given number of bytes from the stream."""
-        return self.audio_stream.read(size)
+        return self._audio_stream.read(size)
 
     def write(self, buf):
         """Write the given bytes to the stream."""
-        return self.audio_stream.write(buf)
+        return self._audio_stream.write(buf)
 
     def close(self):
         """Close the underlying stream and audio interface."""
-        if SharedAudioStream.audio_stream:
-            self.audio_stream.close()
+        if SharedAudioStream._audio_stream:
+            self._audio_stream.close()
             SharedAudioStream.audio_stream = None
-        if SharedAudioStream.audio_interface:
-            self.audio_interface.terminate()
-            SharedAudioStream.audio_interface = None
+        if SharedAudioStream._audio_interface:
+            self._audio_interface.terminate()
+            SharedAudioStream._audio_interface = None
 
 
 if __name__ == '__main__':

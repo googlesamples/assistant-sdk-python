@@ -50,15 +50,15 @@ git clone sso://devrel/samples/assistant/embedded-sdk-python embedded-assistant-
 cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secret.json
 ```
 
-- Install the sample dependencies:
-    - If you're using python 3:
+- Install the sample:
+  - If you're using python 3:
 
         ```
-        PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
-        sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv
+        sudo apt-get install python3-dev python3-venv
         cd embedded-assistant-sdk-python
         python3 -m venv env
-        env/bin/python3 -m pip install -r requirements.txt
+        env/bin/python3 -m pip install setuptools --upgrade
+        env/bin/python3 setup.py install
         ```
 
   - If you're using python 2:
@@ -67,8 +67,22 @@ cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secr
         sudo apt-get install python-dev python-virtualenv
         cd embedded-assistant-sdk-python
         virtualenv env --no-site-packages
-        env/bin/pip install -r requirements.txt
+        env/bin/pip install setuptools --upgrade
+        env/bin/python3 setup.py install
         ```
+
+  - If you're using goobuntu:
+
+        ```
+        PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
+        sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv
+        cd embedded-assistant-sdk-python
+        python3 -m venv env
+        env/bin/python3 -m pip install setuptools --upgrade
+        env/bin/python3 setup.py install
+        ```
+
+
 
 Run the sample
 ==============
@@ -76,14 +90,22 @@ Run the sample
 - Initialize new OAuth2 credentials by running the following command
   and follow its instructions.
 ```
-env/bin/python embedded_assistant.py --authorize client_secret.json
+env/bin/python -m googlesamples.assistant --authorize client_secret.json
 ```
 - Start the Embedded Assistant sample.
 ```
-env/bin/python embedded_assistant.py
+env/bin/python -m googlesamples.assistant
 ```
 - Record your voice query and the sample should play back the Google
   Assistant answer.
+
+Run the tests
+=============
+
+- Run the tests
+```
+env/bin/python setup.py test
+```
 
 License
 =======

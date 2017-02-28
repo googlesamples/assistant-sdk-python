@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#
 # Copyright (C) 2016 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,7 +91,8 @@ def load_credentials(path, scopes):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description='helper script to generate OAuth2 credentials')
+    parser = argparse.ArgumentParser(description='helper script '
+                                     'to generate OAuth2 credentials')
     parser.add_argument('client_secrets', type=str,
                         help='Path to OAuth2 client secret JSON file. ')
     parser.add_argument('scopes', type=str, nargs='+',

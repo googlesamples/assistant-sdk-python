@@ -14,30 +14,43 @@
 # limitations under the License.
 
 import unittest
-from audio_helpers import SampleRateLimiter
+from googlesamples.assistant.audio_helpers import SampleRateLimiter
 from six import BytesIO
 import time
 
+
 class SampleRateLimiterTest(unittest.TestCase):
-    def test_rate_limiting(self):
+    def setUp(self):
         stream = BytesIO()
-        limiter = SampleRateLimiter(stream, 16000, 16)
-        sleep_time_1024 = limiter.sleep_time(1024)
-        sleep_time_512 = limiter.sleep_time(512)
-        self.assertEqual(sleep_time_512, sleep_time_1024 / 2)
+        self.limiter = SampleRateLimiter(stream, 16000, 16)
+        self.sleep_time_1024 = self.limiter._sleep_time(1024)
+        self.sleep_time_512 = self.limiter._sleep_time(512)
+
+    def test_sleep_time(self):
+        self.assertEqual(self.sleep_time_512, self.sleep_time_1024 / 2)
+
+    def test_no_sleep_on_first_read(self):
         previous_time = time.time()
-        limiter.read(1024)
+        self.limiter.read(1024)
         # check sleep was not called
-        self.assertLess(time.time(), previous_time + sleep_time_1024)
+        self.assertLess(time.time(), previous_time + self.sleep_time_1024)
+
+    def test_first_sleep(self):
+        self.limiter.read(1024)
         previous_time = time.time()
-        limiter.read(512)
+        self.limiter.read(512)
         # sleep was called with sleep_time_1024
-        self.assertGreater(time.time(), previous_time + sleep_time_1024)
+        self.assertGreater(time.time(), previous_time + self.sleep_time_1024)
+
+    def test_next_sleep(self):
+        self.limiter.read(1024)
+        self.limiter.read(512)
         previous_time = time.time()
-        limiter.read(0)
+        self.limiter.read(0)
         # sleep was called with sleep_time_512
-        self.assertGreater(time.time(), previous_time + sleep_time_512)
-        self.assertLess(time.time(), previous_time + sleep_time_1024)
+        self.assertGreater(time.time(), previous_time + self.sleep_time_512)
+        self.assertLess(time.time(), previous_time + self.sleep_time_1024)
+
 
 if __name__ == '__main__':
     unittest.main()
