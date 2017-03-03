@@ -25,28 +25,17 @@ from . import (embedded_assistant,
                auth_helpers)
 
 EPILOG = """examples:
-  # embedded_assistant.py --authorize /path/to/client_secret.json
-  Initialize new OAuth2 credentials with the given client secret file:
-  (can be downloaded from the API Manager in Google Developers console)
-  - start an interactive OAuth2 authorization flow
-  - save new OAuth2 credentials locally
-  (location can be specified with the --credentials flag)
-  - exit
+  # Authorize the sample to access the Embedded Assistant API:
+  python -m googlesamples.assistant --authorize /path/to/client_secret.json
 
-  # embedded_assistant.py
-  Run the Embedded Assistant sample with microphone input:
-  - use the credentials created with the --authorize flag
-  - record voice query from microphone
-  - play assistant response on speaker
-  - exit
+  # Run the sample with microphone input and speaker output.
+  python -m googlesamples.assistant
 
-  # embedded_assistant.py -i /path/to/query.riff
-  Run the Embedded Assistant sample with file input:
-  - use the credentials created with the --authorize flag
-  - read voice query from the given file
-  (using the -i flag)
-  - play assistant response on speaker
-  - exit
+  # Run the sample with file input and speaker output.
+  python -m googlesamples.assistant -i query.riff
+
+  # Run the sample with file input and output.
+  python -m googlesamples.assistant -i query.riff -o response.riff
 """
 
 ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
@@ -89,13 +78,13 @@ def main():
     args = parser.parse_args()
 
     # Setup logging.
-    if args.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
-    # Get assistant API credentials.
     if args.authorize:
+        # In Authorize mode:
+        # - Start an interactive OAuth2 authorization flow.
+        # - Save new OAuth2 credentials locally.
+        # - Exit.
         credentials = auth_helpers.credentials_flow_interactive(
             args.authorize, scopes=[ASSISTANT_OAUTH_SCOPE])
         auth_helpers.save_credentials(args.credentials, credentials)
@@ -133,16 +122,30 @@ def main():
 
     interactive = not (args.input_audio_file or args.output_audio_file)
     if interactive:
+        # In interactive mode:
+        # - Read audio samples from microphone.
+        # - Send converse request.
+        # - Wait for END_OF_UTTERANCE (This is optional).
+        # - Iterate on converse responses audio data and playback samples.
         while True:
             audio_stream = audio_helpers.PyAudioStream()
-            input('Press Enter to record a new query')
-            request_samples = iter_with_progress('Recording: ', audio_stream)
-            response_samples = assistant.converse(request_samples)
-            next(response_samples)  # wait for end of utterance
-            for s in iter_with_progress('Playing ', response_samples):
+            input_samples = iter_with_progress('Recording: ', audio_stream)
+            # TODO(proppy): wait for input at the beginning of the loop.
+            input('Press Enter to start a new conversation ')
+            converse_responses = assistant.converse(input_samples)
+            assistant.wait_end_of_utterance(converse_responses)
+            print('End of utterance detected.')
+            output_samples = assistant.iter_converse_responses_audio(
+                converse_responses)
+            for s in iter_with_progress('Playing', output_samples):
                 audio_stream.write(s)
             audio_stream.close()
     else:
+        # In non-interactive mode:
+        # - Read audio samples from microphone.
+        # - Send converse request.
+        # - Wait for END_OF_UTTERANCE (This is optional).
+        # - Iterate on converse responses audio data and playback samples.
         if args.input_audio_file:
             input_stream = audio_helpers.SampleRateLimiter(
                 open(args.input_audio_file, 'rb'))
@@ -153,10 +156,12 @@ def main():
                 open(args.output_audio_file, 'wb'))
         else:
             output_stream = audio_helpers.PyAudioStream()
-        request_samples = iter_with_progress('Recording: ', input_stream)
-        response_samples = assistant.converse(request_samples)
-        next(response_samples)  # wait for end of utterance
-        for s in iter_with_progress('Playing ', response_samples):
+        # Read audio sample from input stream.
+        input_samples = iter_with_progress('Recording: ', input_stream)
+        converse_responses = assistant.converse(input_samples)
+        output_samples = assistant.iter_converse_responses_audio(
+            converse_responses)
+        for s in iter_with_progress('Playing ', output_samples):
             output_stream.write(s)
         input_stream.close()
         output_stream.close()

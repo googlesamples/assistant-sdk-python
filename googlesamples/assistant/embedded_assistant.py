@@ -45,44 +45,41 @@ class EmbeddedAssistant(object):
         # We set this Event when it is safe to play audio.
         self._start_playback = threading.Event()
 
-    def converse(self, samples):
-        """Start a converse request with the assistant
-
-        - Send audio samples for the assistant query.
-        - Yield an empty string when end of enturrance is reached.
-        - Then Yield the assistant answer audio samples.
+    def converse(self, samples, sample_rate=AUDIO_SAMPLE_RATE_HZ,
+                 deadline=DEADLINE_SECS):
+        """Send ConverseRequests to the assistant
 
         Args:
-          requests: generator of audio sample data to send as
+          samples: generator of audio sample data to send as
             ConverseRequest proto messages.
-        Returns: generator of audio sample data received from
-          Converseresponse proto messages.
+          sample_rate: sample rate in hertz of the audio data.
+          deadline: gRPC deadline in seconds.
+        Returns: generator of ConverseResponse proto messages.
         """
         self._stop_sending_audio.clear()
         self._start_playback.clear()
+
         # This generator yields ConverseRequest to send to the gRPC
         # Embedded Assistant API.
-        requests = self._generate_converse_requests(samples,
-                                                    AUDIO_SAMPLE_RATE_HZ)
-        # This generator yields ConverseResponse proto messages from
-        # the gRPC Embedded Assistant API.
-        converse_responses = self._service.Converse(requests,
-                                                    DEADLINE_SECS)
-
+        converse_requests = self._gen_converse_requests(samples, sample_rate)
+        # This generator yields ConverseResponse proto messages
+        # received from the gRPC Embedded Assistant API.
+        converse_responses = self._service.Converse(converse_requests,
+                                                    deadline)
+        # Iterate over ConverseResponse proto messages and yield them
+        # back to the caller.
         for resp in converse_responses:
             if resp.error.code != code_pb2.OK:
                 raise RuntimeError('Server error: ' + resp.error.message)
             if resp.event_type == END_OF_UTTERANCE:
                 logging.debug('server reported END_OF_UTTERANCE')
                 self._stop_sending_audio.set()
-                # notify caller we reached END_OF_UTTERANCE.
-                yield ''
             if len(resp.audio_out.audio_data) > 0:
                 self._start_playback.wait()
                 # yield assistant response audio samples back to caller.
-                yield resp.audio_out.audio_data
+            yield resp
 
-    def _generate_converse_requests(self, samples, sample_rate):
+    def _gen_converse_requests(self, samples, sample_rate):
         """Returns a generator of ConverseRequest proto messages from the
            given audio samples.
 
@@ -118,3 +115,33 @@ class EmbeddedAssistant(object):
             # Subsequent requests need audio data, but not config.
             yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
         self._start_playback.set()
+
+    def wait_end_of_utterance(self, converse_responses):
+        """Helper to iterate on converse responses until END_OF_UTTERANCE.
+
+        Usage of this helper is optional and client code can also
+        iterate on the ConverseResponse returned by `converse()` for
+        more control.
+
+        Args: generator of ConverseResponse proto messages returned by
+          `converse()`.
+        """
+        for resp in converse_responses:
+            if resp.event_type == END_OF_UTTERANCE:
+                break
+
+    @staticmethod
+    def iter_converse_responses_audio(converse_responses):
+        """Helper to iterate on audio samples in converse responses.
+
+        Usage of this helper is optional and client code can also
+        iterate on the ConverseResponse returned by `converse()` for
+        more control.
+
+        Args: generator of ConverseResponse proto messages.
+        Returns: generator of audio samples.
+
+        """
+        for resp in converse_responses:
+            if len(resp.audio_out.audio_data) > 0:
+                yield resp.audio_out.audio_data
