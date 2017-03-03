@@ -17,11 +17,11 @@
 import argparse
 import logging
 import tqdm
+from six.moves import input
 
 from . import (embedded_assistant,
                audio_helpers,
-               auth_helpers,
-               recommended_settings)
+               auth_helpers)
 
 EPILOG = """examples:
   # embedded_assistant.py --authorize /path/to/client_secret.json
@@ -101,31 +101,6 @@ def main():
                       'to initialize new OAuth2 credentials.')
         return
 
-    # Setup audio input stream.
-    if args.input_audio_file:
-        input_stream = audio_helpers.SampleRateLimiter(
-            open(args.input_audio_file, 'rb'),
-            recommended_settings.AUDIO_SAMPLE_RATE,
-            recommended_settings.AUDIO_BYTES_PER_SAMPLE,
-            recommended_settings.AUDIO_CHUNK_BYTES)
-    else:
-        input_stream = audio_helpers.SharedAudioStream(
-            recommended_settings.AUDIO_SAMPLE_RATE,
-            recommended_settings.AUDIO_BYTES_PER_SAMPLE,
-            recommended_settings.AUDIO_CHUNK_BYTES)
-
-    # Setup audio output stream.
-    if args.output_audio_file:
-        output_stream = audio_helpers.WaveStreamWriter(
-            open(args.output_audio_file, 'wb'),
-            recommended_settings.AUDIO_SAMPLE_RATE,
-            recommended_settings.AUDIO_BYTES_PER_SAMPLE)
-    else:
-        output_stream = audio_helpers.SharedAudioStream(
-            recommended_settings.AUDIO_SAMPLE_RATE,
-            recommended_settings.AUDIO_BYTES_PER_SAMPLE,
-            recommended_settings.AUDIO_CHUNK_BYTES)
-
     # Start the Embedded Assistant API client.
     assistant = embedded_assistant.EmbeddedAssistant(credentials,
                                                      endpoint='deprecated')
@@ -137,14 +112,36 @@ def main():
                 t.update(len(d))
                 yield d
 
-    request_samples = iter_with_progress('Recording: ', input_stream)
-    response_samples = assistant.converse(request_samples)
-    next(response_samples)  # wait for end of utterance
-    for s in iter_with_progress('Playing ', response_samples):
-        output_stream.write(s)
+    interactive = not (args.input_audio_file or args.output_audio_file)
+    if interactive:
+        while True:
+            audio_stream = audio_helpers.PyAudioStream()
+            input('Press Enter to record a new query')
+            request_samples = iter_with_progress('Recording: ', audio_stream)
+            response_samples = assistant.converse(request_samples)
+            next(response_samples)  # wait for end of utterance
+            for s in iter_with_progress('Playing ', response_samples):
+                audio_stream.write(s)
+            audio_stream.close()
+    else:
+        if args.input_audio_file:
+            input_stream = audio_helpers.SampleRateLimiter(
+                open(args.input_audio_file, 'rb'))
+        else:
+            input_stream = audio_helpers.PyAudioStream()
+        if args.output_audio_file:
+            output_stream = audio_helpers.WaveStreamWriter(
+                open(args.output_audio_file, 'wb'))
+        else:
+            output_stream = audio_helpers.PyAudioStream()
+        request_samples = iter_with_progress('Recording: ', input_stream)
+        response_samples = assistant.converse(request_samples)
+        next(response_samples)  # wait for end of utterance
+        for s in iter_with_progress('Playing ', response_samples):
+            output_stream.write(s)
 
-    input_stream.close()
-    output_stream.close()
+        input_stream.close()
+        output_stream.close()
 
 
 if __name__ == '__main__':

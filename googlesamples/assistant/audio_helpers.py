@@ -17,9 +17,47 @@ import time
 import pyaudio
 import wave
 
+from . import recommended_settings
 
-# TODO(proppy): parse WAV instead of RAW data.
-class SampleRateLimiter(object):
+
+class AudioStreamBase(object):
+    """A base class for audio stream based on file-like objects.
+
+    Args:
+      fp: file-like stream object to read from.
+      sample_rate: sample rate in hertz.
+      bytes_per_sample: sample size in bytes.
+      chunk_size: chunk size in bytes of each read when iterating.
+    """
+    def __init__(self,
+                 sample_rate=recommended_settings.AUDIO_SAMPLE_RATE,
+                 bytes_per_sample=recommended_settings.AUDIO_BYTES_PER_SAMPLE,
+                 chunk_size=recommended_settings.AUDIO_CHUNK_BYTES):
+        self._sample_rate = sample_rate
+        self._bytes_per_sample = bytes_per_sample
+        self._chunk_size = chunk_size
+
+    @property
+    def sample_rate(self):
+        """Return the sample rate of the underlying audio stream."""
+        return self._sample_rate
+
+    @property
+    def bytes_per_sample(self):
+        """Return the sample width of the underlying audio stream."""
+        return self._bytes_per_sample
+
+    @property
+    def chunk_size(self):
+        """Return the chunk size of the underlying audio stream."""
+        return self._chunk_size
+
+    def __iter__(self):
+        """Returns a generator reading data from the stream."""
+        return iter(lambda: self.read(self._chunk_size), '')
+
+
+class SampleRateLimiter(AudioStreamBase):
     """A stream reader that throttles reads to a given sample rate.
 
     This is used to throttle the rate at which gRPC ConverseRequest
@@ -27,17 +65,17 @@ class SampleRateLimiter(object):
     time" (i.e. at sample rate) audio throughput when reading data
     from files.
 
+    Support file-object like interface and generator iteration.
+
     Args:
       fp: file-like stream object to read from.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
-      chunk_size: chunk size in bytes when iterating on the file-object.
+      chunk_size: chunk size in bytes of each read when iterating.
     """
-    def __init__(self, fp, sample_rate, bytes_per_sample, chunk_size):
+    def __init__(self, fp, *args, **kwargs):
+        super(SampleRateLimiter, self).__init__(*args, **kwargs)
         self._fp = fp
-        self._sample_rate = float(sample_rate)
-        self._bytes_per_sample = float(bytes_per_sample)
-        self._chunk_size = chunk_size
         self._sleep_until = 0
 
     def read(self, size):
@@ -55,60 +93,35 @@ class SampleRateLimiter(object):
         #  When reach end of audio stream, pad remainder with silence (zeros).
         return data.ljust(size, b'\x00')
 
-    @property
-    def sample_rate(self):
-        """Return the sample rate of the underlying audio stream."""
-        return self._sample_rate
-
-    @property
-    def bytes_per_sample(self):
-        """Return the sample width of the underlying audio stream."""
-        return self._bytes_per_sample
+    def close(self):
+        """Close the underlying stream."""
+        self._fp.close()
 
     def _sleep_time(self, size):
-        sample_count = size / self.bytes_per_sample
-        sample_rate_dt = sample_count / self.sample_rate
+        sample_count = size / float(self.bytes_per_sample)
+        sample_rate_dt = sample_count / float(self.sample_rate)
         return sample_rate_dt
 
     @property
     def name(self):
         return self._fp.name
 
-    def close(self):
-        """Close the underlying stream."""
-        self._fp.close()
 
-    def __iter__(self):
-        """Returns a generator reading data from the stream."""
-        return iter(lambda: self.read(self._chunk_size), '')
-
-
-class WaveStreamWriter(object):
+class WaveStreamWriter(AudioStreamBase):
     """A WAV stream writer.
 
     Args:
-      fp: file-like stream object to write to.
+      fp: file-like stream object to read from.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
     """
-    def __init__(self, fp, sample_rate, bytes_per_sample):
+    def __init__(self, fp, *args, **kwargs):
+        super(WaveStreamWriter, self).__init__(*args, **kwargs)
         self._fp = fp
-        self._sample_rate = float(sample_rate)
-        self._bytes_per_sample = float(bytes_per_sample)
-        self._wavep = wave.open(self.fp)
-        self._wavep.setsampwidth(bytes_per_sample)
+        self._wavep = wave.open(self._fp)
+        self._wavep.setsampwidth(self.bytes_per_sample)
         self._wavep.setnchannels(1)
-        self._wavep.setframerate(sample_rate)
-
-    @property
-    def sample_rate(self):
-        """Return the sample rate of the underlying audio stream."""
-        return self._sample_rate
-
-    @property
-    def bytes_per_sample(self):
-        """Return the sample width of the underlying audio stream."""
-        return self._bytes_per_sample
+        self._wavep.setframerate(self.sample_rate)
 
     def write(self, data):
         """Read frame bytes to the WAV stream.
@@ -124,42 +137,31 @@ class WaveStreamWriter(object):
         self._fp.close()
 
 
-# TODO(proppy): split payaudio helper in separate file.
-class SharedAudioStream(object):
-    """A Shared PyAudio stream.
+# TODO(proppy): split pyAudio helper in separate file.
+class PyAudioStream(AudioStreamBase):
+    """A PyAudio stream helper.
 
-    Each instance will share the same bi-directional audio stream and
-    audio interface.
+    Support file-object like interface and generator iteration.
 
     Args:
-      fp: file-like stream object to write to.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
       chunk_size: chunk size in bytes of each audio I/O buffer.
     """
-    _audio_interface = None
-    _audio_stream = None
-
-    def __init__(self, sample_rate, bytes_per_sample, chunk_size):
-        self._sample_rate = sample_rate
-        self._bytes_per_sample = bytes_per_sample
-        self._chunk_size = chunk_size
-
-        if SharedAudioStream._audio_interface:
-            return
-
-        if bytes_per_sample == 2:
+    def __init__(self, *args, **kwargs):
+        super(PyAudioStream, self).__init__(*args, **kwargs)
+        if self.bytes_per_sample == 2:
             audio_format = pyaudio.paInt16
         else:
-            raise Exception('unsupported sample size:', bytes_per_sample)
-        SharedAudioStream._audio_interface = pyaudio.PyAudio()
-        SharedAudioStream._audio_stream = self._audio_interface.open(
+            raise Exception('unsupported sample size:', self.bytes_per_sample)
+        self._audio_interface = pyaudio.PyAudio()
+        self._audio_stream = self._audio_interface.open(
             format=audio_format,
             # The API currently only supports 1-channel (mono) audio
             # https://goo.gl/z757pE
             channels=1,
-            rate=sample_rate,
-            frames_per_buffer=int(chunk_size/bytes_per_sample),
+            rate=self.sample_rate,
+            frames_per_buffer=int(self.chunk_size/self.bytes_per_sample),
             input=True, output=True
         )
 
@@ -167,16 +169,6 @@ class SharedAudioStream(object):
     def name(self):
         """Returns the name of the underlying audio device."""
         return self._audio_interface.get_default_input_device_info()['name']
-
-    @property
-    def sample_rate(self):
-        """Return the sample rate of the underlying audio stream."""
-        return self._sample_rate
-
-    @property
-    def bytes_per_sample(self):
-        """Return the sample width of the underlying audio stream."""
-        return self._bytes_per_sample
 
     def read(self, size):
         """Read the given number of bytes from the stream."""
@@ -188,16 +180,12 @@ class SharedAudioStream(object):
 
     def close(self):
         """Close the underlying stream and audio interface."""
-        if SharedAudioStream._audio_stream:
+        if self._audio_stream:
             self._audio_stream.close()
-            SharedAudioStream.audio_stream = None
-        if SharedAudioStream._audio_interface:
+            self._audio_stream = None
+        if self._audio_interface:
             self._audio_interface.terminate()
-            SharedAudioStream._audio_interface = None
-
-    def __iter__(self):
-        """Returns a generator reading data from the stream."""
-        return iter(lambda: self.read(self._chunk_size), '')
+            self._audio_interface = None
 
 
 if __name__ == '__main__':
@@ -213,9 +201,9 @@ if __name__ == '__main__':
     chunk_size = 1024
     record_time = 5
     end_time = time.time() + record_time
-    stream = SharedAudioStream(sample_rate_hz,
-                               bytes_per_sample,
-                               chunk_size)
+    stream = PyAudioStream(sample_rate_hz,
+                           bytes_per_sample,
+                           chunk_size)
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')
