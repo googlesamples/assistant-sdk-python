@@ -68,7 +68,7 @@ cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secr
         cd embedded-assistant-sdk-python
         virtualenv env --no-site-packages
         env/bin/pip install setuptools --upgrade
-        env/bin/python3 setup.py install
+        env/bin/python setup.py install
         ```
 
   - If you're using goobuntu:
