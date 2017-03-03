@@ -31,11 +31,13 @@ class SampleRateLimiter(object):
       fp: file-like stream object to read from.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
+      chunk_size: chunk size in bytes when iterating on the file-object.
     """
-    def __init__(self, fp, sample_rate, bytes_per_sample):
+    def __init__(self, fp, sample_rate, bytes_per_sample, chunk_size):
         self._fp = fp
         self._sample_rate = float(sample_rate)
         self._bytes_per_sample = float(bytes_per_sample)
+        self._chunk_size = chunk_size
         self._sleep_until = 0
 
     def read(self, size):
@@ -75,6 +77,10 @@ class SampleRateLimiter(object):
     def close(self):
         """Close the underlying stream."""
         self._fp.close()
+
+    def __iter__(self):
+        """Returns a generator reading data from the stream."""
+        return iter(lambda: self.read(self._chunk_size), '')
 
 
 class WaveStreamWriter(object):
@@ -129,14 +135,15 @@ class SharedAudioStream(object):
       fp: file-like stream object to write to.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
-      buffer_size: size in bytes of each audio I/O buffer.
+      chunk_size: chunk size in bytes of each audio I/O buffer.
     """
     _audio_interface = None
     _audio_stream = None
 
-    def __init__(self, sample_rate, bytes_per_sample, buffer_size):
+    def __init__(self, sample_rate, bytes_per_sample, chunk_size):
         self._sample_rate = sample_rate
         self._bytes_per_sample = bytes_per_sample
+        self._chunk_size = chunk_size
 
         if SharedAudioStream._audio_interface:
             return
@@ -152,7 +159,7 @@ class SharedAudioStream(object):
             # https://goo.gl/z757pE
             channels=1,
             rate=sample_rate,
-            frames_per_buffer=int(buffer_size/bytes_per_sample),
+            frames_per_buffer=int(chunk_size/bytes_per_sample),
             input=True, output=True
         )
 
@@ -188,6 +195,10 @@ class SharedAudioStream(object):
             self._audio_interface.terminate()
             SharedAudioStream._audio_interface = None
 
+    def __iter__(self):
+        """Returns a generator reading data from the stream."""
+        return iter(lambda: self.read(self._chunk_size), '')
+
 
 if __name__ == '__main__':
     """Test audio stream processing:
@@ -199,12 +210,12 @@ if __name__ == '__main__':
 
     sample_rate_hz = 16000
     bytes_per_sample = 2
-    buffer_size = 1024
+    chunk_size = 1024
     record_time = 5
     end_time = time.time() + record_time
     stream = SharedAudioStream(sample_rate_hz,
                                bytes_per_sample,
-                               buffer_size)
+                               chunk_size)
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')
@@ -212,14 +223,14 @@ if __name__ == '__main__':
               position=0) as t:
         t.set_description('Recording samples: ')
         while time.time() < end_time:
-            samples.append(stream.read(buffer_size))
-            t.update(buffer_size)
+            samples.append(stream.read(chunk_size))
+            t.update(chunk_size)
 
     with tqdm(unit='s', total=sample_rate_hz*record_time, position=1) as t:
         t.set_description('Playing samples: ')
         while len(samples):
             stream.write(samples.pop(0))
-            t.update(buffer_size)
+            t.update(chunk_size)
 
     stream.close()
     logging.info('audio test completed.')

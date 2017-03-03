@@ -22,7 +22,7 @@ import time
 class SampleRateLimiterTest(unittest.TestCase):
     def setUp(self):
         stream = BytesIO()
-        self.limiter = SampleRateLimiter(stream, 16000, 16)
+        self.limiter = SampleRateLimiter(stream, 16000, 16, 1024)
         self.sleep_time_1024 = self.limiter._sleep_time(1024)
         self.sleep_time_512 = self.limiter._sleep_time(512)
 

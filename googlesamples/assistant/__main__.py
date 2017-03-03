@@ -106,7 +106,8 @@ def main():
         input_stream = audio_helpers.SampleRateLimiter(
             open(args.input_audio_file, 'rb'),
             recommended_settings.AUDIO_SAMPLE_RATE,
-            recommended_settings.AUDIO_BYTES_PER_SAMPLE)
+            recommended_settings.AUDIO_BYTES_PER_SAMPLE,
+            recommended_settings.AUDIO_CHUNK_BYTES)
     else:
         input_stream = audio_helpers.SharedAudioStream(
             recommended_settings.AUDIO_SAMPLE_RATE,
@@ -136,9 +137,7 @@ def main():
                 t.update(len(d))
                 yield d
 
-    request_samples = iter(lambda: input_stream.read(
-        recommended_settings.AUDIO_CHUNK_BYTES), '')
-    request_samples = iter_with_progress('Recording: ', request_samples)
+    request_samples = iter_with_progress('Recording: ', input_stream)
     response_samples = assistant.converse(request_samples)
     next(response_samples)  # wait for end of utterance
     for s in iter_with_progress('Playing ', response_samples):
