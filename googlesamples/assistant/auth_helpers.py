@@ -19,6 +19,7 @@ import logging
 
 import google.oauth2.flow
 import google.oauth2.credentials
+import six.moves
 
 
 def credentials_flow_interactive(client_secrets_file, scopes):
@@ -43,7 +44,7 @@ def credentials_flow_interactive(client_secrets_file, scopes):
         redirect_uri='urn:ietf:wg:oauth:2.0:oob')
     auth_url, _ = flow.authorization_url(prompt='consent')
     print('Please go to this URL: %s' % auth_url)
-    code = input('Enter the authorization code: ')
+    code = six.moves.input('Enter the authorization code: ')
     flow.fetch_token(code=code)
     return flow.credentials
 
