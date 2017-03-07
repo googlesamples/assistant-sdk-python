@@ -85,8 +85,6 @@ class EmbeddedAssistant(object):
                 self._stop_sending_audio.set()
                 # notify caller we reached END_OF_UTTERANCE.
                 yield ''
-            if resp.error.code != code_pb2.OK:
-                raise RuntimeError('Server error: ' + resp.error.message)
             if len(resp.audio_out.audio_data) > 0:
                 self._start_playback.wait()
                 # yield assistant response audio samples back to caller.
