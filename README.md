@@ -1,15 +1,15 @@
 Embedded Assistant Python SDK & Samples
 =======================================
 
-This repositories contains Python modules and samples for the Embedded Assistant
-API.
+This repositories contains Python samples for the Embedded Assistant API.
 
-Pre-requisites
---------------
+Supported configuration
+-----------------------
 
-- Python >= 2.7 or >= 3.4
-- Microphone
-- Speaker
+- [Raspberry Pi 3 Model B](https://www.adafruit.com/products/3334)
+- [Mini USB Microphone](https://www.adafruit.com/product/3367)
+- [Mini External USB Stereo Speaker](https://www.adafruit.com/products/3369)
+- [Raspbian Jessie with Pixel](https://www.raspberrypi.org/downloads/raspbian/)
 
 API Setup
 =========
@@ -27,7 +27,42 @@ API Setup
 Hardware setup
 ==============
 
-- Verify that the Microphone and the Speaker are working:
+USB Microphone and Speaker
+--------------------------
+
+- Connect the [Mini USB Microphone](https://www.adafruit.com/product/3367)
+  on one of the Raspberry Pi 3 USB port.
+- Connect
+  the [Mini External USB Stereo Speaker](https://www.adafruit.com/products/3369)
+  on one of the Raspberry Pi 3 USB port.
+- Replace `~/.asoundrc` w/ following content:
+
+```
+pcm.!default {
+  type asym
+  playback.pcm "usb_speaker"
+  capture.pcm "usb_mic"
+}
+
+pcm.usb_mic {
+  type plug
+  slave {
+    pcm "hw:1,0"
+    rate 48000
+  }
+}
+
+pcm.usb_speaker {
+  type plug
+  slave {
+    pcm "hw:2,0"
+    rate 48000
+  }
+}
+```
+
+- Verify that recording and playback are working:
+
 ```
 # record a short audio clip
 arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
@@ -79,20 +114,22 @@ cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secr
         env/bin/python -m pip install -e ".[MAIN]"
         ```
 
-
-
 Run the sample
 ==============
 
 - Initialize new OAuth2 credentials by running the following command
   and follow its instructions.
+
 ```
 env/bin/python -m googlesamples.assistant --authorize client_secret.json
 ```
+
 - Start the Embedded Assistant sample.
+
 ```
 env/bin/python -m googlesamples.assistant
 ```
+
 - Record your voice query and the sample should play back the Google
   Assistant answer.
 
@@ -100,6 +137,7 @@ Run the tests
 =============
 
 - Run the tests
+
 ```
 env/bin/python setup.py test
 ```

@@ -23,7 +23,7 @@ import google.oauth2.credentials
 from google.rpc import code_pb2
 
 from . import embedded_assistant_pb2
-from .recommended_settings import AUDIO_SAMPLE_RATE, DEADLINE_SECS
+from .recommended_settings import AUDIO_SAMPLE_RATE_HZ, DEADLINE_SECS
 
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
 # Embedded Assistant API scope.
@@ -71,7 +71,7 @@ class EmbeddedAssistant(object):
         # This generator yields ConverseRequest to send to the gRPC
         # Embedded Assistant API.
         requests = self._generate_converse_requests(samples,
-                                                    AUDIO_SAMPLE_RATE)
+                                                    AUDIO_SAMPLE_RATE_HZ)
         # This generator yields ConverseResponse proto messages from
         # the gRPC Embedded Assistant API.
         converse_responses = self._service.Converse(requests,

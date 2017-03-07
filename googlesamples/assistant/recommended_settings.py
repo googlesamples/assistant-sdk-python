@@ -18,11 +18,18 @@
 #   Note: API supports higher frequencies, but using the same sample
 #   rate for input and output allows us to share the same audio stream
 #   for input and output.
-AUDIO_SAMPLE_RATE = 16000
+AUDIO_SAMPLE_RATE_HZ = 16000
 # Audio sample size in bytes.
 AUDIO_BYTES_PER_SAMPLE = 2
+# Audio I/O chunk size in seconds.
+AUDIO_CHUNK_DURATION_SECS = 0.1
 # Audio I/O chunk size in bytes.
-AUDIO_CHUNK_BYTES = 1024
+AUDIO_CHUNK_SIZE = int(AUDIO_SAMPLE_RATE_HZ
+                       * AUDIO_BYTES_PER_SAMPLE
+                       * AUDIO_CHUNK_DURATION_SECS)
+# Audio I/O flush size in bytes (used to flush PyAudio buffer during
+# playback to ensure audio is not truncated).
+AUDIO_FLUSH_SIZE = AUDIO_CHUNK_SIZE * 2
 
 # Embedded Assistant API RPC deadline in seconds.
 DEADLINE_SECS = 60 * 3 + 5

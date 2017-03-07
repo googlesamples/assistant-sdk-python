@@ -139,7 +139,6 @@ def main():
         next(response_samples)  # wait for end of utterance
         for s in iter_with_progress('Playing ', response_samples):
             output_stream.write(s)
-
         input_stream.close()
         output_stream.close()
 

@@ -30,9 +30,9 @@ class AudioStreamBase(object):
       chunk_size: chunk size in bytes of each read when iterating.
     """
     def __init__(self,
-                 sample_rate=recommended_settings.AUDIO_SAMPLE_RATE,
+                 sample_rate=recommended_settings.AUDIO_SAMPLE_RATE_HZ,
                  bytes_per_sample=recommended_settings.AUDIO_BYTES_PER_SAMPLE,
-                 chunk_size=recommended_settings.AUDIO_CHUNK_BYTES):
+                 chunk_size=recommended_settings.AUDIO_CHUNK_SIZE):
         self._sample_rate = sample_rate
         self._bytes_per_sample = bytes_per_sample
         self._chunk_size = chunk_size
@@ -157,8 +157,6 @@ class PyAudioStream(AudioStreamBase):
         self._audio_interface = pyaudio.PyAudio()
         self._audio_stream = self._audio_interface.open(
             format=audio_format,
-            # The API currently only supports 1-channel (mono) audio
-            # https://goo.gl/z757pE
             channels=1,
             rate=self.sample_rate,
             frames_per_buffer=int(self.chunk_size/self.bytes_per_sample),
@@ -172,15 +170,21 @@ class PyAudioStream(AudioStreamBase):
 
     def read(self, size):
         """Read the given number of bytes from the stream."""
-        return self._audio_stream.read(size)
+        # TODO(proppy): enable exception_on_overflow when audio
+        # processing moved to separate thread.
+        return self._audio_stream.read(size, exception_on_overflow=False)
 
     def write(self, buf):
         """Write the given bytes to the stream."""
         return self._audio_stream.write(buf)
 
+    def flush(self, size=recommended_settings.AUDIO_FLUSH_SIZE):
+        self._audio_stream.write(b'\x00' * size)
+
     def close(self):
-        """Close the underlying stream and audio interface."""
+        """Flush and close the underlying stream and audio interface."""
         if self._audio_stream:
+            self.flush()
             self._audio_stream.close()
             self._audio_stream = None
         if self._audio_interface:
