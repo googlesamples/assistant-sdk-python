@@ -20,12 +20,10 @@ DEPENDENCIES = [
     'google-auth==0.6.0',
     'googleapis-common-protos==1.5.0',
     'grpcio==1.1.0',
-    'PyAudio==0.2.10',
     'requests==2.13.0',
     'requests-oauthlib==0.8.0',
     'six==1.10.0',
     'urllib3[secure]==1.20',
-    'tqdm==4.11.2'
 ]
 
 with open('README.md', 'r') as f:
@@ -50,12 +48,16 @@ setup(
     packages=find_packages(exclude=('tests')),
     namespace_packages=('googlesamples',),
     install_requires=DEPENDENCIES,
+    extras_require={
+        'MAIN': ['tqdm==4.11.2', 'PyAudio==0.2.10']
+    },
     setup_requires=['flake8'],
     tests_require=['flake8'],
     test_suite='setup.load_test_suite',
     entry_points={
         'console_scripts': [
-            'google-assistant-sample=googlesamples.assistant.__main__:main'
+            'googlesamples-assistant'
+            '=googlesamples.assistant.__main__:main [MAIN]'
         ],
     },
     license='Apache 2.0',

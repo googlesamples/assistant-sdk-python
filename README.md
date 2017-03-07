@@ -54,32 +54,29 @@ cp ~/Downloads/client_secret_XXXX.json embedded-assistant-sdk-python/client_secr
   - If you're using python 3:
 
         ```
-        sudo apt-get install python3-dev python3-venv
+        sudo apt-get install python3-dev python3-venv portaudio19-dev
         cd embedded-assistant-sdk-python
         python3 -m venv env
-        env/bin/python3 -m pip install setuptools --upgrade
-        env/bin/python3 setup.py install
+        env/bin/python -m pip install -e ".[MAIN]"
         ```
 
   - If you're using python 2:
 
         ```
-        sudo apt-get install python-dev python-virtualenv
+        sudo apt-get install python-dev python-virtualenv portaudio19-dev
         cd embedded-assistant-sdk-python
         virtualenv env --no-site-packages
-        env/bin/pip install setuptools --upgrade
-        env/bin/python setup.py install
+        env/bin/pip install -e ".[MAIN]"
         ```
 
   - If you're using goobuntu:
 
         ```
         PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
-        sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv
+        sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv portaudio19-dev
         cd embedded-assistant-sdk-python
         python3 -m venv env
-        env/bin/python3 -m pip install setuptools --upgrade
-        env/bin/python3 setup.py install
+        env/bin/python -m pip install -e ".[MAIN]"
         ```
 
 
