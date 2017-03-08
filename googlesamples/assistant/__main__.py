@@ -17,6 +17,7 @@
 import argparse
 import logging
 import tqdm
+import grpc
 from six.moves import input
 
 from . import (embedded_assistant,
@@ -70,6 +71,11 @@ def main():
                         default='.embedded_assistant_credentials.json',
                         help='Path to store and read OAuth2 credentials '
                         'generated with the `--authorize` flag.')
+    parser.add_argument('--ssl_credentials_for_testing', type=str, default=None,
+                        help='Path to ssl_certificates.pem; for testing only.')
+    parser.add_argument('--grpc_channel_option', type=str, action='append',
+                        help='name=val options used to construct gRPC channel',
+                        default=[])
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Verbose logging.')
     args = parser.parse_args()
@@ -101,9 +107,16 @@ def main():
                       'to initialize new OAuth2 credentials.')
         return
 
+    grpc_channel_options = {}
+    for pair in args.grpc_channel_option:
+      key, val = pair.split('=')
+      grpc_channel_options[key] = val
+
     # Start the Embedded Assistant API client.
-    assistant = embedded_assistant.EmbeddedAssistant(credentials,
-                                                     endpoint='deprecated')
+    assistant = embedded_assistant.EmbeddedAssistant(
+        credentials, ssl_credentials_file=args.ssl_credentials_for_testing,
+        grpc_channel_options=list(grpc_channel_options.items()),
+        endpoint='deprecated')
 
     def iter_with_progress(title, gen):
         with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:
