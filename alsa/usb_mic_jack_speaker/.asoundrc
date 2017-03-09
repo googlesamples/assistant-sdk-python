@@ -1,0 +1,21 @@
+pcm.!default {
+  type asym
+  capture.pcm "usb_mic"
+  playback.pcm "jack_speaker"
+}
+
+pcm.usb_mic {
+  type plug
+  slave {
+    pcm "hw:1,0"
+    rate 48000
+  }
+}
+
+pcm.jack_speaker {
+  type plug
+  slave {
+    pcm "hw:0,0"
+    rate 48000
+  }
+}
