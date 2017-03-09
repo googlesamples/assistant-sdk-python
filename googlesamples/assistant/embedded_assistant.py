@@ -21,44 +21,25 @@ import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.credentials
 from google.rpc import code_pb2
-import grpc
 
 from . import embedded_assistant_pb2
 from .recommended_settings import AUDIO_SAMPLE_RATE_HZ, DEADLINE_SECS
 
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
-# Embedded Assistant API scope.
-ASSISTANT_SCOPE = 'https://www.googleapis.com/auth/assistant'
-ASSISTANT_ENDPOINTS = {
-    'deprecated': 'internal-assistant-api',
-    'dev': 'internal-assistant-api'
-}
 
 
 class EmbeddedAssistant(object):
     """Example client for the gRPC Embedded Assistant API.
     Args:
+      grpc_channel(grpc.Channel): gRPC channel via which to send
+        Embedded Assistant API RPC requests.
       credentials(google.oauth2.credentials.Credentials): OAuth2 credentials.
-      ssl_credentials_file(str): Path to SSL credentials.pem file (for testing).
-      grpc_channel_options([(option_name, option_val)]): gRPC channel options.
     """
-    def __init__(self, credentials, ssl_credentials_file=None,
-                 grpc_channel_options=None, endpoint='dev'):
-        # TODO(proppy): add a flag in __main__
-        endpoint = ASSISTANT_ENDPOINTS.get(endpoint, endpoint)
-        logging.info('Connecting to %s', endpoint)
+    def __init__(self, grpc_channel, credentials=None):
         # TODO(proppy): remove when gRPC auth is activated.
         self._credentials = credentials
-        http_request = google.auth.transport.requests.Request()
-        # TODO(dakota): Move the ssl_credentials stuff to auth_helpers.
-        ssl_credentials = None
-        if ssl_credentials_file:
-            with open(ssl_credentials_file) as f:
-                ssl_credentials = grpc.ssl_channel_credentials(f.read())
-        channel = google.auth.transport.grpc.secure_authorized_channel(
-            credentials, http_request, endpoint,
-            ssl_credentials=ssl_credentials, options=grpc_channel_options or [])
-        self._service = embedded_assistant_pb2.EmbeddedAssistantStub(channel)
+        self._service = embedded_assistant_pb2.EmbeddedAssistantStub(
+            grpc_channel)
         # We set this Event when the server tells us to stop sending audio.
         self._stop_sending_audio = threading.Event()
         # We set this Event when it is safe to play audio.

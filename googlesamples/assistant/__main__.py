@@ -49,6 +49,11 @@ EPILOG = """examples:
   - exit
 """
 
+ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
+ASSISTANT_API_ENDPOINTS = {
+    'deprecated': 'internal-assistant-api',
+    'dev': 'internal-assistant-api',
+}
 
 def main():
     logging.basicConfig(level=logging.INFO)
@@ -66,6 +71,9 @@ def main():
     parser.add_argument('-o', '--output_audio_file', type=str, default=None,
                         help='Path to output audio file. '
                         'If missing, uses pyaudio playback')
+    parser.add_argument('--api_endpoint', type=str, default='deprecated',
+                        help='Name or address of Embedded Assistant API '
+                        'service.')
     parser.add_argument('--credentials', type=str,
                         metavar='OAUTH2_CREDENTIALS_FILE',
                         default='.embedded_assistant_credentials.json',
@@ -74,8 +82,8 @@ def main():
     parser.add_argument('--ssl_credentials_for_testing', type=str, default=None,
                         help='Path to ssl_certificates.pem; for testing only.')
     parser.add_argument('--grpc_channel_option', type=str, action='append',
-                        help='name=val options used to construct gRPC channel',
-                        default=[])
+                        help='Options used to construct gRPC channel', nargs=2,
+                        default=[], metavar=('OPTION_NAME', 'OPTION_VALUE'))
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='Verbose logging.')
     args = parser.parse_args()
@@ -89,8 +97,7 @@ def main():
     # Get assistant API credentials.
     if args.authorize:
         credentials = auth_helpers.credentials_flow_interactive(
-            args.authorize,
-            scopes=[embedded_assistant.ASSISTANT_SCOPE])
+            args.authorize, scopes=[ASSISTANT_OAUTH_SCOPE])
         auth_helpers.save_credentials(args.credentials, credentials)
         logging.info('OAuth credentials initialized: %s', args.credentials)
         logging.info('Run the sample without the `--authorize` flag '
@@ -99,24 +106,23 @@ def main():
 
     try:
         credentials = auth_helpers.load_credentials(
-            args.credentials,
-            scopes=[embedded_assistant.ASSISTANT_SCOPE])
+            args.credentials, scopes=[ASSISTANT_OAUTH_SCOPE])
     except Exception as e:
         logging.error('Error loading credentials: %s', e)
         logging.error('Run the sample with the `--authorize` flag '
                       'to initialize new OAuth2 credentials.')
         return
 
-    grpc_channel_options = {}
-    for pair in args.grpc_channel_option:
-      key, val = pair.split('=')
-      grpc_channel_options[key] = val
+    endpoint = ASSISTANT_API_ENDPOINTS.get(args.api_endpoint, args.api_endpoint)
+    grpc_channel = auth_helpers.create_grpc_channel(
+        endpoint, credentials,
+        ssl_credentials_file=args.ssl_credentials_for_testing,
+        grpc_channel_options=map(tuple, args.grpc_channel_option))
+    logging.info('Connecting to %s', endpoint)
 
     # Start the Embedded Assistant API client.
     assistant = embedded_assistant.EmbeddedAssistant(
-        credentials, ssl_credentials_file=args.ssl_credentials_for_testing,
-        grpc_channel_options=list(grpc_channel_options.items()),
-        endpoint='deprecated')
+        grpc_channel, credentials=credentials)
 
     def iter_with_progress(title, gen):
         with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:

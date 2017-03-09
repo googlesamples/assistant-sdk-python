@@ -17,8 +17,10 @@
 import json
 import logging
 
+import google.auth.transport.requests
 import google.oauth2.flow
 import google.oauth2.credentials
+import grpc
 import six.moves
 
 
@@ -88,6 +90,27 @@ def load_credentials(path, scopes):
     with open(path, 'r') as f:
         return credentials_from_dict(json.load(f),
                                      scopes=scopes)
+
+
+def create_grpc_channel(target, credentials, ssl_credentials_file=None,
+                        grpc_channel_options=None):
+    """Create and return a gRPC channel.
+
+    Args:
+      credentials(google.oauth2.credentials.Credentials): OAuth2 credentials.
+      ssl_credentials_file(str): Path to SSL credentials.pem file (for testing).
+      grpc_channel_options([(option_name, option_val)]): gRPC channel options.
+    Returns:
+      grpc.Channel.
+    """
+    ssl_credentials = None
+    if ssl_credentials_file:
+        with open(ssl_credentials_file) as f:
+            ssl_credentials = grpc.ssl_channel_credentials(f.read())
+    http_request = google.auth.transport.requests.Request()
+    return google.auth.transport.grpc.secure_authorized_channel(
+        credentials, http_request, target,
+        ssl_credentials=ssl_credentials, options=grpc_channel_options or [])
 
 
 if __name__ == '__main__':
