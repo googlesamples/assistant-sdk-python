@@ -93,12 +93,13 @@ def load_credentials(path, scopes):
 
 
 def create_grpc_channel(target, credentials, ssl_credentials_file=None,
-                        grpc_channel_options=None):
+                        grpc_channel_options=[]):
     """Create and return a gRPC channel.
 
     Args:
       credentials(google.oauth2.credentials.Credentials): OAuth2 credentials.
-      ssl_credentials_file(str): Path to SSL credentials.pem file (for testing).
+      ssl_credentials_file(str): Path to SSL credentials.pem file
+        (for testing).
       grpc_channel_options([(option_name, option_val)]): gRPC channel options.
     Returns:
       grpc.Channel.
@@ -110,7 +111,8 @@ def create_grpc_channel(target, credentials, ssl_credentials_file=None,
     http_request = google.auth.transport.requests.Request()
     return google.auth.transport.grpc.secure_authorized_channel(
         credentials, http_request, target,
-        ssl_credentials=ssl_credentials, options=grpc_channel_options or [])
+        ssl_credentials=ssl_credentials,
+        options=grpc_channel_options)
 
 
 if __name__ == '__main__':

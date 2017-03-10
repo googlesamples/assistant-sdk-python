@@ -17,7 +17,6 @@
 import argparse
 import logging
 import tqdm
-import grpc
 from six.moves import input
 
 from . import (embedded_assistant,
@@ -44,6 +43,7 @@ ASSISTANT_API_ENDPOINTS = {
     'dev': 'internal-assistant-api',
 }
 
+
 def main():
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(
@@ -68,7 +68,8 @@ def main():
                         default='.embedded_assistant_credentials.json',
                         help='Path to store and read OAuth2 credentials '
                         'generated with the `--authorize` flag.')
-    parser.add_argument('--ssl_credentials_for_testing', type=str, default=None,
+    parser.add_argument('--ssl_credentials_for_testing',
+                        type=str, default=None,
                         help='Path to ssl_certificates.pem; for testing only.')
     parser.add_argument('--grpc_channel_option', type=str, action='append',
                         help='Options used to construct gRPC channel', nargs=2,
@@ -102,16 +103,17 @@ def main():
                       'to initialize new OAuth2 credentials.')
         return
 
-    endpoint = ASSISTANT_API_ENDPOINTS.get(args.api_endpoint, args.api_endpoint)
+    endpoint = ASSISTANT_API_ENDPOINTS.get(args.api_endpoint,
+                                           args.api_endpoint)
     grpc_channel = auth_helpers.create_grpc_channel(
         endpoint, credentials,
         ssl_credentials_file=args.ssl_credentials_for_testing,
-        grpc_channel_options=map(tuple, args.grpc_channel_option))
+        grpc_channel_options=args.grpc_channel_option)
     logging.info('Connecting to %s', endpoint)
 
     # Start the Embedded Assistant API client.
-    assistant = embedded_assistant.EmbeddedAssistant(
-        grpc_channel, credentials=credentials)
+    assistant = embedded_assistant.EmbeddedAssistant(grpc_channel,
+                                                     credentials=credentials)
 
     def iter_with_progress(title, gen):
         with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:
