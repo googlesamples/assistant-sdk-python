@@ -19,7 +19,6 @@ import threading
 import google.auth
 import google.auth.transport.grpc
 import google.auth.transport.requests
-import google.oauth2.credentials
 from google.rpc import code_pb2
 
 from . import embedded_assistant_pb2
@@ -33,11 +32,8 @@ class EmbeddedAssistant(object):
     Args:
       grpc_channel(grpc.Channel): gRPC channel via which to send
         Embedded Assistant API RPC requests.
-      credentials(google.oauth2.credentials.Credentials): OAuth2 credentials.
     """
-    def __init__(self, grpc_channel, credentials=None):
-        # TODO(proppy): remove when gRPC auth is activated.
-        self._credentials = credentials
+    def __init__(self, grpc_channel):
         self._service = embedded_assistant_pb2.EmbeddedAssistantStub(
             grpc_channel)
         # We set this Event when the server tells us to stop sending audio.
@@ -87,16 +83,10 @@ class EmbeddedAssistant(object):
           samples: generator of audio samples.
           sample_rate: audio data sample rate.
         """
-        # TODO(proppy): remove when gRPC auth is activated.
-        http_request = google.auth.transport.requests.Request()
-        self._credentials.refresh(http_request)
-        access_token = self._credentials.token
-
         audio_in_config = embedded_assistant_pb2.AudioInConfig(
             encoding='LINEAR16',
             sample_rate_hertz=int(sample_rate),
             language_code='en-US',
-            auth_token=access_token,
         )
         audio_out_config = embedded_assistant_pb2.AudioOutConfig(
             encoding='LINEAR16',

@@ -39,7 +39,6 @@ EPILOG = """examples:
 
 ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
 ASSISTANT_API_ENDPOINTS = {
-    'deprecated': 'internal-assistant-api',
     'dev': 'internal-assistant-api',
 }
 
@@ -60,7 +59,7 @@ def main():
     parser.add_argument('-o', '--output_audio_file', type=str, default=None,
                         help='Path to output audio file. '
                         'If missing, uses pyaudio playback')
-    parser.add_argument('--api_endpoint', type=str, default='deprecated',
+    parser.add_argument('--api_endpoint', type=str, default='dev',
                         help='Name or address of Embedded Assistant API '
                         'service.')
     parser.add_argument('--credentials', type=str,
@@ -112,8 +111,7 @@ def main():
     logging.info('Connecting to %s', endpoint)
 
     # Start the Embedded Assistant API client.
-    assistant = embedded_assistant.EmbeddedAssistant(grpc_channel,
-                                                     credentials=credentials)
+    assistant = embedded_assistant.EmbeddedAssistant(grpc_channel)
 
     def iter_with_progress(title, gen):
         with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:

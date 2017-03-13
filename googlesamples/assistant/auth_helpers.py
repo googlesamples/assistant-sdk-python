@@ -109,6 +109,9 @@ def create_grpc_channel(target, credentials, ssl_credentials_file=None,
         with open(ssl_credentials_file) as f:
             ssl_credentials = grpc.ssl_channel_credentials(f.read())
     http_request = google.auth.transport.requests.Request()
+    # TODO(proppy): figure out if/why we need to force a refresh.
+    # if yes, consider remove access token from serialized credentials.
+    credentials.refresh(http_request)
     return google.auth.transport.grpc.secure_authorized_channel(
         credentials, http_request, target,
         ssl_credentials=ssl_credentials,
