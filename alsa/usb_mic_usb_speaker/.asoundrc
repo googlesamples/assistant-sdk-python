@@ -8,7 +8,6 @@ pcm.usb_mic {
   type plug
   slave {
     pcm "hw:1,0"
-    rate 48000
   }
 }
 
@@ -16,6 +15,5 @@ pcm.usb_speaker {
   type plug
   slave {
     pcm "hw:2,0"
-    rate 48000
   }
 }

@@ -22,7 +22,7 @@ AUDIO_SAMPLE_RATE_HZ = 16000
 # Audio sample size in bytes.
 AUDIO_BYTES_PER_SAMPLE = 2
 # Audio I/O chunk size in seconds.
-AUDIO_CHUNK_DURATION_SECS = 0.1
+AUDIO_CHUNK_DURATION_SECS = 0.5
 # Audio I/O chunk size in bytes.
 AUDIO_CHUNK_SIZE = int(AUDIO_SAMPLE_RATE_HZ
                        * AUDIO_BYTES_PER_SAMPLE

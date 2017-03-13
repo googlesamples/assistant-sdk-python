@@ -200,9 +200,9 @@ if __name__ == '__main__':
     import logging
     from tqdm import tqdm
 
-    sample_rate_hz = 16000
-    bytes_per_sample = 2
-    chunk_size = 1024
+    sample_rate_hz = recommended_settings.AUDIO_SAMPLE_RATE_HZ
+    bytes_per_sample = recommended_settings.AUDIO_BYTES_PER_SAMPLE
+    chunk_size = recommended_settings.AUDIO_CHUNK_SIZE
     record_time = 5
     end_time = time.time() + record_time
     stream = PyAudioStream(sample_rate_hz,

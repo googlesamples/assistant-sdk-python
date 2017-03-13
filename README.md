@@ -10,6 +10,7 @@ Supported configuration
 - [Mini USB Microphone](https://www.adafruit.com/product/3367)
 - [Mini External USB Stereo Speaker](https://www.adafruit.com/products/3369) or [3.5mm Stereo Jack Speaker](https://www.sparkfun.com/products/14023).
 - [Raspbian Jessie with Pixel](https://www.raspberrypi.org/downloads/raspbian/)
+- [Enable SSH on Raspbian](https://www.raspberrypi.org/documentation/remote-access/ssh/)
 
 Connect to the Raspberry Pi
 ===========================
@@ -31,6 +32,7 @@ Get the source
 ==============
 
 - [Connect to the Raspberry Pi](#Connect-to-the-Raspberry-Pi)
+- [Sign in](https://dev-partners-review.googlesource.com) the dev-partners gerrit instance.
 - [Generate](https://dev-partners-review.googlesource.com/new-password) a new gerrit password
 - Clone this repository:
 
@@ -39,10 +41,10 @@ Get the source
 API Setup
 =========
 
-- Visit [console.developers.google.com](console.developers.google.com).
+- Visit [console.developers.google.com](https://console.developers.google.com).
 - Select an existing project or create a new one.
 - Go to `API Manager / Dashboard`.
-- Enable `Google Cloud Speech API`.
+- Enable [`Embedded Google Assistant API`](https://console.developers.google.com/apis/api/internal-assistant-api/overview).
 - Go to `API Manager / Credentials`.
 - Click `Create credentials / OAuth Client ID`.
 - Select `Other`.
@@ -50,7 +52,7 @@ API Setup
 - Click `⬇` to download the `client_secret_XXXX.json` file.
 - Copy the `client_secret_XXXX.json` file to the Raspberry Pi:
 
-        scp ~/Downloads/client_secret_XXXX.json pi@raspberry-pi-ip-address:/home/pi/embedded-assistant-sdk/
+        scp ~/Downloads/client_secret_XXXX.json pi@raspberry-pi-ip-address:/home/pi/embedded-assistant-sdk-python/
         password: raspberry
 
 Audio setup
@@ -80,6 +82,8 @@ Audio setup
             # check recording by replaying it
             aplay --format=S16_LE --rate=16k out.raw
 
+            # adjust playback and recording volume
+            alsamixer
 
 Sample Setup
 ============
@@ -90,24 +94,24 @@ Sample Setup
         cd embedded-assistant-sdk-python
 
 - Install the sample and its dependencies:
-  - If using python 3:
+  - If using python 3 (recommended):
 
-        sudo apt-get install python3-dev python3-venv portaudio19-dev
+        sudo apt-get update
+        sudo apt-get install python3-dev python3-venv portaudio19-dev libffi-dev libssl-dev
         python3 -m venv env
         env/bin/python -m pip install -e ".[MAIN]"
 
   - If using python 2:
 
-        sudo apt-get install python-dev python-virtualenv portaudio19-dev
+        sudo apt-get update
+        sudo apt-get install python-dev python-virtualenv portaudio19-dev libffi-dev libssl-dev
         virtualenv env --no-site-packages
         env/bin/pip install -e ".[MAIN]"
 
-  - If using goobuntu:
+- Verify the audio setup:
 
-        PYTHON3_MINOR_VERSION=$(python3 -c 'import sys; print(sys.version_info[1])')
-        sudo apt-get install python3-dev python3.$PYTHON3_MINOR_VERSION-venv portaudio19-dev
-        python3 -m venv env
-        env/bin/python -m pip install -e ".[MAIN]"
+        # Record a 5 sec sample and play it back
+        env/bin/python -m googlesamples.assistant.audio_helpers
 
 Run the sample
 ==============
@@ -117,25 +121,41 @@ Run the sample
 
         cd embedded-assistant-sdk-python
 
-- Initialize new OAuth2 credentials by running the following command
-  and follow its instructions.
+- Authorize the Embedded Assistant sample to make Google Assistant query for a given Google Account.
 
         env/bin/python -m googlesamples.assistant --authorize client_secret_XXXX.json
+        Please go to this URL: ...
+        Enter the authorization code:
 
 - Start the Embedded Assistant sample.
 
         env/bin/python -m googlesamples.assistant
 
-- Record your voice query and the sample should play back the Google
+- Record a voice query and the sample should play back the Google
   Assistant answer.
 
-Run the tests
-=============
+Troubleshooting
+===============
 
-- Run the tests
+- Use the following commands to troubleshoot/workaaround PyAudio issues:
+```
+# Record an assistant query with alsa commandline tools
+arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw in.raw
+env/bin/python -m googlesamples.assistant -i in.raw
 
-        env/bin/python setup.py flake8
-        env/bin/python setup.py test
+# Playback an assistant answer with alsa commandline tools
+env/bin/python -m googlesamples.assistant -o out.raw
+aplay out.raw
+```
+
+Test
+====
+
+```
+# Run tests
+env/bin/python setup.py flake8
+env/bin/python setup.py test
+```
 
 License
 =======
