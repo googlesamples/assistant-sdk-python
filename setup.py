@@ -26,10 +26,6 @@ DEPENDENCIES = [
     'urllib3[secure]==1.20',
 ]
 
-with open('README.md', 'r') as f:
-    long_description = f.read()
-
-
 def load_test_suite():
     import unittest
     test_loader = unittest.TestLoader()
@@ -43,7 +39,7 @@ setup(
     author='Google Embedded Assistant team',
     author_email='proppy@google.com',
     description='Google Embedded Assistant Sample client',
-    long_description=long_description,
+    long_description='Google Embedded Assistant Sample client',
     url='TODO(proppy) add external repo url',
     packages=find_packages(exclude=('tests')),
     namespace_packages=('googlesamples',),
