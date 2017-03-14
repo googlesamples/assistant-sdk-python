@@ -29,7 +29,7 @@ AUDIO_CHUNK_SIZE = int(AUDIO_SAMPLE_RATE_HZ
                        * AUDIO_CHUNK_DURATION_SECS)
 # Audio I/O flush size in bytes (used to flush PyAudio buffer during
 # playback to ensure audio is not truncated).
-AUDIO_FLUSH_SIZE = AUDIO_CHUNK_SIZE * 2
+AUDIO_FLUSH_SIZE = AUDIO_CHUNK_SIZE * 3
 
 # Embedded Assistant API RPC deadline in seconds.
 DEADLINE_SECS = 60 * 3 + 5
