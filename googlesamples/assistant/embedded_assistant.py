@@ -86,7 +86,6 @@ class EmbeddedAssistant(object):
         audio_in_config = embedded_assistant_pb2.AudioInConfig(
             encoding='LINEAR16',
             sample_rate_hertz=int(sample_rate),
-            language_code='en-US',
         )
         audio_out_config = embedded_assistant_pb2.AudioOutConfig(
             encoding='LINEAR16',
