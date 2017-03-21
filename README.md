@@ -1,95 +1,22 @@
-Embedded Assistant Python SDK & Samples
-=======================================
+Embedded Assistant Python Sample
+================================
 
-This repositories contains Python samples for the Embedded Assistant API.
+This repository contains a Python sample for the Embedded Assistant API.
 
-Supported configuration
------------------------
+See
+[Getting Started with the Raspberry Pi 3](https://developers.google.com/assistant/) for
+instructions on how to run the sample on supported hardware.
 
-- [Raspberry Pi 3 Model B](https://www.adafruit.com/products/3334)
-- [Mini USB Microphone](https://www.adafruit.com/product/3367)
-- [Mini External USB Stereo Speaker](https://www.adafruit.com/products/3369) or [3.5mm Stereo Jack Speaker](https://www.sparkfun.com/products/14023).
-- [Raspbian Jessie with Pixel](https://www.raspberrypi.org/downloads/raspbian/)
-- [Enable SSH on Raspbian](https://www.raspberrypi.org/documentation/remote-access/ssh/)
+Prerequisites
+=============
+- [Python](https://www.python.org/) (3.x prefered)
+- [Google API Console Project](https://console.developers.google.com) w/ Embedded Assistant API [enabled](https://console.developers.google.com/apis).
+- [OAuth client ID credentials](https://console.developers.google.com/apis/credentials) with application type `Other`.
 
-Connect to the Raspberry Pi
-===========================
-
-- Depending of the Raspberry Pi configuration, follow guides below to
-configure network access:
-
-    - [Connect to a WiFi network](https://www.raspberrypi.org/documentation/configuration/wireless/README.md) network.
-    - [Get console access using a USB-TTL cable](https://learn.adafruit.com/adafruits-raspberry-pi-lesson-5-using-a-console-cable/overview).
-    - [Connect to a WiFi network using the command line](https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
-
-- [Find the Raspberry Pi IP address](https://www.raspberrypi.org/documentation/remote-access/ip-address.md)
-- Connect to the Raspberry Pi
-
-        ssh pi@<raspberry-pi-ip-address>
-        password: raspberry
-
-Get the source
+Run the sample
 ==============
 
-- [Connect to the Raspberry Pi](#Connect-to-the-Raspberry-Pi)
-- [Sign in](https://dev-partners-review.googlesource.com) the dev-partners gerrit instance.
-- [Generate](https://dev-partners-review.googlesource.com/new-password) a new gerrit password
-- Clone this repository:
-
-        git clone https://dev-partners.googlesource.com/embedded-assistant-sdk-python
-
-API Setup
-=========
-
-- Visit [console.developers.google.com](https://console.developers.google.com).
-- Select an existing project or create a new one.
-- Go to `API Manager / Dashboard`.
-- Enable [`Embedded Google Assistant API`](https://console.developers.google.com/apis/api/internal-assistant-api/overview).
-- Go to `API Manager / Credentials`.
-- Click `Create credentials / OAuth Client ID`.
-- Select `Other`.
-- Click `Create`.
-- Click `⬇` to download the `client_secret_XXXX.json` file.
-- Copy the `client_secret_XXXX.json` file to the Raspberry Pi:
-
-        scp ~/Downloads/client_secret_XXXX.json pi@raspberry-pi-ip-address:/home/pi/embedded-assistant-sdk-python/
-        password: raspberry
-
-Audio setup
-===========
-
-- [Connect to the Raspberry Pi](#Connect-to-the-Raspberry-Pi)
-- Connect the USB microphone
-- Connect the USB speaker or 3.5mm stereo jack speaker
-- Enter the [sample directory](#Get-the-source)
-
-        cd embedded-assistant-sdk-python
-
-- Copy the `.asoundrc` file corresponding to the audio setup.
-
-    - USB microphone and USB speaker:
-
-            cp alsa/usb_mic_usb_speaker/.asoundrc /home/pi
-
-    - USB microphone and 3.5mm stereo jack speaker:
-
-            cp alsa/usb_mic_jack_speaker/.asoundrc /home/pi
-
-- Verify that recording and playback are working:
-
-            # record a short audio clip
-            arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
-            # check recording by replaying it
-            aplay --format=S16_LE --rate=16k out.raw
-
-            # adjust playback and recording volume
-            alsamixer
-
-Sample Setup
-============
-
-- [Connect to the Raspberry Pi](#Connect-to-the-Raspberry-Pi)
-- Enter the [sample directory](#Get-the-source)
+- Enter the sample directory
 
         cd embedded-assistant-sdk-python
 
@@ -112,14 +39,6 @@ Sample Setup
 
         # Record a 5 sec sample and play it back
         env/bin/python -m googlesamples.assistant.audio_helpers
-
-Run the sample
-==============
-
-- [Connect to the Raspberry Pi](#Connect-to-the-Raspberry-Pi)
-- Enter the [sample directory](#Get-the-source)
-
-        cd embedded-assistant-sdk-python
 
 - Authorize the Embedded Assistant sample to make Google Assistant query for a given Google Account.
 

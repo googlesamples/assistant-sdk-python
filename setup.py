@@ -39,7 +39,7 @@ setup(
     author='Google Embedded Assistant team',
     author_email='proppy@google.com',
     description='Google Embedded Assistant Sample client',
-    long_description='Google Embedded Assistant Sample client',
+    long_description='Sample client for the Google Embedded Assistant gRPC API',
     url='TODO(proppy) add external repo url',
     packages=find_packages(exclude=('tests')),
     namespace_packages=('googlesamples',),
