@@ -40,6 +40,13 @@ class EmbeddedAssistant(object):
         self._stop_sending_audio = threading.Event()
         # We set this Event when it is safe to play audio.
         self._start_playback = threading.Event()
+        # Stores an opaque blob provided in ConverseResponse that, when provided
+        # in a follow-up ConverseRequest, gives the Assistant a context
+        # marker within the current state of the multi-Converse()-RPC
+        # "conversation".
+        # This value, along with MicrophoneMode, supports a more natural
+        # "conversation" with the Assistant.
+        self._converse_state = b''
 
     def converse(self, samples, sample_rate=AUDIO_SAMPLE_RATE_HZ,
                  deadline=DEADLINE_SECS):
@@ -65,6 +72,7 @@ class EmbeddedAssistant(object):
         # Iterate over ConverseResponse proto messages and yield them
         # back to the caller.
         for resp in converse_responses:
+            self._log_response_without_audio(resp)
             if resp.error.code != code_pb2.OK:
                 raise RuntimeError('Server error: ' + resp.error.message)
             if resp.event_type == END_OF_UTTERANCE:
@@ -72,8 +80,21 @@ class EmbeddedAssistant(object):
                 self._stop_sending_audio.set()
             if len(resp.audio_out.audio_data) > 0:
                 self._start_playback.wait()
-                # yield assistant response audio samples back to caller.
+            if resp.result.converse_state:
+                logging.debug('Saving converse_state: %s',
+                              resp.result.converse_state)
+                self._converse_state = resp.result.converse_state
+            # yield ConverseResponse back to caller.
             yield resp
+
+    @staticmethod
+    def _log_response_without_audio(converse_response):
+        if logging.isEnabledFor(logging.DEBUG):
+            resp_copy = embedded_assistant_pb2.ConverseResponse()
+            resp_copy.CopyFrom(converse_response)
+            resp_copy.ClearField('audio_out')
+            if resp_copy.ListFields():
+                logging.debug('ConverseResponse (without audio): %s', resp_copy)
 
     def _gen_converse_requests(self, samples, sample_rate):
         """Returns a generator of ConverseRequest proto messages from the
@@ -92,9 +113,16 @@ class EmbeddedAssistant(object):
             sample_rate_hertz=int(sample_rate),
             volume_percentage=50,
         )
+        state_config = None
+        if self._converse_state:
+            logging.debug('Sending converse_state: %s', self._converse_state)
+            state_config = embedded_assistant_pb2.State(
+                converse_state=self._converse_state,
+            )
         converse_config = embedded_assistant_pb2.ConverseConfig(
             audio_in_config=audio_in_config,
-            audio_out_config=audio_out_config
+            audio_out_config=audio_out_config,
+            state=state_config,
         )
         # The first ConverseRequest must contain the ConverseConfig
         # and no audio data
@@ -105,7 +133,8 @@ class EmbeddedAssistant(object):
             yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
         self._start_playback.set()
 
-    def wait_end_of_utterance(self, converse_responses):
+    @staticmethod
+    def wait_end_of_utterance(converse_responses):
         """Helper to iterate on converse responses until END_OF_UTTERANCE.
 
         Usage of this helper is optional and client code can also
@@ -120,17 +149,32 @@ class EmbeddedAssistant(object):
                 break
 
     @staticmethod
-    def iter_converse_responses_audio(converse_responses):
-        """Helper to iterate on audio samples in converse responses.
+    def handle_converse_response(converse_response, audio_output_stream,
+                                 mic_mode_handler=None):
+        """Default handler for a ConverseResponse message.
 
-        Usage of this helper is optional and client code can also
-        iterate on the ConverseResponse returned by `converse()` for
-        more control.
+        This handler writes audio bytes in the ConverseResponse to the given
+        audio_output_stream, passes the returned MicrophoneMode to a given
+        handler, and logs some useful information.
 
-        Args: generator of ConverseResponse proto messages.
-        Returns: generator of audio samples.
+        Usage of this helper is optional, and this helper defines one possible
+        strategy for handling of a ConverseResponse message.
 
+        Args:
+          converse_response: ConverseResponse proto message.
+          audio_output_stream: file-like object that consumes audio samples.
+          mic_mode_handler: optional; callable(MicrophoneMode) handler.
         """
-        for resp in converse_responses:
-            if len(resp.audio_out.audio_data) > 0:
-                yield resp.audio_out.audio_data
+        # TODO(b/36456437): Expose this handling more transparently to the user.
+        if len(converse_response.audio_out.audio_data) > 0:
+            audio_output_stream.write(converse_response.audio_out.audio_data)
+        if converse_response.result.spoken_request_text:
+            logging.info('Transcript of user query: "%s"',
+                         converse_response.result.spoken_request_text)
+        if converse_response.result.spoken_response_text:
+            logging.info(
+                'Transcript of TTS response (only populated from IFTTT): "%s"',
+                converse_response.result.spoken_response_text)
+        if mic_mode_handler and converse_response.result.microphone_mode:
+            mic_mode_handler(converse_response.result.microphone_mode)
+

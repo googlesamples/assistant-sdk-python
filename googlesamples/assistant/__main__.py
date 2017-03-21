@@ -16,6 +16,7 @@
 
 import argparse
 import logging
+import sys
 import tqdm
 from six.moves import input
 
@@ -44,7 +45,6 @@ ASSISTANT_API_ENDPOINTS = {
 
 
 def main():
-    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawTextHelpFormatter,
         epilog=EPILOG)
@@ -117,7 +117,7 @@ def main():
         with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:
             t.set_description(title)
             for d in gen:
-                t.update(len(d))
+                t.update(sys.getsizeof(d))
                 yield d
 
     interactive = not (args.input_audio_file or args.output_audio_file)
@@ -128,17 +128,17 @@ def main():
         # - Wait for END_OF_UTTERANCE (This is optional).
         # - Iterate on converse responses audio data and playback samples.
         while True:
+            # TODO(dakota): Stop recreating the audio stream in between requests
             audio_stream = audio_helpers.PyAudioStream()
             input_samples = iter_with_progress('Recording: ', audio_stream)
             # TODO(proppy): wait for input at the beginning of the loop.
-            input('Press Enter to start a new conversation ')
+            input('Press Enter to send a new request ')
             converse_responses = assistant.converse(input_samples)
             assistant.wait_end_of_utterance(converse_responses)
             print('End of utterance detected.')
-            output_samples = assistant.iter_converse_responses_audio(
-                converse_responses)
-            for s in iter_with_progress('Playing', output_samples):
-                audio_stream.write(s)
+            for resp in iter_with_progress('Playing', converse_responses):
+                # TODO(dakota): Add handler for MicrophoneMode.
+                assistant.handle_converse_response(resp, audio_stream)
             audio_stream.close()
     else:
         # In non-interactive mode:
@@ -159,10 +159,8 @@ def main():
         # Read audio sample from input stream.
         input_samples = iter_with_progress('Recording: ', input_stream)
         converse_responses = assistant.converse(input_samples)
-        output_samples = assistant.iter_converse_responses_audio(
-            converse_responses)
-        for s in iter_with_progress('Playing ', output_samples):
-            output_stream.write(s)
+        for response in iter_with_progress('Playing ', converse_responses):
+            assistant.handle_converse_response(response, output_stream)
         input_stream.close()
         output_stream.close()
 
