@@ -89,7 +89,7 @@ class EmbeddedAssistant(object):
 
     @staticmethod
     def _log_response_without_audio(converse_response):
-        if logging.isEnabledFor(logging.DEBUG):
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
             resp_copy = embedded_assistant_pb2.ConverseResponse()
             resp_copy.CopyFrom(converse_response)
             resp_copy.ClearField('audio_out')
