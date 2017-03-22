@@ -40,7 +40,6 @@ EPILOG = """examples:
 
 ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
 ASSISTANT_API_ENDPOINTS = {
-    'dev': 'internal-assistant-api',
     'prod': 'embedded-assistant.googleapis.com',
 }
 
@@ -60,7 +59,7 @@ def main():
     parser.add_argument('-o', '--output_audio_file', type=str, default=None,
                         help='Path to output audio file. '
                         'If missing, uses pyaudio playback')
-    parser.add_argument('--api_endpoint', type=str, default='dev',
+    parser.add_argument('--api_endpoint', type=str, default='prod',
                         help='Name or address of Embedded Assistant API '
                         'service.')
     parser.add_argument('--credentials', type=str,
