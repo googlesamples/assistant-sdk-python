@@ -35,6 +35,7 @@ Run the sample
         virtualenv env --no-site-packages
         env/bin/pip install -e ".[MAIN]"
 
+<a name="verify-audio-setup"></a>
 - Verify the audio setup:
 
         # Record a 5 sec sample and play it back
@@ -56,24 +57,34 @@ Run the sample
 Troubleshooting
 ===============
 
-- Use the following commands to troubleshoot/workaaround PyAudio issues:
+- Use the following commands to troubleshoot audio issues:
 ```
-# Record an assistant query with alsa commandline tools
-arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw in.raw
-env/bin/python -m googlesamples.assistant -i in.raw
+# Play a test sound
+speaker-test -t wav
 
-# Playback an assistant answer with alsa commandline tools
-env/bin/python -m googlesamples.assistant -o out.raw
-aplay out.raw
+# Record and play back some audio using ALSA command-line tools
+arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw f.raw
+aplay f.raw
 ```
 
-Test
-====
+See above for [how to verify your environment's audio setup](#verify-audio-setup).
+
+Development and Testing
+=======================
 
 ```
-# Run tests
+# Run lint and tests
 env/bin/python setup.py flake8
 env/bin/python setup.py test
+
+# Record and send pre-recorded audio to the Assistant
+env/bin/python -m googlesamples.assistant -i in.raw
+
+# Save Assistant response to a file
+env/bin/python -m googlesamples.assistant -o out.raw
+
+# Run the sample with verbose logging enabled
+env/bin/python -m googlesamples.assistant --verbose
 ```
 
 License
