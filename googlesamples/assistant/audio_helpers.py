@@ -16,6 +16,8 @@
 import time
 import pyaudio
 import wave
+import sys
+import tqdm
 
 from . import recommended_settings
 
@@ -226,3 +228,10 @@ if __name__ == '__main__':
 
     stream.close()
     logging.info('audio test completed.')
+
+def iter_with_progress(title, gen):
+    with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:
+        t.set_description(title)
+        for d in gen:
+            t.update(sys.getsizeof(d))
+            yield d

@@ -17,12 +17,13 @@
 import argparse
 import logging
 import sys
-import tqdm
 from six.moves import input
 
 from . import (embedded_assistant,
                audio_helpers,
                auth_helpers)
+
+from .embedded_assistant_pb2 import ConverseResponse
 
 EPILOG = """examples:
   # Authorize the sample to access the Embedded Assistant API:
@@ -113,38 +114,38 @@ def main():
     # Start the Embedded Assistant API client.
     assistant = embedded_assistant.EmbeddedAssistant(grpc_channel)
 
-    def iter_with_progress(title, gen):
-        with tqdm.tqdm(unit='B', unit_scale=True, position=0) as t:
-            t.set_description(title)
-            for d in gen:
-                t.update(sys.getsizeof(d))
-                yield d
-
     interactive = not (args.input_audio_file or args.output_audio_file)
     if interactive:
         # In interactive mode:
         # - Read audio samples from microphone.
         # - Send converse request.
-        # - Wait for END_OF_UTTERANCE (This is optional).
         # - Iterate on converse responses audio data and playback samples.
         while True:
+            input('Press Enter to send a new request. ')
             # TODO(dakota): Stop recreating the audio stream in between requests
             audio_stream = audio_helpers.PyAudioStream()
-            input_samples = iter_with_progress('Recording: ', audio_stream)
-            # TODO(proppy): wait for input at the beginning of the loop.
-            input('Press Enter to send a new request ')
+            input_samples = audio_helpers.iter_with_progress('Recording:',
+                                                             audio_stream)
             converse_responses = assistant.converse(input_samples)
-            assistant.wait_end_of_utterance(converse_responses)
-            print('End of utterance detected.')
-            for resp in iter_with_progress('Playing', converse_responses):
-                # TODO(dakota): Add handler for MicrophoneMode.
-                assistant.handle_converse_response(resp, audio_stream)
+            for resp in audio_helpers.iter_with_progress('Playing:',
+                                                         converse_responses):
+                if resp.event_type == ConverseResponse.END_OF_UTTERANCE:
+                    logging.info('End of audio request detected')
+                if len(resp.audio_out.audio_data) > 0:
+                    audio_stream.write(resp.audio_out.audio_data)
+                if resp.result.spoken_request_text:
+                    logging.info('Transcript of user request: "%s"',
+                                 resp.result.spoken_request_text)
+                if resp.result.spoken_response_text:
+                    logging.info(
+                        'Transcript of TTS response (only populated from IFTTT): "%s"',
+                        resp.result.spoken_response_text)
+                # TODO(proppy): Implement handling of MicrophoneMode.
             audio_stream.close()
     else:
         # In non-interactive mode:
         # - Read audio samples from microphone.
         # - Send converse request.
-        # - Wait for END_OF_UTTERANCE (This is optional).
         # - Iterate on converse responses audio data and playback samples.
         if args.input_audio_file:
             input_stream = audio_helpers.SampleRateLimiter(
@@ -156,11 +157,9 @@ def main():
                 open(args.output_audio_file, 'wb'))
         else:
             output_stream = audio_helpers.PyAudioStream()
-        # Read audio sample from input stream.
-        input_samples = iter_with_progress('Recording: ', input_stream)
-        converse_responses = assistant.converse(input_samples)
-        for response in iter_with_progress('Playing ', converse_responses):
-            assistant.handle_converse_response(response, output_stream)
+        # TODO(proppy): Converge non-interactive handling or split it.
+        for resp in assistant.converse(input_stream):
+            audio_stream.write(resp.audio_out.audio_data)
         input_stream.close()
         output_stream.close()
 
