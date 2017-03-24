@@ -159,7 +159,8 @@ def main():
             output_stream = audio_helpers.PyAudioStream()
         # TODO(proppy): Converge non-interactive handling or split it.
         for resp in assistant.converse(input_stream):
-            audio_stream.write(resp.audio_out.audio_data)
+            if len(resp.audio_out.audio_data) > 0:
+                output_stream.write(resp.audio_out.audio_data)
         input_stream.close()
         output_stream.close()
 

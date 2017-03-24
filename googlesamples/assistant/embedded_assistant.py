@@ -64,7 +64,8 @@ class EmbeddedAssistant(object):
 
         # This generator yields ConverseRequest to send to the gRPC
         # Embedded Assistant API.
-        converse_requests = self._gen_converse_requests(samples, sample_rate)
+        converse_requests = self._gen_converse_requests(iter(samples),
+                                                        sample_rate)
         # This generator yields ConverseResponse proto messages
         # received from the gRPC Embedded Assistant API.
         converse_responses = self._service.Converse(converse_requests,
