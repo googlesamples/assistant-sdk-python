@@ -17,6 +17,8 @@
 import json
 import logging
 
+import google.auth
+import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.flow
 import google.oauth2.credentials
