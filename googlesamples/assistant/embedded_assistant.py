@@ -16,9 +16,6 @@
 import logging
 import threading
 
-import google.auth
-import google.auth.transport.grpc
-import google.auth.transport.requests
 from google.rpc import code_pb2
 
 from . import embedded_assistant_pb2
@@ -40,10 +37,10 @@ class EmbeddedAssistant(object):
         self._stop_sending_audio = threading.Event()
         # We set this Event when it is safe to play audio.
         self._start_playback = threading.Event()
-        # Stores an opaque blob provided in ConverseResponse that, when provided
-        # in a follow-up ConverseRequest, gives the Assistant a context
-        # marker within the current state of the multi-Converse()-RPC
-        # "conversation".
+        # Stores an opaque blob provided in ConverseResponse that,
+        # when provided in a follow-up ConverseRequest,
+        # gives the Assistant a context marker within the current state
+        # of the multi-Converse()-RPC "conversation".
         # This value, along with MicrophoneMode, supports a more natural
         # "conversation" with the Assistant.
         self._converse_state = b''
@@ -95,7 +92,8 @@ class EmbeddedAssistant(object):
             resp_copy.CopyFrom(converse_response)
             resp_copy.ClearField('audio_out')
             if resp_copy.ListFields():
-                logging.debug('ConverseResponse (without audio): %s', resp_copy)
+                logging.debug('ConverseResponse (without audio): %s',
+                              resp_copy)
 
     def _gen_converse_requests(self, samples, sample_rate):
         """Returns a generator of ConverseRequest proto messages from the

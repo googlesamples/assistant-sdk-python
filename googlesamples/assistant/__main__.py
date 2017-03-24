@@ -16,7 +16,6 @@
 
 import argparse
 import logging
-import sys
 from six.moves import input
 
 from . import (embedded_assistant,
@@ -122,7 +121,8 @@ def main():
         # - Iterate on converse responses audio data and playback samples.
         while True:
             input('Press Enter to send a new request. ')
-            # TODO(dakota): Stop recreating the audio stream in between requests
+            # TODO(dakota): Stop recreating the audio stream
+            # in between requests
             audio_stream = audio_helpers.PyAudioStream()
             input_samples = audio_helpers.iter_with_progress('Recording:',
                                                              audio_stream)
@@ -138,7 +138,8 @@ def main():
                                  resp.result.spoken_request_text)
                 if resp.result.spoken_response_text:
                     logging.info(
-                        'Transcript of TTS response (only populated from IFTTT): "%s"',
+                        'Transcript of TTS response '
+                        '(only populated from IFTTT): "%s"',
                         resp.result.spoken_response_text)
                 # TODO(proppy): Implement handling of MicrophoneMode.
             audio_stream.close()

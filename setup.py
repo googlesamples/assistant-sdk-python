@@ -26,6 +26,7 @@ DEPENDENCIES = [
     'urllib3[secure]==1.20',
 ]
 
+
 def load_test_suite():
     import unittest
     test_loader = unittest.TestLoader()
@@ -38,8 +39,8 @@ setup(
     version='0.0.1',
     author='Google Embedded Assistant team',
     author_email='proppy@google.com',
-    description='Google Embedded Assistant Sample client',
-    long_description='Sample client for the Google Embedded Assistant gRPC API',
+    description='Embedded Google Assistant API Sample client',
+    long_description='Sample client for the Embedded Google Assistant API',
     url='TODO(proppy) add external repo url',
     packages=find_packages(exclude=('tests')),
     namespace_packages=('googlesamples',),
