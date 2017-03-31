@@ -23,6 +23,7 @@ from . import (embedded_assistant,
                auth_helpers)
 
 from .embedded_assistant_pb2 import ConverseResponse
+from .embedded_assistant_pb2 import Result
 
 EPILOG = """examples:
   # Authorize the sample to access the Embedded Assistant API:
@@ -119,8 +120,10 @@ def main():
         # - Read audio samples from microphone.
         # - Send converse request.
         # - Iterate on converse responses audio data and playback samples.
+        user_response_expected = False
         while True:
-            input('Press Enter to send a new request. ')
+            if not user_response_expected:
+                input('Press Enter to send a new request. ')
             # TODO(dakota): Stop recreating the audio stream
             # in between requests
             audio_stream = audio_helpers.PyAudioStream()
@@ -141,7 +144,11 @@ def main():
                         'Transcript of TTS response '
                         '(only populated from IFTTT): "%s"',
                         resp.result.spoken_response_text)
-                # TODO(proppy): Implement handling of MicrophoneMode.
+                if resp.result.microphone_mode == Result.DIALOG_FOLLOW_ON:
+                    user_response_expected = True
+                    logging.info('Expecting follow-on query from user.')
+                elif resp.result.microphone_mode == Result.CLOSE_MICROPHONE:
+                    user_response_expected = False
             audio_stream.close()
     else:
         # In non-interactive mode:
