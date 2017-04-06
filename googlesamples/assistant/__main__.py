@@ -41,7 +41,7 @@ EPILOG = """examples:
 
 ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
 ASSISTANT_API_ENDPOINTS = {
-    'prod': 'embedded-assistant.googleapis.com',
+    'prod': 'embeddedassistant.googleapis.com',
 }
 
 
