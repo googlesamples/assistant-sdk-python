@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import time
 import pyaudio
+import threading
+import time
 import wave
 
 from . import recommended_settings
@@ -90,6 +91,8 @@ class SampleRateLimiter(AudioStreamBase):
             time.sleep(missing_dt)
         self._sleep_until = time.time() + self._sleep_time(size)
         data = self._fp.read(size)
+        if len(data) == 0:
+            return ''
         #  When reach end of audio stream, pad remainder with silence (zeros).
         return data.ljust(size, b'\x00')
 
@@ -139,17 +142,28 @@ class WaveStreamWriter(AudioStreamBase):
 
 # TODO(proppy): split PyAudio helper in separate file.
 class PyAudioStream(AudioStreamBase):
-    """A PyAudio stream helper.
+    """A PyAudio bi-directional stream helper.
 
     File-like object that supports generator iteration.
     Unstarted when initialized: caller must call start().
+
+    Expected usage:
+    - Start recording by creating a new `PyAudioStream`
+    - Iterate or call `read` to get input samples.
+    - Stop recording w/ `stop_recording`.
+    - Start playback w/ `start_playback`.
+    - Call `write` to write output samples.
 
     Args:
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
       chunk_size: chunk size in bytes of each audio I/O buffer.
+      lock: enable exclusive playback and recording operation.
     """
-    def __init__(self, *args, **kwargs):
+    _stop_recording = None
+    _start_playback = None
+
+    def __init__(self, lock=True, *args, **kwargs):
         super(PyAudioStream, self).__init__(*args, **kwargs)
         if self.bytes_per_sample == 2:
             audio_format = pyaudio.paInt16
@@ -164,6 +178,17 @@ class PyAudioStream(AudioStreamBase):
             start=False,
             input=True, output=True
         )
+        if lock:
+            self._stop_recording = threading.Event()
+            self._start_playback = threading.Event()
+
+    def stop_recording(self):
+        if self._stop_recording:
+            self._stop_recording.set()
+
+    def start_playback(self):
+        if self._start_playback:
+            self._start_playback.set()
 
     @property
     def name(self):
@@ -172,12 +197,16 @@ class PyAudioStream(AudioStreamBase):
 
     def read(self, size):
         """Read the given number of bytes from the stream."""
+        if self._stop_recording and self._stop_recording.is_set():
+            return ''
         # TODO(proppy): enable exception_on_overflow when audio
         # processing moved to separate thread.
         return self._audio_stream.read(size, exception_on_overflow=False)
 
     def write(self, buf):
         """Write the given bytes to the stream."""
+        if self._start_playback:
+            self._start_playback.wait()
         return self._audio_stream.write(buf)
 
     def flush(self, size=recommended_settings.AUDIO_FLUSH_SIZE):
@@ -186,6 +215,7 @@ class PyAudioStream(AudioStreamBase):
 
     def start(self):
         """Start the underlying stream."""
+        self.reset()
         self._audio_stream.start_stream()
 
     def stop(self):
@@ -193,8 +223,17 @@ class PyAudioStream(AudioStreamBase):
         self.flush()
         self._audio_stream.stop_stream()
 
+    def reset(self):
+        """Clear recording and playback state."""
+        if self._stop_recording:
+            self._stop_recording.clear()
+        if self._start_playback:
+            self._start_playback.clear()
+
     def close(self):
         """Close the underlying stream and audio interface."""
+        if self._audio_stream.is_active():
+            self.stop()
         self._audio_stream.close()
         self._audio_interface.terminate()
 
@@ -206,14 +245,10 @@ if __name__ == '__main__':
     """
     import logging
 
-    sample_rate_hz = recommended_settings.AUDIO_SAMPLE_RATE_HZ
-    bytes_per_sample = recommended_settings.AUDIO_BYTES_PER_SAMPLE
     chunk_size = recommended_settings.AUDIO_CHUNK_SIZE
     record_time = 5
     end_time = time.time() + record_time
-    stream = PyAudioStream(sample_rate_hz,
-                           bytes_per_sample,
-                           chunk_size)
+    stream = PyAudioStream()
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')
@@ -223,7 +258,9 @@ if __name__ == '__main__':
     while time.time() < end_time:
         samples.append(stream.read(chunk_size))
     logging.info('Finished recording.')
+    stream.stop_recording()
 
+    stream.start_playback()
     logging.info('Playing back samples.')
     while len(samples):
         stream.write(samples.pop(0))

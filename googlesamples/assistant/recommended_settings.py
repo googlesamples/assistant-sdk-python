@@ -31,5 +31,5 @@ AUDIO_CHUNK_SIZE = int(AUDIO_SAMPLE_RATE_HZ
 # playback to ensure audio is not truncated).
 AUDIO_FLUSH_SIZE = AUDIO_CHUNK_SIZE * 3
 
-# Embedded Assistant API RPC deadline in seconds.
+# Google Assistant API RPC deadline in seconds.
 DEADLINE_SECS = 60 * 3 + 5

@@ -1,0 +1,85 @@
+#
+# Copyright (C) 2016 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Helper functions for the Google Assistant API."""
+
+import logging
+
+from google.assistant.v1alpha1 import embedded_assistant_pb2
+from .recommended_settings import AUDIO_SAMPLE_RATE_HZ
+
+
+END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
+
+
+def log_converse_request_without_audio(converse_request):
+    """Log ConverseRequest fields without audio data."""
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        resp_copy = embedded_assistant_pb2.ConverseRequest()
+        resp_copy.CopyFrom(converse_request)
+        resp_copy.ClearField('audio_in')
+        if resp_copy.ListFields():
+            logging.debug('ConverseRequest (without audio): %s',
+                          resp_copy)
+
+
+def log_converse_response_without_audio(converse_response):
+    """Log ConverseResponse fields without audio data."""
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
+        resp_copy = embedded_assistant_pb2.ConverseResponse()
+        resp_copy.CopyFrom(converse_response)
+        resp_copy.ClearField('audio_out')
+        if resp_copy.ListFields():
+            logging.debug('ConverseResponse (without audio): %s',
+                          resp_copy)
+
+
+def gen_converse_requests(samples,
+                          sample_rate=AUDIO_SAMPLE_RATE_HZ,
+                          converse_state=None,
+                          volume_percentage=50):
+    """Returns a generator of ConverseRequest proto messages from the
+       given audio samples.
+
+    Args:
+      samples: generator of audio samples.
+      sample_rate: audio data sample rate.
+      converse_state: opaque bytes describing current conversation state.
+    """
+    audio_in_config = embedded_assistant_pb2.AudioInConfig(
+        encoding='LINEAR16',
+        sample_rate_hertz=int(sample_rate),
+    )
+    audio_out_config = embedded_assistant_pb2.AudioOutConfig(
+        encoding='LINEAR16',
+        sample_rate_hertz=int(sample_rate),
+        volume_percentage=volume_percentage,
+    )
+    state_config = None
+    if converse_state:
+        logging.debug('Sending converse_state: %s', converse_state)
+        state_config = embedded_assistant_pb2.State(
+            converse_state=converse_state,
+        )
+    converse_config = embedded_assistant_pb2.ConverseConfig(
+        audio_in_config=audio_in_config,
+        audio_out_config=audio_out_config,
+        state=state_config,
+    )
+    # The first ConverseRequest must contain the ConverseConfig
+    # and no audio data
+    yield embedded_assistant_pb2.ConverseRequest(config=converse_config)
+    for data in samples:
+        # Subsequent requests need audio data, but not config.
+        yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
