@@ -121,12 +121,12 @@ def main():
         # - Send converse request.
         # - Iterate on converse responses audio data and playback samples.
         user_response_expected = False
+        audio_stream = audio_helpers.PyAudioStream()
         while True:
             if not user_response_expected:
                 input('Press Enter to send a new request. ')
-            # TODO(dakota): Stop recreating the audio stream
-            # in between requests
-            audio_stream = audio_helpers.PyAudioStream()
+                audio_stream.start()
+
             input_samples = audio_helpers.iter_with_progress('Recording:',
                                                              audio_stream)
             converse_responses = assistant.converse(input_samples)
@@ -149,7 +149,9 @@ def main():
                     logging.info('Expecting follow-on query from user.')
                 elif resp.result.microphone_mode == Result.CLOSE_MICROPHONE:
                     user_response_expected = False
-            audio_stream.close()
+            if not user_response_expected:
+                logging.info('stop audio_stream')
+                audio_stream.stop()
     else:
         # In non-interactive mode:
         # - Read audio samples from microphone.

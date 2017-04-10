@@ -142,7 +142,8 @@ class WaveStreamWriter(AudioStreamBase):
 class PyAudioStream(AudioStreamBase):
     """A PyAudio stream helper.
 
-    Support file-object like interface and generator iteration.
+    File-like object that supports generator iteration.
+    Unstarted when initialized: caller must call start().
 
     Args:
       sample_rate: sample rate in hertz.
@@ -161,6 +162,7 @@ class PyAudioStream(AudioStreamBase):
             channels=1,
             rate=self.sample_rate,
             frames_per_buffer=int(self.chunk_size/self.bytes_per_sample),
+            start=False,
             input=True, output=True
         )
 
@@ -181,6 +183,13 @@ class PyAudioStream(AudioStreamBase):
 
     def flush(self, size=recommended_settings.AUDIO_FLUSH_SIZE):
         self._audio_stream.write(b'\x00' * size)
+
+    def start(self):
+        self._audio_stream.start_stream()
+
+    def stop(self):
+        self.flush()
+        self._audio_stream.stop_stream()
 
     def close(self):
         """Flush and close the underlying stream and audio interface."""
