@@ -1,90 +1,85 @@
-Embedded Assistant Python Sample
-================================
+Google Assistant Python Sample
+==============================
 
-This repository contains a Python sample for the Embedded Assistant API.
+This repository contains a Python sample for the Google Assistant API.
 
 See
 [Getting Started with the Raspberry Pi 3](https://developers.google.com/assistant/) for
 instructions on how to run the sample on supported hardware.
 
 ## Prerequisites
+
 - [Python](https://www.python.org/) (3.x prefered)
 - [Google API Console Project](https://console.developers.google.com) w/ Embedded Assistant API [enabled](https://console.developers.google.com/apis).
 - [OAuth client ID credentials](https://console.developers.google.com/apis/credentials) with application type `Other`.
+- Create a virtualenv.
+
+        # python3 (recommended)
+        sudo apt-get update
+        python3 -m venv env
+        env/bin/python -m pip install --upgrade pip setuptools
+
+        # python2
+        sudo apt-get update
+        virtualenv env --no-site-packages
+        env/bin/python -m pip install --upgrade pip setuptools
 
 ## Setup
 
-### Enter the sample directory
+- Install the sample and its dependencies.
 
-        cd embedded-assistant-sdk-python
+        sudo apt-get install python-dev python-virtualenv portaudio19-dev libffi-dev libssl-dev
+        env/bin/python -m pip install -e ".[MAIN]"
 
-### Install the sample and its dependencies
+- Authorize access to the Google Assistant API.
 
-#### If using python 3 (recommended)
-
-    sudo apt-get update
-    sudo apt-get install python3-dev python3-venv portaudio19-dev libffi-dev libssl-dev
-    python3 -m venv env
-    env/bin/python -m pip install --upgrade pip
-    env/bin/python -m pip install -e ".[MAIN]"
-
-#### If using python 2
-
-    sudo apt-get update
-    sudo apt-get install python-dev python-virtualenv portaudio19-dev libffi-dev libssl-dev
-    virtualenv env --no-site-packages
-    env/bin/pip install -e ".[MAIN]"
-
-### Authorize the Embedded Assistant API
-
-        env/bin/python -m googlesamples.assistant --authorize client_secret_XXXX.json
+        env/bin/python -m googlesamples.assistant.auth_helpers --client-secrets client_secret_XXXX.json
         Please go to this URL: ...
         Enter the authorization code:
 
-### Verify Audio Setup
+-  Verify audio setup.
 
-```
-# Record a 5 sec sample and play it back
-env/bin/python -m googlesamples.assistant.audio_helpers
-```
+        # Record a 5 sec sample and play it back
+        env/bin/python -m googlesamples.assistant.audio_helpers
 
 ## Run the Sample
 
-Record a voice query and the program should play back the Assistant's answer:
+- Record a voice query and the program should play back the Google Assistant's answer:
 
-```
-env/bin/python -m googlesamples.assistant
-```
+        env/bin/python -m googlesamples.assistant
+
+-  Record and send pre-recorded audio to the Assistant
+
+        env/bin/python -m googlesamples.assistant -i in.raw
+
+- Save Assistant response to a file
+
+        env/bin/python -m googlesamples.assistant -o out.raw
 
 ## Troubleshooting
 
-```
-# Play a test sound
-speaker-test -t wav
+- Verify ALSA setup
 
-# Record and play back some audio using ALSA command-line tools
-arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw f.raw
-aplay f.raw
-```
+        # Play a test sound
+        speaker-test -t wav
 
-See above for [how to verify the environment's audio setup](#Verify-Audio-Setup).
+        # Record and play back some audio using ALSA command-line tools
+        arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw f.raw
+        aplay f.raw
+
+- Run the sample with verbose logging enabled
+
+        env/bin/python -m googlesamples.assistant --verbose
 
 ## Development and Testing
 
-```
-# Run lint and tests
-env/bin/python setup.py flake8
-env/bin/python setup.py test
+-  Run lint tool
 
-# Record and send pre-recorded audio to the Assistant
-env/bin/python -m googlesamples.assistant -i in.raw
+        env/bin/python setup.py flake8
 
-# Save Assistant response to a file
-env/bin/python -m googlesamples.assistant -o out.raw
+- Run unit tests
 
-# Run the sample with verbose logging enabled
-env/bin/python -m googlesamples.assistant --verbose
-```
+        env/bin/python setup.py test
 
 ## License
 

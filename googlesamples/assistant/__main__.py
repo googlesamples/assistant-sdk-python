@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Sample that implements GRPC client for Embedded Google Assistant API."""
+"""Sample that implements GRPC client for Google Assistant API."""
 
 import argparse
 import logging
@@ -26,9 +26,6 @@ from .embedded_assistant_pb2 import ConverseResponse
 from .embedded_assistant_pb2 import Result
 
 EPILOG = """examples:
-  # Authorize the sample to access the Embedded Assistant API:
-  python -m googlesamples.assistant --authorize /path/to/client_secret.json
-
   # Run the sample with microphone input and speaker output.
   python -m googlesamples.assistant
 
@@ -50,10 +47,6 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
         epilog=EPILOG)
     # TODO(proppy): refactor flag documentation
-    parser.add_argument('--authorize', type=str,
-                        metavar='CLIENT_SECRET_JSON_FILE', default=None,
-                        help='Initialize the embedded assistant credentials. '
-                        'If missing, existing credentials will be used.')
     parser.add_argument('-i', '--input_audio_file', type=str, default=None,
                         help='Path to input audio file. '
                         'If missing, uses pyaudio capture')
@@ -61,13 +54,12 @@ def main():
                         help='Path to output audio file. '
                         'If missing, uses pyaudio playback')
     parser.add_argument('--api_endpoint', type=str, default='prod',
-                        help='Name or address of Embedded Assistant API '
+                        help='Name or address of Google Assistant API '
                         'service.')
     parser.add_argument('--credentials', type=str,
                         metavar='OAUTH2_CREDENTIALS_FILE',
-                        default='.embedded_assistant_credentials.json',
-                        help='Path to store and read OAuth2 credentials '
-                        'generated with the `--authorize` flag.')
+                        default='.assistant_credentials.json',
+                        help='Path to read OAuth2 credentials.')
     parser.add_argument('--ssl_credentials_for_testing',
                         type=str, default=None,
                         help='Path to ssl_certificates.pem; for testing only.')
@@ -81,26 +73,12 @@ def main():
     # Setup logging.
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
-    if args.authorize:
-        # In Authorize mode:
-        # - Start an interactive OAuth2 authorization flow.
-        # - Save new OAuth2 credentials locally.
-        # - Exit.
-        credentials = auth_helpers.credentials_flow_interactive(
-            args.authorize, scopes=[ASSISTANT_OAUTH_SCOPE])
-        auth_helpers.save_credentials(args.credentials, credentials)
-        logging.info('OAuth credentials initialized: %s', args.credentials)
-        logging.info('Run the sample without the `--authorize` flag '
-                     'to start the embedded assistant')
-        return
-
     try:
         credentials = auth_helpers.load_credentials(
             args.credentials, scopes=[ASSISTANT_OAUTH_SCOPE])
     except Exception as e:
         logging.error('Error loading credentials: %s', e)
-        logging.error('Run the sample with the `--authorize` flag '
-                      'to initialize new OAuth2 credentials.')
+        logging.error('Run auth_helpers to initialize new OAuth2 credentials.')
         return
 
     endpoint = ASSISTANT_API_ENDPOINTS.get(args.api_endpoint,
@@ -111,7 +89,7 @@ def main():
         grpc_channel_options=args.grpc_channel_option)
     logging.info('Connecting to %s', endpoint)
 
-    # Start the Embedded Assistant API client.
+    # Start the Google Assistant API client.
     assistant = embedded_assistant.EmbeddedAssistant(grpc_channel)
 
     interactive = not (args.input_audio_file or args.output_audio_file)

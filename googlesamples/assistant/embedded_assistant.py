@@ -25,10 +25,10 @@ END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
 
 
 class EmbeddedAssistant(object):
-    """Example client for the gRPC Embedded Assistant API.
+    """Example client for the gRPC Google Assistant API.
     Args:
       grpc_channel(grpc.Channel): gRPC channel via which to send
-        Embedded Assistant API RPC requests.
+        Google Assistant API RPC requests.
     """
     def __init__(self, grpc_channel):
         self._service = embedded_assistant_pb2.EmbeddedAssistantStub(
@@ -60,11 +60,11 @@ class EmbeddedAssistant(object):
         self._start_playback.clear()
 
         # This generator yields ConverseRequest to send to the gRPC
-        # Embedded Assistant API.
+        # Google Assistant API.
         converse_requests = self._gen_converse_requests(iter(samples),
                                                         sample_rate)
         # This generator yields ConverseResponse proto messages
-        # received from the gRPC Embedded Assistant API.
+        # received from the gRPC Google Assistant API.
         converse_responses = self._service.Converse(converse_requests,
                                                     deadline)
         # Iterate over ConverseResponse proto messages and yield them

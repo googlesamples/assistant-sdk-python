@@ -62,7 +62,7 @@ class SampleRateLimiter(AudioStreamBase):
     """A stream reader that throttles reads to a given sample rate.
 
     This is used to throttle the rate at which gRPC ConverseRequest
-    messages are sent to the EmbeddedAssistant API to emulate "real
+    messages are sent to the Google Assistant API to emulate "real
     time" (i.e. at sample rate) audio throughput when reading data
     from files.
 

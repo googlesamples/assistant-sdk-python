@@ -17,11 +17,9 @@ from setuptools import setup
 
 
 DEPENDENCIES = [
-    'google-auth==0.8.0',
+    'google-auth-oauthlib==0.0.1',
     'googleapis-common-protos==1.5.0',
     'grpcio==1.1.0',
-    'requests==2.13.0',
-    'requests-oauthlib==0.8.0',
     'six==1.10.0',
     'urllib3[secure]==1.20',
 ]

@@ -12,28 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""auth_helpers implements Device and Web authorization flow."""
+"""auth_helpers implements InstalledApp authorization flow helpers."""
 
 import json
-import logging
+import os
 
 import google.auth
 import google.auth.transport.grpc
 import google.auth.transport.requests
-import google.oauth2.flow
+import google_auth_oauthlib.flow
 import google.oauth2.credentials
 import grpc
-import six.moves
 
 
-def credentials_flow_interactive(client_secrets_file, scopes):
+def credentials_flow_interactive(client_secrets_path, scopes):
     """Initiate an interactive OAuth2InstalledApp flow.
 
-    - Display a URL for the user to visit.
-    - URL displays a code for the user to copy.
-    - Wait on standard input for the user to enter the provided code.
-    - Exchange OAuth2 tokens.
-    - Returns credentials.
+    - If an X server is running: Run a browser based flow.
+    - If not: Run a console based flow.
 
     Args:
       client_secrets_file: The path to the client secrets JSON file.
@@ -42,32 +38,31 @@ def credentials_flow_interactive(client_secrets_file, scopes):
       google.oauth2.credentials.Credentials: new OAuth2 credentials authorized
         with the given scopes.
     """
-    flow = google.oauth2.flow.Flow.from_client_secrets_file(
-        client_secrets_file,
-        scopes=scopes,
-        redirect_uri='urn:ietf:wg:oauth:2.0:oob')
-    auth_url, _ = flow.authorization_url(prompt='consent')
-    print('Please go to this URL: %s' % auth_url)
-    code = six.moves.input('Enter the authorization code: ')
-    flow.fetch_token(code=code)
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+        client_secrets_path,
+        scopes=scopes)
+    if 'DISPLAY' in os.environ:
+        flow.run_local_server()
+    else:
+        flow.run_console()
     return flow.credentials
 
 
 def credentials_to_dict(credentials):
     return {'access_token': credentials.token,
-            'refresh_token': credentials._refresh_token,
-            'token_uri': credentials._token_uri,
-            'client_id': credentials._client_id,
-            'client_secret': credentials._client_secret}
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret}
 
 
 def credentials_from_dict(credentials, scopes):
     return google.oauth2.credentials.Credentials(
-        credentials['access_token'],
-        credentials['refresh_token'],
-        credentials['token_uri'],
-        credentials['client_id'],
-        credentials['client_secret'],
+        token=credentials['access_token'],
+        refresh_token=credentials['refresh_token'],
+        token_uri=credentials['token_uri'],
+        client_id=credentials['client_id'],
+        client_secret=credentials['client_secret'],
         scopes=scopes)
 
 
@@ -124,11 +119,21 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='helper script '
                                      'to generate OAuth2 credentials')
-    parser.add_argument('client_secrets', type=str,
-                        help='Path to OAuth2 client secret JSON file. ')
-    parser.add_argument('scopes', type=str, nargs='+',
+    parser.add_argument('--client-secrets', type=str,
+                        metavar='CLIENT_SECRET_JSON_FILE',
+                        default='client_secrets.json',
+                        help='Path to OAuth2 client secret JSON file.')
+    parser.add_argument('--credentials', type=str,
+                        metavar='OAUTH2_CREDENTIALS_FILE',
+                        default='.assistant_credentials.json',
+                        help='Path to store OAuth2 credentials.')
+    parser.add_argument('--scopes', type=str,
+                        action='append',
+                        metavar='OAUTH2_SCOPE',
+                        default=['https://www.googleapis.com/auth/assistant'],
                         help='API scopes to authorize access for.')
     args = parser.parse_args()
     credentials = credentials_flow_interactive(args.client_secrets,
                                                args.scopes)
-    logging.info('access_token: %s' % credentials['access_token'])
+    save_credentials(args.credentials, credentials)
+    print('credentials saved: %s' % args.credentials)
