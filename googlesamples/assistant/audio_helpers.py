@@ -16,7 +16,6 @@
 import time
 import pyaudio
 import wave
-import sys
 
 from . import recommended_settings
 
@@ -138,7 +137,7 @@ class WaveStreamWriter(AudioStreamBase):
         self._fp.close()
 
 
-# TODO(proppy): split pyAudio helper in separate file.
+# TODO(proppy): split PyAudio helper in separate file.
 class PyAudioStream(AudioStreamBase):
     """A PyAudio stream helper.
 
@@ -182,24 +181,22 @@ class PyAudioStream(AudioStreamBase):
         return self._audio_stream.write(buf)
 
     def flush(self, size=recommended_settings.AUDIO_FLUSH_SIZE):
+        """Flush the underlying stream (write additional silence)."""
         self._audio_stream.write(b'\x00' * size)
 
     def start(self):
+        """Start the underlying stream."""
         self._audio_stream.start_stream()
 
     def stop(self):
+        """Flush and stop the underlying stream."""
         self.flush()
         self._audio_stream.stop_stream()
 
     def close(self):
-        """Flush and close the underlying stream and audio interface."""
-        if self._audio_stream:
-            self.flush()
-            self._audio_stream.close()
-            self._audio_stream = None
-        if self._audio_interface:
-            self._audio_interface.terminate()
-            self._audio_interface = None
+        """Close the underlying stream and audio interface."""
+        self._audio_stream.close()
+        self._audio_interface.terminate()
 
 
 if __name__ == '__main__':
@@ -208,7 +205,6 @@ if __name__ == '__main__':
     - Playback the recorded samples.
     """
     import logging
-    from tqdm import tqdm
 
     sample_rate_hz = recommended_settings.AUDIO_SAMPLE_RATE_HZ
     bytes_per_sample = recommended_settings.AUDIO_BYTES_PER_SAMPLE
@@ -221,27 +217,18 @@ if __name__ == '__main__':
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')
-    with tqdm(unit='s', total=sample_rate_hz*record_time,
-              position=0) as t:
-        t.set_description('Recording samples: ')
-        while time.time() < end_time:
-            samples.append(stream.read(chunk_size))
-            t.update(chunk_size)
 
-    with tqdm(unit='s', total=sample_rate_hz*record_time, position=1) as t:
-        t.set_description('Playing samples: ')
-        while len(samples):
-            stream.write(samples.pop(0))
-            t.update(chunk_size)
+    stream.start()
+    logging.info('Recording samples.')
+    while time.time() < end_time:
+        samples.append(stream.read(chunk_size))
+    logging.info('Finished recording.')
 
-    stream.close()
+    logging.info('Playing back samples.')
+    while len(samples):
+        stream.write(samples.pop(0))
+    logging.info('Finished playback.')
+    stream.stop()
+
     logging.info('audio test completed.')
-
-
-def iter_with_progress(title, gen):
-    from tqdm import tqdm
-    with tqdm(unit='B', unit_scale=True, position=0) as t:
-        t.set_description(title)
-        for d in gen:
-            t.update(sys.getsizeof(d))
-            yield d
+    stream.close()

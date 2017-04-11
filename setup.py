@@ -44,7 +44,7 @@ setup(
     namespace_packages=('googlesamples',),
     install_requires=DEPENDENCIES,
     extras_require={
-        'MAIN': ['tqdm==4.11.2', 'PyAudio==0.2.10']
+        'MAIN': ['PyAudio==0.2.10']
     },
     setup_requires=['flake8'],
     tests_require=['flake8'],

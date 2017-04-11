@@ -104,23 +104,20 @@ def main():
             if not user_response_expected:
                 input('Press Enter to send a new request. ')
                 audio_stream.start()
-
-            input_samples = audio_helpers.iter_with_progress('Recording:',
-                                                             audio_stream)
-            converse_responses = assistant.converse(input_samples)
-            for resp in audio_helpers.iter_with_progress('Playing:',
-                                                         converse_responses):
+                logging.info('Recording audio request.')
+            for resp in assistant.converse(audio_stream):
                 if resp.event_type == ConverseResponse.END_OF_UTTERANCE:
-                    logging.info('End of audio request detected')
+                    logging.info('End of audio request detected.')
                 if len(resp.audio_out.audio_data) > 0:
                     audio_stream.write(resp.audio_out.audio_data)
                 if resp.result.spoken_request_text:
-                    logging.info('Transcript of user request: "%s"',
+                    logging.info('Transcript of user request: "%s".',
                                  resp.result.spoken_request_text)
+                    logging.info('Playing assistant response.')
                 if resp.result.spoken_response_text:
                     logging.info(
                         'Transcript of TTS response '
-                        '(only populated from IFTTT): "%s"',
+                        '(only populated from IFTTT): "%s".',
                         resp.result.spoken_response_text)
                 if resp.result.microphone_mode == Result.DIALOG_FOLLOW_ON:
                     user_response_expected = True
@@ -128,7 +125,7 @@ def main():
                 elif resp.result.microphone_mode == Result.CLOSE_MICROPHONE:
                     user_response_expected = False
             if not user_response_expected:
-                logging.info('stop audio_stream')
+                logging.info('Finished playing assistant response.')
                 audio_stream.stop()
     else:
         # In non-interactive mode:
