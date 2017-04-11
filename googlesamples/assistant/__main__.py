@@ -140,11 +140,13 @@ def main():
                 open(args.input_audio_file, 'rb'))
         else:
             input_stream = audio_helpers.PyAudioStream()
+            input_stream.start()
         if args.output_audio_file:
             output_stream = audio_helpers.WaveStreamWriter(
                 open(args.output_audio_file, 'wb'))
         else:
             output_stream = audio_helpers.PyAudioStream()
+            output_stream.start()
         # TODO(proppy): Converge non-interactive handling or split it.
         for resp in assistant.converse(input_stream):
             if len(resp.audio_out.audio_data) > 0:
