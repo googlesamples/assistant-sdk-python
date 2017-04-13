@@ -44,6 +44,7 @@ class EmbeddedAssistant(object):
         # This value, along with MicrophoneMode, supports a more natural
         # "conversation" with the Assistant.
         self._converse_state = b''
+        self._volume_percentage = 50
 
     def converse(self, samples, sample_rate=AUDIO_SAMPLE_RATE_HZ,
                  deadline=DEADLINE_SECS):
@@ -82,6 +83,11 @@ class EmbeddedAssistant(object):
                 logging.debug('Saving converse_state: %s',
                               resp.result.converse_state)
                 self._converse_state = resp.result.converse_state
+            if resp.audio_out.volume_percentage != self._volume_percentage:
+                logging.info('Volume should be set to %s%%'
+                             % self._volume_percentage)
+                # NOTE: No volume change is currently implemented.
+                self._volume_percentage = resp.audio_out.volume_percentage
             # yield ConverseResponse back to caller.
             yield resp
 
@@ -110,7 +116,7 @@ class EmbeddedAssistant(object):
         audio_out_config = embedded_assistant_pb2.AudioOutConfig(
             encoding='LINEAR16',
             sample_rate_hertz=int(sample_rate),
-            volume_percentage=50,
+            volume_percentage=self._volume_percentage,
         )
         state_config = None
         if self._converse_state:
