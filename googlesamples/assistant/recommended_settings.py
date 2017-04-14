@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Recommended Audio parameters:
+# Recommended internal parameters. Changing these values may result in
+# errors. See https://developers.google.com/assistant/reference for
+# more information.
+#
 # Audio sample rate in Hertz.
 #   Note: API supports higher frequencies, but using the same sample
 #   rate for input and output allows us to share the same audio stream

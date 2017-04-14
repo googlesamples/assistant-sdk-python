@@ -81,6 +81,8 @@ instructions on how to run the sample on supported hardware.
 See [MAINTAINER.md](MAINTAINER.md) for more documentation on the
 development, maintainance and release of the Python package itself.
 
+- Internal settings are located in googlesamples/assistant/recommended_settings.py
+
 ## License
 
 Copyright (C) 2016 Google Inc.
