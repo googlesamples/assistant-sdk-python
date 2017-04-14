@@ -22,8 +22,8 @@ from . import (embedded_assistant,
                audio_helpers,
                auth_helpers)
 
-from .embedded_assistant_pb2 import ConverseResponse
-from .embedded_assistant_pb2 import Result
+from google.assistant.v1alpha1 import embedded_assistant_pb2
+
 
 EPILOG = """examples:
   # Run the sample with microphone input and speaker output.
@@ -40,6 +40,9 @@ ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
 ASSISTANT_API_ENDPOINTS = {
     'prod': 'embeddedassistant.googleapis.com',
 }
+END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
+DIALOG_FOLLOW_ON = embedded_assistant_pb2.Result.DIALOG_FOLLOW_ON
+CLOSE_MICROPHONE = embedded_assistant_pb2.Result.CLOSE_MICROPHONE
 
 
 def main():
@@ -106,7 +109,7 @@ def main():
                 audio_stream.start()
                 logging.info('Recording audio request.')
             for resp in assistant.converse(audio_stream):
-                if resp.event_type == ConverseResponse.END_OF_UTTERANCE:
+                if resp.event_type == END_OF_UTTERANCE:
                     logging.info('End of audio request detected.')
                 if len(resp.audio_out.audio_data) > 0:
                     audio_stream.write(resp.audio_out.audio_data)
@@ -119,10 +122,10 @@ def main():
                         'Transcript of TTS response '
                         '(only populated from IFTTT): "%s".',
                         resp.result.spoken_response_text)
-                if resp.result.microphone_mode == Result.DIALOG_FOLLOW_ON:
+                if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
                     user_response_expected = True
                     logging.info('Expecting follow-on query from user.')
-                elif resp.result.microphone_mode == Result.CLOSE_MICROPHONE:
+                elif resp.result.microphone_mode == CLOSE_MICROPHONE:
                     user_response_expected = False
             if not user_response_expected:
                 logging.info('Finished playing assistant response.')

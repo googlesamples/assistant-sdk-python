@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""googlesamples namespace package."""
+"""google namespace package."""
 
 try:
     import pkg_resources

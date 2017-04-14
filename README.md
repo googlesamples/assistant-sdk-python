@@ -16,20 +16,25 @@ instructions on how to run the sample on supported hardware.
 
         # python3 (recommended)
         sudo apt-get update
+        sudo apt-get install python3-dev python3-venv
         python3 -m venv env
         env/bin/python -m pip install --upgrade pip setuptools
 
         # python2
         sudo apt-get update
+        sudo apt-get install python-dev python-virtualenv
         virtualenv env --no-site-packages
         env/bin/python -m pip install --upgrade pip setuptools
 
 ## Setup
 
-- Install the sample and its dependencies.
+- Install the sample dependencies.
 
-        sudo apt-get install python-dev python-virtualenv portaudio19-dev libffi-dev libssl-dev
-        env/bin/python -m pip install -e ".[MAIN]"
+        sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+
+- Install the Google Assistant SDK and samples.
+
+        env/bin/python -m pip install -e ".[samples]"
 
 - Authorize access to the Google Assistant API.
 
@@ -71,15 +76,10 @@ instructions on how to run the sample on supported hardware.
 
         env/bin/python -m googlesamples.assistant --verbose
 
-## Development and Testing
+## For Maintainers
 
--  Run lint tool
-
-        env/bin/python setup.py flake8
-
-- Run unit tests
-
-        env/bin/python setup.py test
+See [MAINTAINER.md](MAINTAINER.md) for more documentation on the
+development, maintainance and release of the Python package itself.
 
 ## License
 

@@ -12,17 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from setuptools import find_packages
-from setuptools import setup
+from setuptools import setup, find_packages
 
+install_requires = [
+  'googleapis-common-protos[grpc]>=1.5.2, <2.0dev',
+  'grpcio>=1.0.2, <2.0dev',
+]
 
-DEPENDENCIES = [
+auth_helpers_requires = [
     'google-auth-oauthlib==0.0.1',
-    'googleapis-common-protos==1.5.0',
-    'grpcio==1.1.0',
-    'six==1.10.0',
     'urllib3[secure]==1.20',
 ]
+
+samples_requires = [
+    'six==1.10.0',
+    'PyAudio==0.2.10',
+] + auth_helpers_requires
 
 
 def load_test_suite():
@@ -33,18 +38,25 @@ def load_test_suite():
 
 
 setup(
-    name='google-assistant',
-    version='0.0.1',
-    author='Google Embedded Assistant team',
+    name='google-assistant-sdk',
+    version='0.1',
+    author='Google Assistant SDK team',
     author_email='proppy@google.com',
-    description='Embedded Google Assistant API Sample client',
-    long_description='Sample client for the Embedded Google Assistant API',
-    url='TODO(proppy) add external repo url',
+    description='Python SDK for the Google Assistant API',
+    long_description=('Python bindings and samples '
+                      'for the Google Assistant API'),
+    url='https://github.com/googlesamples/google-assistant-sdk-python',
     packages=find_packages(exclude=('tests')),
-    namespace_packages=('googlesamples',),
-    install_requires=DEPENDENCIES,
+    namespace_packages=[
+        'google',
+        'google.assistant',
+        'googlesamples',
+    ],
+    install_requires=install_requires,
     extras_require={
-        'MAIN': ['PyAudio==0.2.10']
+        'MAIN': samples_requires,
+        'samples': samples_requires,
+        'auth_helpers': auth_helpers_requires,
     },
     setup_requires=['flake8'],
     tests_require=['flake8'],
@@ -56,7 +68,7 @@ setup(
         ],
     },
     license='Apache 2.0',
-    keywords='google assistant client sample',
+    keywords='google assistant api sample',
     classifiers=(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',

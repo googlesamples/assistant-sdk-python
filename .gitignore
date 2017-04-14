@@ -10,3 +10,5 @@ build/
 google_assistant.egg-info/
 *.egg
 .eggs/
+*.egg-info/
+googleapis/

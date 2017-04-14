@@ -17,8 +17,11 @@ import logging
 import threading
 
 from google.rpc import code_pb2
+from google.assistant.v1alpha1 import (
+    embedded_assistant_pb2_grpc,
+    embedded_assistant_pb2
+)
 
-from . import embedded_assistant_pb2
 from .recommended_settings import AUDIO_SAMPLE_RATE_HZ, DEADLINE_SECS
 
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
@@ -31,7 +34,7 @@ class EmbeddedAssistant(object):
         Google Assistant API RPC requests.
     """
     def __init__(self, grpc_channel):
-        self._service = embedded_assistant_pb2.EmbeddedAssistantStub(
+        self._service = embedded_assistant_pb2_grpc.EmbeddedAssistantStub(
             grpc_channel)
         # We set this Event when the server tells us to stop sending audio.
         self._stop_sending_audio = threading.Event()
