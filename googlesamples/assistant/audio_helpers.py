@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pyaudio
 import threading
 import time
 import wave
+
+import sounddevice as sd
 
 from . import recommended_settings
 
@@ -140,8 +141,8 @@ class WaveStreamWriter(AudioStreamBase):
         self._fp.close()
 
 
-# TODO(proppy): split PyAudio helper in separate file.
-class PyAudioStream(AudioStreamBase):
+# TODO(proppy): split sounddevice helper in separate file.
+class SdAudioStream(AudioStreamBase):
     """A PyAudio bi-directional stream helper.
 
     File-like object that supports generator iteration.
@@ -164,20 +165,14 @@ class PyAudioStream(AudioStreamBase):
     _start_playback = None
 
     def __init__(self, lock=True, *args, **kwargs):
-        super(PyAudioStream, self).__init__(*args, **kwargs)
+        super(SdAudioStream, self).__init__(*args, **kwargs)
         if self.bytes_per_sample == 2:
-            audio_format = pyaudio.paInt16
+            audio_format = 'int16'
         else:
             raise Exception('unsupported sample size:', self.bytes_per_sample)
-        self._audio_interface = pyaudio.PyAudio()
-        self._audio_stream = self._audio_interface.open(
-            format=audio_format,
-            channels=1,
-            rate=self.sample_rate,
-            frames_per_buffer=int(self.chunk_size/self.bytes_per_sample),
-            start=False,
-            input=True, output=True
-        )
+        self._audio_stream = sd.RawStream(
+            samplerate=self.sample_rate,
+            channels=1, dtype=audio_format)
         if lock:
             self._stop_recording = threading.Event()
             self._start_playback = threading.Event()
@@ -193,7 +188,7 @@ class PyAudioStream(AudioStreamBase):
     @property
     def name(self):
         """Returns the name of the underlying audio device."""
-        return self._audio_interface.get_default_input_device_info()['name']
+        return sd.default.device
 
     def read(self, size):
         """Read the given number of bytes from the stream."""
@@ -201,7 +196,7 @@ class PyAudioStream(AudioStreamBase):
             return ''
         # TODO(proppy): enable exception_on_overflow when audio
         # processing moved to separate thread.
-        return self._audio_stream.read(size, exception_on_overflow=False)
+        return bytes(self._audio_stream.read(size)[0])
 
     def write(self, buf):
         """Write the given bytes to the stream."""
@@ -216,12 +211,12 @@ class PyAudioStream(AudioStreamBase):
     def start(self):
         """Start the underlying stream."""
         self.reset()
-        self._audio_stream.start_stream()
+        self._audio_stream.start()
 
     def stop(self):
         """Flush and stop the underlying stream."""
         self.flush()
-        self._audio_stream.stop_stream()
+        self._audio_stream.stop()
 
     def reset(self):
         """Clear recording and playback state."""
@@ -232,10 +227,9 @@ class PyAudioStream(AudioStreamBase):
 
     def close(self):
         """Close the underlying stream and audio interface."""
-        if self._audio_stream.is_active():
+        if self._audio_stream.active:
             self.stop()
         self._audio_stream.close()
-        self._audio_interface.terminate()
 
 
 if __name__ == '__main__':
@@ -248,7 +242,7 @@ if __name__ == '__main__':
     chunk_size = recommended_settings.AUDIO_CHUNK_SIZE
     record_time = 5
     end_time = time.time() + record_time
-    stream = PyAudioStream()
+    stream = SdAudioStream()
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')

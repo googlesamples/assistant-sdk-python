@@ -26,7 +26,7 @@ auth_helpers_requires = [
 
 samples_requires = [
     'six==1.10.0',
-    'PyAudio==0.2.10',
+    'sounddevice==0.3.7',
 ] + auth_helpers_requires
 
 

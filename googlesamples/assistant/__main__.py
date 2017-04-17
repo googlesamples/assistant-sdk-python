@@ -103,7 +103,7 @@ def main():
         # - Send converse request.
         # - Iterate on converse responses audio data and playback samples.
         user_response_expected = False
-        audio_stream = audio_helpers.PyAudioStream()
+        audio_stream = audio_helpers.SdAudioStream()
         # Stores an opaque blob provided in ConverseResponse that,
         # when provided in a follow-up ConverseRequest,
         # gives the Assistant a context marker within the current state
