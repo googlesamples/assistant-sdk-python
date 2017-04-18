@@ -17,6 +17,7 @@
 import json
 import os
 
+
 import google.auth
 import google.auth.transport.grpc
 import google.auth.transport.requests
@@ -72,6 +73,9 @@ def save_credentials(path, credentials):
       path(str): path to the credentials file.
       credentials(google.oauth2.credentials.Credentials): OAuth2 credentials.
     """
+    config_path = os.path.dirname(path)
+    if not os.path.isdir(config_path):
+        os.makedirs(config_path)
     with open(path, 'w') as f:
         json.dump(credentials_to_dict(credentials), f)
 
@@ -113,27 +117,3 @@ def create_grpc_channel(target, credentials, ssl_credentials_file=None,
         credentials, http_request, target,
         ssl_credentials=ssl_credentials,
         options=grpc_channel_options)
-
-
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description='helper script '
-                                     'to generate OAuth2 credentials')
-    parser.add_argument('--client-secrets', type=str,
-                        metavar='CLIENT_SECRET_JSON_FILE',
-                        default='client_secrets.json',
-                        help='Path to OAuth2 client secret JSON file.')
-    parser.add_argument('--credentials', type=str,
-                        metavar='OAUTH2_CREDENTIALS_FILE',
-                        default='.assistant_credentials.json',
-                        help='Path to store OAuth2 credentials.')
-    parser.add_argument('--scopes', type=str,
-                        action='append',
-                        metavar='OAUTH2_SCOPE',
-                        default=['https://www.googleapis.com/auth/assistant'],
-                        help='API scopes to authorize access for.')
-    args = parser.parse_args()
-    credentials = credentials_flow_interactive(args.client_secrets,
-                                               args.scopes)
-    save_credentials(args.credentials, credentials)
-    print('credentials saved: %s' % args.credentials)

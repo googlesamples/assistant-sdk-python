@@ -14,10 +14,10 @@
 # limitations under the License.
 """Sample that implements GRPC client for Google Assistant API."""
 
-import argparse
 import logging
-from six.moves import input
+import os.path
 
+import click
 from google.assistant.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 
@@ -25,78 +25,74 @@ from . import (assistant_helpers,
                audio_helpers,
                auth_helpers)
 
-
-EPILOG = """examples:
-  # Run the sample with microphone input and speaker output.
-  python -m googlesamples.assistant
-
-  # Run the sample with file input and speaker output.
-  python -m googlesamples.assistant -i query.riff
-
-  # Run the sample with file input and output.
-  python -m googlesamples.assistant -i query.riff -o response.riff
-"""
-
+APP_NAME = 'googlesamples-assistant'
 ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
-ASSISTANT_API_ENDPOINTS = {
-    'prod': 'embeddedassistant.googleapis.com',
-}
+ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
 DIALOG_FOLLOW_ON = embedded_assistant_pb2.Result.DIALOG_FOLLOW_ON
 CLOSE_MICROPHONE = embedded_assistant_pb2.Result.CLOSE_MICROPHONE
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawTextHelpFormatter,
-        epilog=EPILOG)
-    # TODO(proppy): refactor flag documentation
-    parser.add_argument('-i', '--input_audio_file', type=str, default=None,
-                        help='Path to input audio file. '
-                        'If missing, uses pyaudio capture')
-    parser.add_argument('-o', '--output_audio_file', type=str, default=None,
-                        help='Path to output audio file. '
-                        'If missing, uses pyaudio playback')
-    parser.add_argument('--api_endpoint', type=str, default='prod',
-                        help='Name or address of Google Assistant API '
-                        'service.')
-    parser.add_argument('--credentials', type=str,
-                        metavar='OAUTH2_CREDENTIALS_FILE',
-                        default='.assistant_credentials.json',
-                        help='Path to read OAuth2 credentials.')
-    parser.add_argument('--ssl_credentials_for_testing',
-                        type=str, default=None,
-                        help='Path to ssl_certificates.pem; for testing only.')
-    parser.add_argument('--grpc_channel_option', type=str, action='append',
-                        help='Options used to construct gRPC channel', nargs=2,
-                        default=[], metavar=('OPTION_NAME', 'OPTION_VALUE'))
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help='Verbose logging.')
-    args = parser.parse_args()
+@click.command()
+@click.option('--api-endpoint', default=ASSISTANT_API_ENDPOINT,
+              metavar='<api endpoint>', show_default=True,
+              help='Address of Google Assistant API service.')
+@click.option('--credentials',
+              metavar='<credentials>', show_default=True,
+              default=os.path.join(click.get_app_dir(APP_NAME),
+                                   'assistant_credentials.json'),
+              help='Path to read OAuth2 credentials.')
+@click.option('--verbose', '-v', is_flag=True, default=False,
+              help='Verbose logging.')
+@click.option('--input-audio-file', '-i',
+              metavar='<input file>',
+              help='Path to input audio file. '
+              'If missing, uses audio capture')
+@click.option('--output-audio-file', '-o',
+              metavar='<output file>',
+              help='Path to output audio file. '
+              'If missing, uses audio playback')
+@click.option('--ssl-credentials-for-testing',
+              metavar='<ssl credentials>',
+              help='Path to ssl_certificates.pem; for testing only.')
+@click.option('--grpc-channel-option', multiple=True, nargs=2,
+              metavar='<option> <value>',
+              help='Options used to construct gRPC channel')
+def main(api_endpoint, credentials, verbose,
+         input_audio_file, output_audio_file,
+         *args, **kwargs):
+    """Samples for the Google Assistant API.
 
+    Run the sample with microphone input and speaker output:
+    python -m googlesamples.assistant
+
+    Run the sample with file input and speaker output:
+    python -m googlesamples.assistant -i <input file>
+
+    Run the sample with file input and output:
+    python -m googlesamples.assistant -i <input file> -o <output file>
+    """
     # Setup logging.
-    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+    logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
 
     try:
         credentials = auth_helpers.load_credentials(
-            args.credentials, scopes=[ASSISTANT_OAUTH_SCOPE])
+            credentials, scopes=[ASSISTANT_OAUTH_SCOPE])
     except Exception as e:
         logging.error('Error loading credentials: %s', e)
         logging.error('Run auth_helpers to initialize new OAuth2 credentials.')
         return
 
-    endpoint = ASSISTANT_API_ENDPOINTS.get(args.api_endpoint,
-                                           args.api_endpoint)
     grpc_channel = auth_helpers.create_grpc_channel(
-        endpoint, credentials,
-        ssl_credentials_file=args.ssl_credentials_for_testing,
-        grpc_channel_options=args.grpc_channel_option)
-    logging.info('Connecting to %s', endpoint)
+        api_endpoint, credentials,
+        ssl_credentials_file=kwargs.get('ssl_credentials_for_testing', None),
+        grpc_channel_options=kwargs.get('grpc_channel_option', None))
+    logging.info('Connecting to %s', api_endpoint)
 
     # Start the Embedded Assistant API client.
     assistant = embedded_assistant_pb2.EmbeddedAssistantStub(grpc_channel)
 
-    interactive = not (args.input_audio_file or args.output_audio_file)
+    interactive = not (input_audio_file or output_audio_file)
     if interactive:
         # In interactive mode:
         # - Read audio samples from microphone.
@@ -116,7 +112,7 @@ def main():
         volume_percentage = 50
         while True:
             if not user_response_expected:
-                input('Press Enter to send a new request. ')
+                click.pause(info='Press Enter to send a new request...')
 
             audio_stream.start()
             logging.info('Recording audio request.')
@@ -175,15 +171,15 @@ def main():
         # - Read audio samples from microphone.
         # - Send converse requests.
         # - Iterate on converse responses audio data and playback samples.
-        if args.input_audio_file:
+        if input_audio_file:
             input_stream = audio_helpers.SampleRateLimiter(
-                open(args.input_audio_file, 'rb'))
+                open(input_audio_file, 'rb'))
         else:
             input_stream = audio_helpers.PyAudioStream(lock=False)
             input_stream.start()
-        if args.output_audio_file:
+        if output_audio_file:
             output_stream = audio_helpers.WaveStreamWriter(
-                open(args.output_audio_file, 'wb'))
+                open(output_audio_file, 'wb'))
         else:
             output_stream = audio_helpers.PyAudioStream(lock=False)
             output_stream.start()
