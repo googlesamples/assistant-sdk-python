@@ -28,10 +28,13 @@ def log_converse_request_without_audio(converse_request):
     if logging.getLogger().isEnabledFor(logging.DEBUG):
         resp_copy = embedded_assistant_pb2.ConverseRequest()
         resp_copy.CopyFrom(converse_request)
-        resp_copy.ClearField('audio_in')
-        if resp_copy.ListFields():
-            logging.debug('ConverseRequest (without audio): %s',
-                          resp_copy)
+        if len(resp_copy.audio_in) > 0:
+            size = len(resp_copy.audio_in)
+            resp_copy.ClearField('audio_in')
+            logging.debug('ConverseRequest: audio_in (%d bytes)',
+                          size)
+            return
+        logging.debug('ConverseRequest: %s', resp_copy)
 
 
 def log_converse_response_without_audio(converse_response):
@@ -39,10 +42,20 @@ def log_converse_response_without_audio(converse_response):
     if logging.getLogger().isEnabledFor(logging.DEBUG):
         resp_copy = embedded_assistant_pb2.ConverseResponse()
         resp_copy.CopyFrom(converse_response)
-        resp_copy.ClearField('audio_out')
-        if resp_copy.ListFields():
-            logging.debug('ConverseResponse (without audio): %s',
-                          resp_copy)
+        has_audio_data = (resp_copy.HasField('audio_out') and
+                          len(resp_copy.audio_out.audio_data) > 0)
+        if has_audio_data:
+            size = len(resp_copy.audio_out.audio_data)
+            resp_copy.audio_out.ClearField('audio_data')
+            if resp_copy.audio_out.ListFields():
+                logging.debug('ConverseResponse: %s audio_data (%d bytes)',
+                              resp_copy,
+                              size)
+            else:
+                logging.debug('ConverseResponse: audio_data (%d bytes)',
+                              size)
+            return
+        logging.debug('ConverseResponse: %s', resp_copy)
 
 
 def gen_converse_requests(samples,
