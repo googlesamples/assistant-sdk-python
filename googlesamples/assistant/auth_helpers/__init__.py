@@ -17,7 +17,6 @@
 import json
 import os
 
-
 import google.auth
 import google.auth.transport.grpc
 import google.auth.transport.requests

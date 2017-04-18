@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import threading
 import time
 import wave
@@ -22,62 +23,31 @@ import sounddevice as sd
 from . import recommended_settings
 
 
-class AudioStreamBase(object):
-    """A base class for audio stream based on file-like objects.
+class WaveSource(object):
+    """Audio source that reads audio data from a WAV file.
+
+    Reads are throttled to emulate the given sample rate and silence
+    is returned when the end of the file is reached.
 
     Args:
       fp: file-like stream object to read from.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
-      chunk_size: chunk size in bytes of each read when iterating.
+
     """
-    def __init__(self,
+    def __init__(self, fp,
                  sample_rate=recommended_settings.AUDIO_SAMPLE_RATE_HZ,
-                 bytes_per_sample=recommended_settings.AUDIO_BYTES_PER_SAMPLE,
-                 chunk_size=recommended_settings.AUDIO_CHUNK_SIZE):
+                 bytes_per_sample=recommended_settings.AUDIO_BYTES_PER_SAMPLE):
+        self._fp = fp
+        try:
+            self._wavep = wave.open(self._fp, 'r')
+        except wave.Error as e:
+            logging.warning('error opening WAV file: %s, '
+                            'falling back to RAW format', e)
+            self._fp.seek(0)
+            self._wavep = None
         self._sample_rate = sample_rate
         self._bytes_per_sample = bytes_per_sample
-        self._chunk_size = chunk_size
-
-    @property
-    def sample_rate(self):
-        """Return the sample rate of the underlying audio stream."""
-        return self._sample_rate
-
-    @property
-    def bytes_per_sample(self):
-        """Return the sample width of the underlying audio stream."""
-        return self._bytes_per_sample
-
-    @property
-    def chunk_size(self):
-        """Return the chunk size of the underlying audio stream."""
-        return self._chunk_size
-
-    def __iter__(self):
-        """Returns a generator reading data from the stream."""
-        return iter(lambda: self.read(self._chunk_size), '')
-
-
-class SampleRateLimiter(AudioStreamBase):
-    """A stream reader that throttles reads to a given sample rate.
-
-    This is used to throttle the rate at which gRPC ConverseRequest
-    messages are sent to the Google Assistant API to emulate "real
-    time" (i.e. at sample rate) audio throughput when reading data
-    from files.
-
-    Support file-object like interface and generator iteration.
-
-    Args:
-      fp: file-like stream object to read from.
-      sample_rate: sample rate in hertz.
-      bytes_per_sample: sample size in bytes.
-      chunk_size: chunk size in bytes of each read when iterating.
-    """
-    def __init__(self, fp, *args, **kwargs):
-        super(SampleRateLimiter, self).__init__(*args, **kwargs)
-        self._fp = fp
         self._sleep_until = 0
 
     def read(self, size):
@@ -91,44 +61,51 @@ class SampleRateLimiter(AudioStreamBase):
         if missing_dt > 0:
             time.sleep(missing_dt)
         self._sleep_until = time.time() + self._sleep_time(size)
-        data = self._fp.read(size)
-        if len(data) == 0:
-            return ''
+        data = (self._wavep.readframes(size)
+                if self._wavep
+                else self._fp.read(size))
         #  When reach end of audio stream, pad remainder with silence (zeros).
-        return data.ljust(size, b'\x00')
+        if not data:
+            return b'\x00' * size
+        return data
 
     def close(self):
         """Close the underlying stream."""
+        if self._wavep:
+            self._wavep.close()
         self._fp.close()
 
     def _sleep_time(self, size):
-        sample_count = size / float(self.bytes_per_sample)
-        sample_rate_dt = sample_count / float(self.sample_rate)
+        sample_count = size / float(self._bytes_per_sample)
+        sample_rate_dt = sample_count / float(self._sample_rate)
         return sample_rate_dt
 
-    @property
-    def name(self):
-        return self._fp.name
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
 
 
-class WaveStreamWriter(AudioStreamBase):
-    """A WAV stream writer.
+class WaveSink(object):
+    """Audio sink that writes audio data to a WAV file.
 
     Args:
-      fp: file-like stream object to read from.
+      fp: file-like stream object to write data to.
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
     """
-    def __init__(self, fp, *args, **kwargs):
-        super(WaveStreamWriter, self).__init__(*args, **kwargs)
+    def __init__(self, fp,
+                 sample_rate=recommended_settings.AUDIO_SAMPLE_RATE_HZ,
+                 bytes_per_sample=recommended_settings.AUDIO_BYTES_PER_SAMPLE):
         self._fp = fp
-        self._wavep = wave.open(self._fp)
-        self._wavep.setsampwidth(self.bytes_per_sample)
+        self._wavep = wave.open(self._fp, 'wb')
+        self._wavep.setsampwidth(bytes_per_sample)
         self._wavep.setnchannels(1)
-        self._wavep.setframerate(self.sample_rate)
+        self._wavep.setframerate(sample_rate)
 
     def write(self, data):
-        """Read frame bytes to the WAV stream.
+        """Write bytes to the stream.
 
         Args:
           data: frame data to write.
@@ -140,96 +117,140 @@ class WaveStreamWriter(AudioStreamBase):
         self._wavep.close()
         self._fp.close()
 
+    def start(self):
+        pass
 
-# TODO(proppy): split sounddevice helper in separate file.
-class SdAudioStream(AudioStreamBase):
-    """A PyAudio bi-directional stream helper.
+    def stop(self):
+        pass
 
-    File-like object that supports generator iteration.
-    Unstarted when initialized: caller must call start().
 
-    Expected usage:
-    - Start recording by creating a new `PyAudioStream`
-    - Iterate or call `read` to get input samples.
-    - Stop recording w/ `stop_recording`.
-    - Start playback w/ `start_playback`.
-    - Call `write` to write output samples.
+class SoundDeviceStream(object):
+    """Audio stream based on an underlying sound device.
+
+    It can be used as an audio source (read) and a audio source
+    (write).
 
     Args:
       sample_rate: sample rate in hertz.
       bytes_per_sample: sample size in bytes.
-      chunk_size: chunk size in bytes of each audio I/O buffer.
-      lock: enable exclusive playback and recording operation.
     """
-    _stop_recording = None
-    _start_playback = None
-
-    def __init__(self, lock=True, *args, **kwargs):
-        super(SdAudioStream, self).__init__(*args, **kwargs)
-        if self.bytes_per_sample == 2:
+    def __init__(self,
+                 sample_rate=recommended_settings.AUDIO_SAMPLE_RATE_HZ,
+                 bytes_per_sample=recommended_settings.AUDIO_BYTES_PER_SAMPLE):
+        if bytes_per_sample == 2:
             audio_format = 'int16'
         else:
-            raise Exception('unsupported sample size:', self.bytes_per_sample)
+            raise Exception('unsupported sample size:', bytes_per_sample)
         self._audio_stream = sd.RawStream(
-            samplerate=self.sample_rate,
+            samplerate=sample_rate,
             channels=1, dtype=audio_format)
-        if lock:
-            self._stop_recording = threading.Event()
-            self._start_playback = threading.Event()
-
-    def stop_recording(self):
-        if self._stop_recording:
-            self._stop_recording.set()
-
-    def start_playback(self):
-        if self._start_playback:
-            self._start_playback.set()
-
-    @property
-    def name(self):
-        """Returns the name of the underlying audio device."""
-        return sd.default.device
 
     def read(self, size):
-        """Read the given number of bytes from the stream."""
-        if self._stop_recording and self._stop_recording.is_set():
-            return ''
-        # TODO(proppy): enable exception_on_overflow when audio
-        # processing moved to separate thread.
+        """Read bytes from the stream."""
+        # TODO(proppy): log overflow error.
         return bytes(self._audio_stream.read(size)[0])
 
     def write(self, buf):
-        """Write the given bytes to the stream."""
-        if self._start_playback:
-            self._start_playback.wait()
+        """Write bytes to the stream."""
+        # TODO(proppy): log underflow error.
         return self._audio_stream.write(buf)
-
-    def flush(self, size=recommended_settings.AUDIO_FLUSH_SIZE):
-        """Flush the underlying stream (write additional silence)."""
-        self._audio_stream.write(b'\x00' * size)
 
     def start(self):
         """Start the underlying stream."""
-        self.reset()
-        self._audio_stream.start()
+        if not self._audio_stream.active:
+            self._audio_stream.start()
 
     def stop(self):
-        """Flush and stop the underlying stream."""
-        self.flush()
-        self._audio_stream.stop()
-
-    def reset(self):
-        """Clear recording and playback state."""
-        if self._stop_recording:
-            self._stop_recording.clear()
-        if self._start_playback:
-            self._start_playback.clear()
+        """Stop the underlying stream."""
+        if self._audio_stream.active:
+            self._audio_stream.stop()
 
     def close(self):
         """Close the underlying stream and audio interface."""
-        if self._audio_stream.active:
+        if self._audio_stream:
             self.stop()
-        self._audio_stream.close()
+            self._audio_stream.close()
+            self._audio_stream = None
+
+
+class ConversationStream(object):
+    """Audio stream that supports half-duplex conversation.
+
+    A conversation is the alternance of:
+    - a recording operation
+    - a playback operation
+
+    Excepted usage:
+
+      For each conversation:
+      - start_recording()
+      - read() or iter()
+      - stop_recording()
+      - start_playback()
+      - write()
+      - stop_playback()
+
+      When conversations are finished:
+      - close()
+
+    Args:
+      source: file-like stream object to read input audio bytes from.
+      sink: file-like stream object to write output audio bytes to.
+      chunk_size: chunk size in bytes used for iteration.
+    """
+    def __init__(self, source, sink,
+                 chunk_size=recommended_settings.AUDIO_CHUNK_SIZE):
+        self._source = source
+        self._sink = sink
+        self._chunk_size = chunk_size
+        self._stop_recording = threading.Event()
+        self._start_playback = threading.Event()
+
+    def start_recording(self):
+        """Start recording from the audio source."""
+        self._stop_recording.clear()
+        self._source.start()
+        self._sink.start()
+
+    def stop_recording(self):
+        """Stop recording from the audio source."""
+        self._stop_recording.set()
+
+    def start_playback(self):
+        """Start playback to the audio sink."""
+        self._start_playback.set()
+
+    def stop_playback(self):
+        """Stop playback from the audio sink."""
+        self._start_playback.clear()
+        self._source.stop()
+        self._sink.stop()
+
+    def read(self, size):
+        """Read bytes from the source (if currently recording).
+
+        Will returns an empty byte string, if stop_recording() was called.
+        """
+        if self._stop_recording.is_set():
+            return b''
+        return self._source.read(size)
+
+    def write(self, buf):
+        """Write bytes to the sink (if currently playing).
+
+        Will block until start_playback() is called.
+        """
+        self._start_playback.wait()
+        return self._sink.write(buf)
+
+    def close(self):
+        """Close source and sink."""
+        self._source.close()
+        self._sink.close()
+
+    def __iter__(self):
+        """Returns a generator reading data from the stream."""
+        return iter(lambda: self.read(self._chunk_size), b'')
 
 
 if __name__ == '__main__':
@@ -237,17 +258,18 @@ if __name__ == '__main__':
     - Record 5 seconds of 16-bit samples at 16khz.
     - Playback the recorded samples.
     """
-    import logging
-
     chunk_size = recommended_settings.AUDIO_CHUNK_SIZE
     record_time = 5
     end_time = time.time() + record_time
-    stream = SdAudioStream()
+
+    audio_device = SoundDeviceStream()
+    stream = ConversationStream(source=audio_device,
+                                sink=audio_device)
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')
 
-    stream.start()
+    stream.start_recording()
     logging.info('Recording samples.')
     while time.time() < end_time:
         samples.append(stream.read(chunk_size))
@@ -259,7 +281,7 @@ if __name__ == '__main__':
     while len(samples):
         stream.write(samples.pop(0))
     logging.info('Finished playback.')
-    stream.stop()
+    stream.stop_playback()
 
     logging.info('audio test completed.')
     stream.close()

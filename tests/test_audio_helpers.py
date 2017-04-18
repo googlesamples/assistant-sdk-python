@@ -14,42 +14,120 @@
 # limitations under the License.
 
 import unittest
-from googlesamples.assistant.audio_helpers import SampleRateLimiter
-from six import BytesIO
+
 import time
+import threading
+import wave
+
+from googlesamples.assistant.audio_helpers import (
+    WaveSource, WaveSink, ConversationStream
+)
+from six import BytesIO
 
 
-class SampleRateLimiterTest(unittest.TestCase):
+class WaveSourceTest(unittest.TestCase):
     def setUp(self):
         stream = BytesIO()
-        self.limiter = SampleRateLimiter(stream, 16000, 16, 1024)
-        self.sleep_time_1024 = self.limiter._sleep_time(1024)
-        self.sleep_time_512 = self.limiter._sleep_time(512)
+        w = wave.open(stream, 'wb')
+        sample_rate = 16000
+        bytes_per_sample = 2
+        w.setframerate(sample_rate)
+        w.setsampwidth(bytes_per_sample)
+        w.setnchannels(1)
+        w.writeframes(b'audiodata')
+        self.stream = BytesIO(stream.getvalue())
+        self.source = WaveSource(self.stream, sample_rate, bytes_per_sample)
+        self.sleep_time_1024 = self.source._sleep_time(1024)
+        self.sleep_time_512 = self.source._sleep_time(512)
 
     def test_sleep_time(self):
         self.assertEqual(self.sleep_time_512, self.sleep_time_1024 / 2)
 
     def test_no_sleep_on_first_read(self):
         previous_time = time.time()
-        self.limiter.read(1024)
+        self.source.read(1024)
         # check sleep was not called
         self.assertLess(time.time(), previous_time + self.sleep_time_1024)
 
     def test_first_sleep(self):
-        self.limiter.read(1024)
+        self.source.read(1024)
         previous_time = time.time()
-        self.limiter.read(512)
+        self.source.read(512)
         # sleep was called with sleep_time_1024
         self.assertGreater(time.time(), previous_time + self.sleep_time_1024)
 
     def test_next_sleep(self):
-        self.limiter.read(1024)
-        self.limiter.read(512)
+        self.source.read(1024)
+        self.source.read(512)
         previous_time = time.time()
-        self.limiter.read(0)
+        self.source.read(0)
         # sleep was called with sleep_time_512
         self.assertGreater(time.time(), previous_time + self.sleep_time_512)
         self.assertLess(time.time(), previous_time + self.sleep_time_1024)
+
+    def test_read_header(self):
+        self.assertEqual(b'audiodata', self.source.read(9))
+
+    def test_raw(self):
+        self.stream = BytesIO(b'audiodata')
+        self.source = WaveSource(self.stream, 16000, 2)
+        self.assertEqual(b'audiodata', self.source.read(9))
+
+    def test_silence(self):
+        self.assertEqual(b'audiodata', self.source.read(9))
+        self.assertEqual(b'\x00'*9, self.source.read(9))
+
+
+class WaveSinkTest(unittest.TestCase):
+    def setUp(self):
+        self.stream = BytesIO()
+        self.sink = WaveSink(self.stream, 16000, 2)
+
+    def test_write_header(self):
+        self.sink.write(b'abcd')
+        self.assertEqual(b'RIFF', self.stream.getvalue()[:4])
+
+
+class DummyStream(BytesIO):
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+
+class ConversationStreamTest(unittest.TestCase):
+    def setUp(self):
+        self.source = DummyStream(b'audio data')
+        self.sink = DummyStream()
+        self.stream = ConversationStream(source=self.source,
+                                         sink=self.sink)
+
+    def test_stop_recording(self):
+        self.stream.start_recording()
+        self.assertEqual(b'audio', self.stream.read(5))
+        self.stream.stop_recording()
+        self.assertEqual(b'', self.stream.read(5))
+
+    def test_start_playback(self):
+        self.playback_started = False
+
+        def start_playback():
+            self.playback_started = True
+            self.stream.start_playback()
+        t = threading.Timer(0.1, start_playback)
+        t.start()
+        # write will block until start_playback is called.
+        self.stream.write(b'foo')
+        self.assertEqual(True, self.playback_started)
+        self.assertEqual(b'foo', self.sink.getvalue())
+
+    def test_oneshot_conversation(self):
+        self.assertEqual(b'audio', self.stream.read(5))
+        self.stream.stop_recording()
+        self.stream.start_playback()
+        self.stream.write(b'foo')
+        self.stream.stop_playback()
 
 
 if __name__ == '__main__':

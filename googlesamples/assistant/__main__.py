@@ -66,139 +66,144 @@ def main(api_endpoint, credentials, verbose,
          *args, **kwargs):
     """Samples for the Google Assistant API.
 
-    Run the sample with microphone input and speaker output:
-    python -m googlesamples.assistant
+    Examples:
+      Run the sample with microphone input and speaker output:
 
-    Run the sample with file input and speaker output:
-    python -m googlesamples.assistant -i <input file>
+        $ python -m googlesamples.assistant
 
-    Run the sample with file input and output:
-    python -m googlesamples.assistant -i <input file> -o <output file>
+      Run the sample with file input and speaker output:
+
+        $ python -m googlesamples.assistant -i <input file>
+
+      Run the sample with file input and output:
+
+        $ python -m googlesamples.assistant -i <input file> -o <output file>
     """
     # Setup logging.
     logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
 
+    # Load credentials.
     try:
-        credentials = auth_helpers.load_credentials(
-            credentials,
-            scopes=[common_settings.ASSISTANT_OAUTH_SCOPE]
+        creds = auth_helpers.load_credentials(
+            credentials, scopes=[common_settings.ASSISTANT_OAUTH_SCOPE]
         )
     except Exception as e:
         logging.error('Error loading credentials: %s', e)
         logging.error('Run auth_helpers to initialize new OAuth2 credentials.')
         return
 
+    # Create gRPC channel
     grpc_channel = auth_helpers.create_grpc_channel(
-        api_endpoint, credentials,
-        ssl_credentials_file=kwargs.get('ssl_credentials_for_testing', None),
-        grpc_channel_options=kwargs.get('grpc_channel_option', None))
+        api_endpoint, creds,
+        ssl_credentials_file=kwargs.get('ssl_credentials_for_testing'),
+        grpc_channel_options=kwargs.get('grpc_channel_option')
+    )
     logging.info('Connecting to %s', api_endpoint)
-
-    # Start the Embedded Assistant API client.
+    # Create Google Assistant API gRPC client.
     assistant = embedded_assistant_pb2.EmbeddedAssistantStub(grpc_channel)
 
-    interactive = not (input_audio_file or output_audio_file)
-    if interactive:
-        # In interactive mode:
-        # - Read audio samples from microphone.
-        # - Send converse request.
-        # - Iterate on converse responses audio data and playback samples.
-        user_response_expected = False
-        audio_stream = audio_helpers.SdAudioStream()
-        # Stores an opaque blob provided in ConverseResponse that,
-        # when provided in a follow-up ConverseRequest,
-        # gives the Assistant a context marker within the current state
-        # of the multi-Converse()-RPC "conversation".
-        # This value, along with MicrophoneMode, supports a more natural
-        # "conversation" with the Assistant.
-        converse_state_bytes = None
-        # Stores the current volument percentage.
-        # Note: No volume change is currently implemented in this sample
-        volume_percentage = 50
-        while True:
-            if not user_response_expected:
-                click.pause(info='Press Enter to send a new request...')
-
-            audio_stream.start()
-            logging.info('Recording audio request.')
-
-            # This generator yields ConverseRequest to send to the gRPC
-            # Google Assistant API.
-            converse_requests = assistant_helpers.gen_converse_requests(
-                audio_stream,
-                converse_state=converse_state_bytes,
-                volume_percentage=volume_percentage
-            )
-
-            def iter_converse_requests():
-                for c in converse_requests:
-                    assistant_helpers.log_converse_request_without_audio(c)
-                    yield c
-                audio_stream.start_playback()
-
-            # This generator yields ConverseResponse proto messages
-            # received from the gRPC Google Assistant API.
-            for resp in assistant.Converse(iter_converse_requests()):
-                assistant_helpers.log_converse_response_without_audio(resp)
-                if resp.error.code != code_pb2.OK:
-                    logging.error('server error: %s', resp.error.message)
-                    break
-                if resp.event_type == END_OF_UTTERANCE:
-                    logging.info('End of audio request detected')
-                    audio_stream.stop_recording()
-                if resp.result.spoken_request_text:
-                    logging.info('Transcript of user request: "%s".',
-                                 resp.result.spoken_request_text)
-                    logging.info('Playing assistant response.')
-                if len(resp.audio_out.audio_data) > 0:
-                    audio_stream.write(resp.audio_out.audio_data)
-                if resp.result.spoken_response_text:
-                    logging.info(
-                        'Transcript of TTS response '
-                        '(only populated from IFTTT): "%s".',
-                        resp.result.spoken_response_text)
-                if resp.result.converse_state:
-                    converse_state_bytes = resp.result.converse_state
-                if resp.audio_out.volume_percentage != volume_percentage:
-                    volume_percentage = resp.audio_out.volume_percentage
-                    logging.info('Volume should be set to %s%%'
-                                 % volume_percentage)
-                if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
-                    user_response_expected = True
-                    logging.info('Expecting follow-on query from user.')
-                elif resp.result.microphone_mode == CLOSE_MICROPHONE:
-                    user_response_expected = False
-            if not user_response_expected:
-                logging.info('Finished playing assistant response.')
-            audio_stream.stop()
+    # Configure audio source and sink.
+    audio_device = None
+    if input_audio_file:
+        audio_source = audio_helpers.WaveSource(
+            open(input_audio_file, 'rb')
+        )
     else:
-        # In non-interactive mode:
-        # - Read audio samples from microphone.
-        # - Send converse requests.
-        # - Iterate on converse responses audio data and playback samples.
-        if input_audio_file:
-            input_stream = audio_helpers.SampleRateLimiter(
-                open(input_audio_file, 'rb'))
-        else:
-            input_stream = audio_helpers.PyAudioStream(lock=False)
-            input_stream.start()
-        if output_audio_file:
-            output_stream = audio_helpers.WaveStreamWriter(
-                open(output_audio_file, 'wb'))
-        else:
-            output_stream = audio_helpers.PyAudioStream(lock=False)
-            output_stream.start()
+        audio_source = audio_device = (
+            audio_device or audio_helpers.SoundDeviceStream()
+        )
+    if output_audio_file:
+        audio_sink = audio_helpers.WaveSink(
+            open(output_audio_file, 'wb')
+        )
+    else:
+        audio_sink = audio_device = (
+            audio_device or audio_helpers.SoundDeviceStream()
+        )
+    # Create conversation stream with the given audio source and sink.
+    conversation_stream = audio_helpers.ConversationStream(
+        source=audio_source,
+        sink=audio_sink
+    )
 
+    # Interactive by default.
+    wait_for_user_trigger = True
+    # If file arguments are supplied, don't wait for user trigger.
+    if input_audio_file or output_audio_file:
+        wait_for_user_trigger = False
+
+    # Stores an opaque blob provided in ConverseResponse that,
+    # when provided in a follow-up ConverseRequest,
+    # gives the Assistant a context marker within the current state
+    # of the multi-Converse()-RPC "conversation".
+    # This value, along with MicrophoneMode, supports a more natural
+    # "conversation" with the Assistant.
+    converse_state_bytes = None
+
+    # Stores the current volument percentage.
+    # Note: No volume change is currently implemented in this sample
+    volume_percentage = 50
+
+    while True:
+        if wait_for_user_trigger:
+            click.pause(info='Press Enter to send a new request...')
+
+        conversation_stream.start_recording()
+        logging.info('Recording audio request.')
+
+        # This generator yields ConverseRequest to send to the gRPC
+        # Google Assistant API.
         converse_requests = assistant_helpers.gen_converse_requests(
-            input_stream)
-        # TODO(proppy): Converge non-interactive handling or split it.
-        for resp in assistant.Converse(converse_requests):
+            conversation_stream,
+            converse_state=converse_state_bytes,
+            volume_percentage=volume_percentage
+        )
+
+        def iter_converse_requests():
+            for c in converse_requests:
+                assistant_helpers.log_converse_request_without_audio(c)
+                yield c
+            conversation_stream.start_playback()
+
+        # This generator yields ConverseResponse proto messages
+        # received from the gRPC Google Assistant API.
+        for resp in assistant.Converse(iter_converse_requests()):
+            assistant_helpers.log_converse_response_without_audio(resp)
+            if resp.error.code != code_pb2.OK:
+                logging.error('server error: %s', resp.error.message)
+                break
             if resp.event_type == END_OF_UTTERANCE:
-                logging.info('End of utterance detected')
+                logging.info('End of audio request detected')
+                conversation_stream.stop_recording()
+            if resp.result.spoken_request_text:
+                logging.info('Transcript of user request: "%s".',
+                             resp.result.spoken_request_text)
+                logging.info('Playing assistant response.')
             if len(resp.audio_out.audio_data) > 0:
-                output_stream.write(resp.audio_out.audio_data)
-        input_stream.close()
-        output_stream.close()
+                conversation_stream.write(resp.audio_out.audio_data)
+            if resp.result.spoken_response_text:
+                logging.info(
+                    'Transcript of TTS response '
+                    '(only populated from IFTTT): "%s".',
+                    resp.result.spoken_response_text)
+            if resp.result.converse_state:
+                converse_state_bytes = resp.result.converse_state
+            if resp.audio_out.volume_percentage != volume_percentage:
+                volume_percentage = resp.audio_out.volume_percentage
+                logging.info('Volume should be set to %s%%'
+                             % volume_percentage)
+            if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
+                wait_for_user_trigger = False
+                logging.info('Expecting follow-on query from user.')
+            elif resp.result.microphone_mode == CLOSE_MICROPHONE:
+                wait_for_user_trigger = True
+        logging.info('Finished playing assistant response.')
+        conversation_stream.stop_playback()
+        # If file arguments are supplied, end the conversation.
+        if input_audio_file or output_audio_file:
+            break
+
+    conversation_stream.close()
 
 
 if __name__ == '__main__':

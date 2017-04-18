@@ -55,11 +55,11 @@ instructions on how to run the sample on supported hardware.
 
 -  Record and send pre-recorded audio to the Assistant
 
-        env/bin/python -m googlesamples.assistant -i in.raw
+        env/bin/python -m googlesamples.assistant -i in.wav
 
 - Save Assistant response to a file
 
-        env/bin/python -m googlesamples.assistant -o out.raw
+        env/bin/python -m googlesamples.assistant -o out.wav
 
 ## Troubleshooting
 
