@@ -15,8 +15,8 @@
 from setuptools import setup, find_packages
 
 install_requires = [
-    'googleapis-common-protos[grpc]>=1.5.2, <2.0dev',
-    'grpcio>=1.0.2, <2.0dev',
+    'googleapis-common-protos==1.5.2',
+    'grpcio==1.2.1',
 ]
 
 auth_helpers_requires = [
