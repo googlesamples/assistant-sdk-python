@@ -16,7 +16,7 @@
 
 import logging
 
-from google.assistant.v1alpha1 import embedded_assistant_pb2
+from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from .recommended_settings import AUDIO_SAMPLE_RATE_HZ
 
 

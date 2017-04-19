@@ -51,6 +51,7 @@ setup(
     namespace_packages=[
         'google',
         'google.assistant',
+        'google.assistant.embedded',
         'googlesamples',
     ],
     install_requires=install_requires,

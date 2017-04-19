@@ -3,7 +3,7 @@ import grpc
 from grpc.framework.common import cardinality
 from grpc.framework.interfaces.face import utilities as face_utilities
 
-import google.assistant.v1alpha1.embedded_assistant_pb2 as google_dot_assistant_dot_v1alpha1_dot_embedded__assistant__pb2
+import google.assistant.embedded.v1alpha1.embedded_assistant_pb2 as google_dot_assistant_dot_embedded_dot_v1alpha1_dot_embedded__assistant__pb2
 
 
 class EmbeddedAssistantStub(object):
@@ -18,8 +18,8 @@ class EmbeddedAssistantStub(object):
     """
     self.Converse = channel.stream_stream(
         '/google.assistant.embedded.v1alpha1.EmbeddedAssistant/Converse',
-        request_serializer=google_dot_assistant_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseRequest.SerializeToString,
-        response_deserializer=google_dot_assistant_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseResponse.FromString,
+        request_serializer=google_dot_assistant_dot_embedded_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseRequest.SerializeToString,
+        response_deserializer=google_dot_assistant_dot_embedded_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseResponse.FromString,
         )
 
 
@@ -71,8 +71,8 @@ def add_EmbeddedAssistantServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'Converse': grpc.stream_stream_rpc_method_handler(
           servicer.Converse,
-          request_deserializer=google_dot_assistant_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseRequest.FromString,
-          response_serializer=google_dot_assistant_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseResponse.SerializeToString,
+          request_deserializer=google_dot_assistant_dot_embedded_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseRequest.FromString,
+          response_serializer=google_dot_assistant_dot_embedded_dot_v1alpha1_dot_embedded__assistant__pb2.ConverseResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

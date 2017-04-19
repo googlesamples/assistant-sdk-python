@@ -18,7 +18,7 @@ import logging
 import os.path
 
 import click
-from google.assistant.v1alpha1 import embedded_assistant_pb2
+from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 
 from . import (assistant_helpers,

@@ -34,7 +34,7 @@ instructions on how to run the sample on supported hardware.
 
 - Install the Google Assistant SDK and samples.
 
-        env/bin/python -m pip install -e ".[samples]"
+        env/bin/python -m pip install -e ".[samples]" --upgrade
 
 - Authorize access to the Google Assistant API.
 
