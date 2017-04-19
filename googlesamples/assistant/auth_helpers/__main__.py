@@ -17,9 +17,13 @@ import os.path
 
 import click
 
-from . import credentials_flow_interactive, save_credentials
-
-APP_NAME = 'googlesamples-assistant'
+from . import (
+    credentials_flow_interactive,
+    save_credentials,
+)
+from .. import (
+    common_settings
+)
 
 
 @click.command()
@@ -28,12 +32,14 @@ APP_NAME = 'googlesamples-assistant'
               help='Path to OAuth2 client secret JSON file.')
 @click.option('--scope', multiple=True,
               metavar='<oauth2 scope>', show_default=True,
-              default=['https://www.googleapis.com/auth/assistant'],
+              default=[common_settings.ASSISTANT_OAUTH_SCOPE],
               help='API scopes to authorize access for.')
 @click.option('--credentials',
               metavar='<oauth2_credentials_file>', show_default=True,
-              default=os.path.join(click.get_app_dir(APP_NAME),
-                                   'assistant_credentials.json'),
+              default=os.path.join(
+                  click.get_app_dir(common_settings.ASSISTANT_APP_NAME),
+                  common_settings.ASSISTANT_CREDENTIALS_FILENAME
+              ),
               help='Path to store OAuth2 credentials.')
 def main(client_secrets, scope, credentials):
     """Helper script to generate OAuth2 credentials.

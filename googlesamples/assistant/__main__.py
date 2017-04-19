@@ -21,12 +21,13 @@ import click
 from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 
-from . import (assistant_helpers,
-               audio_helpers,
-               auth_helpers)
+from . import (
+    assistant_helpers,
+    audio_helpers,
+    auth_helpers,
+    common_settings,
+)
 
-APP_NAME = 'googlesamples-assistant'
-ASSISTANT_OAUTH_SCOPE = 'https://www.googleapis.com/auth/assistant'
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
 DIALOG_FOLLOW_ON = embedded_assistant_pb2.Result.DIALOG_FOLLOW_ON
@@ -39,8 +40,10 @@ CLOSE_MICROPHONE = embedded_assistant_pb2.Result.CLOSE_MICROPHONE
               help='Address of Google Assistant API service.')
 @click.option('--credentials',
               metavar='<credentials>', show_default=True,
-              default=os.path.join(click.get_app_dir(APP_NAME),
-                                   'assistant_credentials.json'),
+              default=os.path.join(
+                  click.get_app_dir(common_settings.ASSISTANT_APP_NAME),
+                  common_settings.ASSISTANT_CREDENTIALS_FILENAME
+              ),
               help='Path to read OAuth2 credentials.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
@@ -77,7 +80,9 @@ def main(api_endpoint, credentials, verbose,
 
     try:
         credentials = auth_helpers.load_credentials(
-            credentials, scopes=[ASSISTANT_OAUTH_SCOPE])
+            credentials,
+            scopes=[common_settings.ASSISTANT_OAUTH_SCOPE]
+        )
     except Exception as e:
         logging.error('Error loading credentials: %s', e)
         logging.error('Run auth_helpers to initialize new OAuth2 credentials.')
