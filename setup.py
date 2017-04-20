@@ -1,4 +1,4 @@
-# Copyright 2014 Google Inc.
+# Copyright 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from setuptools import setup, find_packages
+import io
 
 install_requires = [
     'googleapis-common-protos==1.5.2',
@@ -24,30 +25,26 @@ auth_helpers_requires = [
     'urllib3[secure]==1.20',
 ]
 
+audio_helpers_requires = [
+    'sounddevice==0.3.7',
+]
+
 samples_requires = [
     'click==6.7',
-    'six==1.10.0',
-    'sounddevice==0.3.7',
-] + auth_helpers_requires
+] + auth_helpers_requires + audio_helpers_requires
 
-
-def load_test_suite():
-    import unittest
-    test_loader = unittest.TestLoader()
-    test_suite = test_loader.discover('tests', pattern='test_*.py')
-    return test_suite
-
+with io.open('README.rst', 'r') as fh:
+    long_description = fh.read()
 
 setup(
     name='google-assistant-sdk',
-    version='0.1',
+    version='0.1.0',
     author='Google Assistant SDK team',
     author_email='proppy@google.com',
     description='Python SDK for the Google Assistant API',
-    long_description=('Python bindings and samples '
-                      'for the Google Assistant API'),
+    long_description=long_description,
     url='https://github.com/googlesamples/google-assistant-sdk-python',
-    packages=find_packages(exclude=('tests')),
+    packages=find_packages(exclude=['tests*']),
     namespace_packages=[
         'google',
         'google.assistant',
@@ -56,17 +53,16 @@ setup(
     ],
     install_requires=install_requires,
     extras_require={
-        'MAIN': samples_requires,
         'samples': samples_requires,
         'auth_helpers': auth_helpers_requires,
+        'audio_helpers': audio_helpers_requires,
     },
-    setup_requires=['flake8'],
-    tests_require=['flake8'],
-    test_suite='setup.load_test_suite',
     entry_points={
         'console_scripts': [
             'googlesamples-assistant'
-            '=googlesamples.assistant.__main__:main [MAIN]'
+            '=googlesamples.assistant.__main__:main [samples]',
+            'googlesamples-assistant-auth'
+            '=googlesamples.assistant.auth_helpers.__main__:main [samples]',
         ],
     },
     license='Apache 2.0',
