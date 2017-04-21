@@ -22,17 +22,18 @@
 #   rate for input and output allows us to share the same audio stream
 #   for input and output.
 AUDIO_SAMPLE_RATE_HZ = 16000
-# Audio sample size in bytes.
-AUDIO_BYTES_PER_SAMPLE = 2
-# Audio I/O chunk size in seconds.
-AUDIO_CHUNK_DURATION_SECS = 0.5
-# Audio I/O chunk size in bytes.
-AUDIO_CHUNK_SIZE = int(AUDIO_SAMPLE_RATE_HZ
-                       * AUDIO_BYTES_PER_SAMPLE
-                       * AUDIO_CHUNK_DURATION_SECS)
-# Audio I/O flush size in bytes (used to flush PyAudio buffer during
-# playback to ensure audio is not truncated).
-AUDIO_FLUSH_SIZE = AUDIO_CHUNK_SIZE * 3
+# Size of a single sample in bytes.
+AUDIO_SAMPLE_SIZE = 2
+# Size of an audio block of 1 seconds in bytes
+# for the configured sample rate and size.
+AUDIO_1SECOND_SIZE = AUDIO_SAMPLE_RATE_HZ * AUDIO_SAMPLE_SIZE
+# Size of each ConverseStream read operation in bytes.
+CONVERSE_READ_SIZE = int(0.1 * AUDIO_1SECOND_SIZE)
+# Block size in bytes for each audio device read and write operation.
+AUDIO_DEVICE_BLOCK_SIZE = int(0.2 * AUDIO_1SECOND_SIZE)
+# Size of silence data in bytes written during flush operation
+# (used during playback to ensure audio is not truncated).
+AUDIO_DEVICE_FLUSH_SIZE = int(0.8 * AUDIO_1SECOND_SIZE)
 
 # Google Assistant API RPC deadline in seconds.
 DEADLINE_SECS = 60 * 3 + 5
