@@ -7,7 +7,7 @@ import google.assistant.embedded.v1alpha1.embedded_assistant_pb2 as google_dot_a
 
 
 class EmbeddedAssistantStub(object):
-  """Service that implements Embedded Google Assistant API.
+  """Service that implements Google Assistant API.
   """
 
   def __init__(self, channel):
@@ -24,7 +24,7 @@ class EmbeddedAssistantStub(object):
 
 
 class EmbeddedAssistantServicer(object):
-  """Service that implements Embedded Google Assistant API.
+  """Service that implements Google Assistant API.
   """
 
   def Converse(self, request_iterator, context):
@@ -34,33 +34,34 @@ class EmbeddedAssistantServicer(object):
     results, such as the `END_OF_UTTERANCE` event, while sending audio.
 
     A conversation is one or more gRPC connections, each consisting of several
-    streamed requests and responses. For example, if the user said "Set timer"
-    and the assistant responds "For how long?", the sequence could be:
+    streamed requests and responses. For example, the user says *Set timer*
+    and the assistant responds *For how long?*. The sequence could be:
 
-    ConverseRequest.config
-    ConverseRequest.audio_in
-    ConverseRequest.audio_in
-    ConverseRequest.audio_in
-    ConverseResponse.event_type.END_OF_UTTERANCE
-    ConverseResponse.result
-    ConverseResponse.audio_out
-    ConverseResponse.audio_out
-    ConverseResponse.audio_out
+    *   ConverseRequest.config
+    *   ConverseRequest.audio_in
+    *   ConverseRequest.audio_in
+    *   ConverseRequest.audio_in
+    *   ConverseResponse.event_type.END_OF_UTTERANCE
+    *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
+    *   ConverseResponse.audio_out
+    *   ConverseResponse.audio_out
+    *   ConverseResponse.audio_out
 
-    Then the user says "Two minutes" and the assistant responds
-    "Two minute timer, starting now". This is sent as another gRPC connection
+    The user then says *Two minutes* and the assistant responds
+    *Two minute timer, starting now*. This is sent as another gRPC connection
     call to the `Converse` method, again with streamed requests and responses,
     such as:
 
-    ConverseRequest.config
-    ConverseRequest.audio_in
-    ConverseRequest.audio_in
-    ConverseRequest.audio_in
-    ConverseResponse.event_type.END_OF_UTTERANCE
-    ConverseResponse.result
-    ConverseResponse.audio_out
-    ConverseResponse.audio_out
-    ConverseResponse.audio_out
+    *   ConverseRequest.config
+    *   ConverseRequest.audio_in
+    *   ConverseRequest.audio_in
+    *   ConverseRequest.audio_in
+    *   ConverseResponse.event_type.END_OF_UTTERANCE
+    *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
+    *   ConverseResponse.result
+    *   ConverseResponse.audio_out
+    *   ConverseResponse.audio_out
+    *   ConverseResponse.audio_out
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')

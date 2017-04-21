@@ -16,7 +16,6 @@ syntax = "proto3";
 
 package google.assistant.embedded.v1alpha1;
 
-import "google/api/annotations.proto";
 import "google/rpc/status.proto";
 
 option go_package = "google.golang.org/genproto/googleapis/assistant/embedded/v1alpha1;embedded";
@@ -25,7 +24,7 @@ option java_outer_classname = "AssistantProto";
 option java_package = "com.google.assistant.embedded.v1alpha1";
 
 
-// Service that implements Embedded Google Assistant API.
+// Service that implements Google Assistant API.
 service EmbeddedAssistant {
   // Initiates or continues a conversation with the embedded assistant service.
   // Each call performs one round-trip, sending an audio request to the service
@@ -33,37 +32,38 @@ service EmbeddedAssistant {
   // results, such as the `END_OF_UTTERANCE` event, while sending audio.
   //
   // A conversation is one or more gRPC connections, each consisting of several
-  // streamed requests and responses. For example, if the user said "Set timer"
-  // and the assistant responds "For how long?", the sequence could be:
+  // streamed requests and responses. For example, the user says *Set timer*
+  // and the assistant responds *For how long?*. The sequence could be:
   //
-  //   ConverseRequest.config
-  //   ConverseRequest.audio_in
-  //   ConverseRequest.audio_in
-  //   ConverseRequest.audio_in
-  //   ConverseResponse.event_type.END_OF_UTTERANCE
-  //   ConverseResponse.result
-  //   ConverseResponse.audio_out
-  //   ConverseResponse.audio_out
-  //   ConverseResponse.audio_out
+  // *   ConverseRequest.config
+  // *   ConverseRequest.audio_in
+  // *   ConverseRequest.audio_in
+  // *   ConverseRequest.audio_in
+  // *   ConverseResponse.event_type.END_OF_UTTERANCE
+  // *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
+  // *   ConverseResponse.audio_out
+  // *   ConverseResponse.audio_out
+  // *   ConverseResponse.audio_out
   //
-  // Then the user says "Two minutes" and the assistant responds
-  // "Two minute timer, starting now". This is sent as another gRPC connection
+  // The user then says *Two minutes* and the assistant responds
+  // *Two minute timer, starting now*. This is sent as another gRPC connection
   // call to the `Converse` method, again with streamed requests and responses,
   // such as:
   //
-  //   ConverseRequest.config
-  //   ConverseRequest.audio_in
-  //   ConverseRequest.audio_in
-  //   ConverseRequest.audio_in
-  //   ConverseResponse.event_type.END_OF_UTTERANCE
-  //   ConverseResponse.result
-  //   ConverseResponse.audio_out
-  //   ConverseResponse.audio_out
-  //   ConverseResponse.audio_out
+  // *   ConverseRequest.config
+  // *   ConverseRequest.audio_in
+  // *   ConverseRequest.audio_in
+  // *   ConverseRequest.audio_in
+  // *   ConverseResponse.event_type.END_OF_UTTERANCE
+  // *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
+  // *   ConverseResponse.result
+  // *   ConverseResponse.audio_out
+  // *   ConverseResponse.audio_out
+  // *   ConverseResponse.audio_out
   rpc Converse(stream ConverseRequest) returns (stream ConverseResponse);
 }
 
-// Specifies how to process the request.
+// Specifies how to process the `ConverseRequest` messages.
 message ConverseConfig {
   // *Required* Specifies how to process the subsequent incoming audio.
   AudioInConfig audio_in_config = 1;
@@ -71,13 +71,13 @@ message ConverseConfig {
   // *Required* Specifies how to format the audio that will be returned.
   AudioOutConfig audio_out_config = 2;
 
-  // *Required* Represents current state.
+  // *Required* Represents the current dialog state.
   State state = 3;
 }
 
 // Specifies how to process the `audio_in` data that will be provided in
-// subsequent requests. For recommended settings, see
-// [best practices](https://cloud.google.com/speech/docs/best-practices).
+// subsequent requests. For recommended settings, see the Google Assistant SDK
+// [best practices](https://developers.google.com/assistant/best-practices).
 message AudioInConfig {
   // Audio encoding of the data sent in the audio message.
   // Audio must be one-channel (mono). The only language supported is "en-US".
@@ -102,8 +102,8 @@ message AudioInConfig {
   // *Required* Encoding of audio data sent in all `audio_in` messages.
   Encoding encoding = 1;
 
-  // *Required* Sample rate in Hertz of the audio data sent in all `audio_in`
-  // messages. Valid values are: 16000-24000. 16000 is optimal.
+  // *Required* Sample rate (in Hertz) of the audio data sent in all `audio_in`
+  // messages. Valid values are from 16000-24000, but 16000 is optimal.
   // For best results, set the sampling rate of the audio source to 16000 Hz.
   // If that's not possible, use the native sample rate of the audio source
   // (instead of re-sampling).
@@ -113,7 +113,7 @@ message AudioInConfig {
 // Specifies the desired format for the server to use when it returns
 // `audio_out` messages.
 message AudioOutConfig {
-  // Audio encoding of the data returned the audio message. All encodings are
+  // Audio encoding of the data returned in the audio message. All encodings are
   // raw audio bytes with no header, except as indicated below.
   enum Encoding {
     // Not specified. Will return result [google.rpc.Code.INVALID_ARGUMENT][google.rpc.Code.INVALID_ARGUMENT].
@@ -125,7 +125,7 @@ message AudioOutConfig {
     // MP3 audio encoding. The sample rate is encoded in the payload.
     MP3 = 2;
 
-    // Opus encoded audio wrapped in an ogg container. The result will be a
+    // Opus-encoded audio wrapped in an ogg container. The result will be a
     // file which can be played natively on Android and in some browsers (such
     // as Chrome). The quality of the encoding is considerably higher than MP3
     // while using the same bitrate. The sample rate is encoded in the payload.
@@ -136,23 +136,21 @@ message AudioOutConfig {
   // messages.
   Encoding encoding = 1;
 
-  // *Optional* The desired sample rate in Hertz of the audio data returned in
-  // `audio_out` messages. Valid values are: 8000-48000. If omitted, an optimal
-  // sample rate will be selected to provide the best quality speech. In any
-  // case, the `AudioOut` message will contain the actual sample rate used.
-  // (The actual sample rate may or may not match the value set here.)
+  // *Required* The sample rate in Hertz of the audio data returned in
+  // `audio_out` messages. Valid values are: 16000-24000.
   int32 sample_rate_hertz = 2;
 
   // *Required* Current volume setting of the device's audio output.
-  // Valid values are 0 to 100 (corresponding to 0% to 100%, with 0 indicating
-  // muted).
+  // Valid values are 1 to 100 (corresponding to 1% to 100%).
   int32 volume_percentage = 3;
 }
 
 // Provides information about the current dialog state.
 message State {
   // *Required* The `converse_state` value returned in the prior
-  // `ConverseResponse`. Omit if there was no prior `ConverseResponse`.
+  // `ConverseResponse`. Omit (do not set the field) if there was no prior
+  // `ConverseResponse`. If there was a prior `ConverseResponse`, do not omit
+  // this field; doing so will end that conversation.
   bytes converse_state = 1;
 }
 
@@ -163,22 +161,6 @@ message AudioOut {
   // query. Sequential chunks of audio data are received in sequential
   // `ConverseResponse` messages.
   bytes audio_data = 1;
-
-  // *Output-only* The actual sample rate in Hertz of the audio data returned in
-  // `audio_out`. MP3 and OPUS_IN_OGG will also return the actual sample rate in
-  // their payload.
-  int32 sample_rate_hertz = 2;
-
-  // *Output-only* Updated volume-level. Valid values are 0 to 100
-  // (corresponding to 0% to 100%, with 0 indicating muted). The value returned
-  // will equal the value sent in the `AudioOutConfig` request unless a command
-  // such as "Increase the volume" or "Set volume level 4" was recognized, in
-  // which case it returns an updated value. Typically, a client should use this
-  // volume level when playing the audio_out data, and retain this value as the
-  // current volume level. (Some clients may also implement other ways to allow
-  // the current volume level to be changed, for example, by providing a knob
-  // that the user can turn.)
-  int32 volume_percentage = 3;
 }
 
 // The semantic result for the user's spoken query.
@@ -209,12 +191,24 @@ message Result {
   // *Output-only* State information for subsequent `ConverseRequest`. This
   // value should be saved in the client and returned in the `converse_state`
   // with the next `ConverseRequest`. (The client does not need to interpret or
-  // otherwise use this value.)
+  // otherwise use this value.) There is no need to save this information across
+  // device restarts.
   bytes converse_state = 3;
 
   // *Output-only* Specifies preferred mode of the microphone after this
   // `Converse` RPC is processed.
   MicrophoneMode microphone_mode = 4;
+
+  // *Output-only* Updated volume level. The value will be 0 or omitted
+  // (indicating no change) unless a voice command such as "Increase the volume"
+  // or "Set volume level 4" was recognized, in which case the value will be
+  // between 1 and 100 (corresponding to the new volume level of 1% to 100%).
+  // Typically, a client should use this volume level when playing the
+  // `audio_out` data, and retain this value as the current volume level and
+  // supply it in the `AudioOutConfig` of the next `ConverseRequest`. (Some
+  // clients may also implement other ways to allow the current volume level to
+  // be changed, for example, by providing a knob that the user can turn.)
+  int32 volume_percentage = 5;
 }
 
 // The top-level message sent by the client. Clients must send at least two, and

@@ -188,8 +188,8 @@ def main(api_endpoint, credentials, verbose,
                     resp.result.spoken_response_text)
             if resp.result.converse_state:
                 converse_state_bytes = resp.result.converse_state
-            if resp.audio_out.volume_percentage != volume_percentage:
-                volume_percentage = resp.audio_out.volume_percentage
+            if resp.result.volume_percentage != volume_percentage:
+                volume_percentage = resp.result.volume_percentage
                 logging.info('Volume should be set to %s%%'
                              % volume_percentage)
             if resp.result.microphone_mode == DIALOG_FOLLOW_ON:

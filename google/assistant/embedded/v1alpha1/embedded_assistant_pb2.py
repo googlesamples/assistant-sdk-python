@@ -13,7 +13,6 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.rpc import status_pb2 as google_dot_rpc_dot_status__pb2
 
 
@@ -21,9 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='google/assistant/embedded/v1alpha1/embedded_assistant.proto',
   package='google.assistant.embedded.v1alpha1',
   syntax='proto3',
-  serialized_pb=_b('\n;google/assistant/embedded/v1alpha1/embedded_assistant.proto\x12\"google.assistant.embedded.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/rpc/status.proto\"\xe4\x01\n\x0e\x43onverseConfig\x12J\n\x0f\x61udio_in_config\x18\x01 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha1.AudioInConfig\x12L\n\x10\x61udio_out_config\x18\x02 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.AudioOutConfig\x12\x38\n\x05state\x18\x03 \x01(\x0b\x32).google.assistant.embedded.v1alpha1.State\"\xb6\x01\n\rAudioInConfig\x12L\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32:.google.assistant.embedded.v1alpha1.AudioInConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\"<\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x08\n\x04\x46LAC\x10\x02\"\xe3\x01\n\x0e\x41udioOutConfig\x12M\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32;.google.assistant.embedded.v1alpha1.AudioOutConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"L\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x07\n\x03MP3\x10\x02\x12\x0f\n\x0bOPUS_IN_OGG\x10\x03\"\x1f\n\x05State\x12\x16\n\x0e\x63onverse_state\x18\x01 \x01(\x0c\"T\n\x08\x41udioOut\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"\x8e\x02\n\x06Result\x12\x1b\n\x13spoken_request_text\x18\x01 \x01(\t\x12\x1c\n\x14spoken_response_text\x18\x02 \x01(\t\x12\x16\n\x0e\x63onverse_state\x18\x03 \x01(\x0c\x12R\n\x0fmicrophone_mode\x18\x04 \x01(\x0e\x32\x39.google.assistant.embedded.v1alpha1.Result.MicrophoneMode\"]\n\x0eMicrophoneMode\x12\x1f\n\x1bMICROPHONE_MODE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x43LOSE_MICROPHONE\x10\x01\x12\x14\n\x10\x44IALOG_FOLLOW_ON\x10\x02\"\x7f\n\x0f\x43onverseRequest\x12\x44\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.ConverseConfigH\x00\x12\x12\n\x08\x61udio_in\x18\x02 \x01(\x0cH\x00\x42\x12\n\x10\x63onverse_request\"\xe2\x02\n\x10\x43onverseResponse\x12#\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x12.google.rpc.StatusH\x00\x12T\n\nevent_type\x18\x02 \x01(\x0e\x32>.google.assistant.embedded.v1alpha1.ConverseResponse.EventTypeH\x00\x12\x41\n\taudio_out\x18\x03 \x01(\x0b\x32,.google.assistant.embedded.v1alpha1.AudioOutH\x00\x12<\n\x06result\x18\x05 \x01(\x0b\x32*.google.assistant.embedded.v1alpha1.ResultH\x00\"=\n\tEventType\x12\x1a\n\x16\x45VENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x45ND_OF_UTTERANCE\x10\x01\x42\x13\n\x11\x63onverse_response2\x8e\x01\n\x11\x45mbeddedAssistant\x12y\n\x08\x43onverse\x12\x33.google.assistant.embedded.v1alpha1.ConverseRequest\x1a\x34.google.assistant.embedded.v1alpha1.ConverseResponse(\x01\x30\x01\x42\x86\x01\n&com.google.assistant.embedded.v1alpha1B\x0e\x41ssistantProtoP\x01ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha1;embeddedb\x06proto3')
+  serialized_pb=_b('\n;google/assistant/embedded/v1alpha1/embedded_assistant.proto\x12\"google.assistant.embedded.v1alpha1\x1a\x17google/rpc/status.proto\"\xe4\x01\n\x0e\x43onverseConfig\x12J\n\x0f\x61udio_in_config\x18\x01 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha1.AudioInConfig\x12L\n\x10\x61udio_out_config\x18\x02 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.AudioOutConfig\x12\x38\n\x05state\x18\x03 \x01(\x0b\x32).google.assistant.embedded.v1alpha1.State\"\xb6\x01\n\rAudioInConfig\x12L\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32:.google.assistant.embedded.v1alpha1.AudioInConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\"<\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x08\n\x04\x46LAC\x10\x02\"\xe3\x01\n\x0e\x41udioOutConfig\x12M\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32;.google.assistant.embedded.v1alpha1.AudioOutConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"L\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x07\n\x03MP3\x10\x02\x12\x0f\n\x0bOPUS_IN_OGG\x10\x03\"\x1f\n\x05State\x12\x16\n\x0e\x63onverse_state\x18\x01 \x01(\x0c\"\x1e\n\x08\x41udioOut\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\"\xa9\x02\n\x06Result\x12\x1b\n\x13spoken_request_text\x18\x01 \x01(\t\x12\x1c\n\x14spoken_response_text\x18\x02 \x01(\t\x12\x16\n\x0e\x63onverse_state\x18\x03 \x01(\x0c\x12R\n\x0fmicrophone_mode\x18\x04 \x01(\x0e\x32\x39.google.assistant.embedded.v1alpha1.Result.MicrophoneMode\x12\x19\n\x11volume_percentage\x18\x05 \x01(\x05\"]\n\x0eMicrophoneMode\x12\x1f\n\x1bMICROPHONE_MODE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x43LOSE_MICROPHONE\x10\x01\x12\x14\n\x10\x44IALOG_FOLLOW_ON\x10\x02\"\x7f\n\x0f\x43onverseRequest\x12\x44\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.ConverseConfigH\x00\x12\x12\n\x08\x61udio_in\x18\x02 \x01(\x0cH\x00\x42\x12\n\x10\x63onverse_request\"\xe2\x02\n\x10\x43onverseResponse\x12#\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x12.google.rpc.StatusH\x00\x12T\n\nevent_type\x18\x02 \x01(\x0e\x32>.google.assistant.embedded.v1alpha1.ConverseResponse.EventTypeH\x00\x12\x41\n\taudio_out\x18\x03 \x01(\x0b\x32,.google.assistant.embedded.v1alpha1.AudioOutH\x00\x12<\n\x06result\x18\x05 \x01(\x0b\x32*.google.assistant.embedded.v1alpha1.ResultH\x00\"=\n\tEventType\x12\x1a\n\x16\x45VENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x45ND_OF_UTTERANCE\x10\x01\x42\x13\n\x11\x63onverse_response2\x8e\x01\n\x11\x45mbeddedAssistant\x12y\n\x08\x43onverse\x12\x33.google.assistant.embedded.v1alpha1.ConverseRequest\x1a\x34.google.assistant.embedded.v1alpha1.ConverseResponse(\x01\x30\x01\x42\x86\x01\n&com.google.assistant.embedded.v1alpha1B\x0e\x41ssistantProtoP\x01ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha1;embeddedb\x06proto3')
   ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_rpc_dot_status__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_rpc_dot_status__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
@@ -49,8 +48,8 @@ _AUDIOINCONFIG_ENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=508,
-  serialized_end=568,
+  serialized_start=478,
+  serialized_end=538,
 )
 _sym_db.RegisterEnumDescriptor(_AUDIOINCONFIG_ENCODING)
 
@@ -79,8 +78,8 @@ _AUDIOOUTCONFIG_ENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=722,
-  serialized_end=798,
+  serialized_start=692,
+  serialized_end=768,
 )
 _sym_db.RegisterEnumDescriptor(_AUDIOOUTCONFIG_ENCODING)
 
@@ -105,8 +104,8 @@ _RESULT_MICROPHONEMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1097,
-  serialized_end=1190,
+  serialized_start=1040,
+  serialized_end=1133,
 )
 _sym_db.RegisterEnumDescriptor(_RESULT_MICROPHONEMODE)
 
@@ -127,8 +126,8 @@ _CONVERSERESPONSE_EVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1594,
-  serialized_end=1655,
+  serialized_start=1537,
+  serialized_end=1598,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSERESPONSE_EVENTTYPE)
 
@@ -173,8 +172,8 @@ _CONVERSECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=155,
-  serialized_end=383,
+  serialized_start=125,
+  serialized_end=353,
 )
 
 
@@ -212,8 +211,8 @@ _AUDIOINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=386,
-  serialized_end=568,
+  serialized_start=356,
+  serialized_end=538,
 )
 
 
@@ -258,8 +257,8 @@ _AUDIOOUTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=571,
-  serialized_end=798,
+  serialized_start=541,
+  serialized_end=768,
 )
 
 
@@ -289,8 +288,8 @@ _STATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=800,
-  serialized_end=831,
+  serialized_start=770,
+  serialized_end=801,
 )
 
 
@@ -308,20 +307,6 @@ _AUDIOOUT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
-    _descriptor.FieldDescriptor(
-      name='sample_rate_hertz', full_name='google.assistant.embedded.v1alpha1.AudioOut.sample_rate_hertz', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='volume_percentage', full_name='google.assistant.embedded.v1alpha1.AudioOut.volume_percentage', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
   ],
   extensions=[
   ],
@@ -334,8 +319,8 @@ _AUDIOOUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=833,
-  serialized_end=917,
+  serialized_start=803,
+  serialized_end=833,
 )
 
 
@@ -374,6 +359,13 @@ _RESULT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='volume_percentage', full_name='google.assistant.embedded.v1alpha1.Result.volume_percentage', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -387,8 +379,8 @@ _RESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=920,
-  serialized_end=1190,
+  serialized_start=836,
+  serialized_end=1133,
 )
 
 
@@ -428,8 +420,8 @@ _CONVERSEREQUEST = _descriptor.Descriptor(
       name='converse_request', full_name='google.assistant.embedded.v1alpha1.ConverseRequest.converse_request',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1192,
-  serialized_end=1319,
+  serialized_start=1135,
+  serialized_end=1262,
 )
 
 
@@ -484,8 +476,8 @@ _CONVERSERESPONSE = _descriptor.Descriptor(
       name='converse_response', full_name='google.assistant.embedded.v1alpha1.ConverseResponse.converse_response',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1322,
-  serialized_end=1676,
+  serialized_start=1265,
+  serialized_end=1619,
 )
 
 _CONVERSECONFIG.fields_by_name['audio_in_config'].message_type = _AUDIOINCONFIG
@@ -600,7 +592,7 @@ try:
 
 
   class EmbeddedAssistantStub(object):
-    """Service that implements Embedded Google Assistant API.
+    """Service that implements Google Assistant API.
     """
 
     def __init__(self, channel):
@@ -617,7 +609,7 @@ try:
 
 
   class EmbeddedAssistantServicer(object):
-    """Service that implements Embedded Google Assistant API.
+    """Service that implements Google Assistant API.
     """
 
     def Converse(self, request_iterator, context):
@@ -627,33 +619,34 @@ try:
       results, such as the `END_OF_UTTERANCE` event, while sending audio.
 
       A conversation is one or more gRPC connections, each consisting of several
-      streamed requests and responses. For example, if the user said "Set timer"
-      and the assistant responds "For how long?", the sequence could be:
+      streamed requests and responses. For example, the user says *Set timer*
+      and the assistant responds *For how long?*. The sequence could be:
 
-      ConverseRequest.config
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseResponse.event_type.END_OF_UTTERANCE
-      ConverseResponse.result
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
+      *   ConverseRequest.config
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseResponse.event_type.END_OF_UTTERANCE
+      *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
 
-      Then the user says "Two minutes" and the assistant responds
-      "Two minute timer, starting now". This is sent as another gRPC connection
+      The user then says *Two minutes* and the assistant responds
+      *Two minute timer, starting now*. This is sent as another gRPC connection
       call to the `Converse` method, again with streamed requests and responses,
       such as:
 
-      ConverseRequest.config
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseResponse.event_type.END_OF_UTTERANCE
-      ConverseResponse.result
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
+      *   ConverseRequest.config
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseResponse.event_type.END_OF_UTTERANCE
+      *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
+      *   ConverseResponse.result
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
       """
       context.set_code(grpc.StatusCode.UNIMPLEMENTED)
       context.set_details('Method not implemented!')
@@ -679,7 +672,7 @@ try:
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """Service that implements Embedded Google Assistant API.
+    """Service that implements Google Assistant API.
     """
     def Converse(self, request_iterator, context):
       """Initiates or continues a conversation with the embedded assistant service.
@@ -688,33 +681,34 @@ try:
       results, such as the `END_OF_UTTERANCE` event, while sending audio.
 
       A conversation is one or more gRPC connections, each consisting of several
-      streamed requests and responses. For example, if the user said "Set timer"
-      and the assistant responds "For how long?", the sequence could be:
+      streamed requests and responses. For example, the user says *Set timer*
+      and the assistant responds *For how long?*. The sequence could be:
 
-      ConverseRequest.config
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseResponse.event_type.END_OF_UTTERANCE
-      ConverseResponse.result
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
+      *   ConverseRequest.config
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseResponse.event_type.END_OF_UTTERANCE
+      *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
 
-      Then the user says "Two minutes" and the assistant responds
-      "Two minute timer, starting now". This is sent as another gRPC connection
+      The user then says *Two minutes* and the assistant responds
+      *Two minute timer, starting now*. This is sent as another gRPC connection
       call to the `Converse` method, again with streamed requests and responses,
       such as:
 
-      ConverseRequest.config
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseResponse.event_type.END_OF_UTTERANCE
-      ConverseResponse.result
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
+      *   ConverseRequest.config
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseResponse.event_type.END_OF_UTTERANCE
+      *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
+      *   ConverseResponse.result
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
       """
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
 
@@ -725,7 +719,7 @@ try:
     It is recommended to use the GA API (classes and functions in this
     file not marked beta) for all further purposes. This class was generated
     only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """Service that implements Embedded Google Assistant API.
+    """Service that implements Google Assistant API.
     """
     def Converse(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
       """Initiates or continues a conversation with the embedded assistant service.
@@ -734,33 +728,34 @@ try:
       results, such as the `END_OF_UTTERANCE` event, while sending audio.
 
       A conversation is one or more gRPC connections, each consisting of several
-      streamed requests and responses. For example, if the user said "Set timer"
-      and the assistant responds "For how long?", the sequence could be:
+      streamed requests and responses. For example, the user says *Set timer*
+      and the assistant responds *For how long?*. The sequence could be:
 
-      ConverseRequest.config
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseResponse.event_type.END_OF_UTTERANCE
-      ConverseResponse.result
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
+      *   ConverseRequest.config
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseResponse.event_type.END_OF_UTTERANCE
+      *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
 
-      Then the user says "Two minutes" and the assistant responds
-      "Two minute timer, starting now". This is sent as another gRPC connection
+      The user then says *Two minutes* and the assistant responds
+      *Two minute timer, starting now*. This is sent as another gRPC connection
       call to the `Converse` method, again with streamed requests and responses,
       such as:
 
-      ConverseRequest.config
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseRequest.audio_in
-      ConverseResponse.event_type.END_OF_UTTERANCE
-      ConverseResponse.result
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
-      ConverseResponse.audio_out
+      *   ConverseRequest.config
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseRequest.audio_in
+      *   ConverseResponse.event_type.END_OF_UTTERANCE
+      *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
+      *   ConverseResponse.result
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
+      *   ConverseResponse.audio_out
       """
       raise NotImplementedError()
 
