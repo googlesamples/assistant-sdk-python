@@ -3,24 +3,25 @@ Maintainer guide
 
 ## Prerequisites
 
-- Install the gRPC tools.
+- Install automation tools
 
-        env/bin/pip install grpcio-tools
-
-- Check out googleapis/googleapis repo.
-
-        git clone https://github.com/googleapis/googleapis
+        env/bin/pip install nox-automation
 
 ## Tasks
 
 - Run lint tool
 
-        env/bin/python setup.py flake8
+        nox -s lint
 
 - Run unit tests
 
-        env/bin/python setup.py test
+        nox -s unittest
 
 - Regenerate the python gRPC stubs
 
-        env/bin/python -m grpc_tools.protoc --proto_path=proto --proto_path=googleapis --python_out=. --grpc_python_out=. proto/google/assistant/embedded/v1alpha1/embedded_assistant.proto
+        git clone https://github.com/googleapis/googleapis
+        nox -s protoc
+
+- Create a new `google_assistant_sdk` release in `dist`
+
+        nox -s release
