@@ -32,10 +32,13 @@ service EmbeddedAssistant {
   // results, such as the `END_OF_UTTERANCE` event, while sending audio.
   //
   // A conversation is one or more gRPC connections, each consisting of several
-  // streamed requests and responses. For example, the user says *Set timer*
-  // and the assistant responds *For how long?*. The sequence could be:
+  // streamed requests and responses.
+  // For example, the user says *Add to my shopping list* and the assistant
+  // responds *What do you want to add?*. The sequence of streamed requests and
+  // responses in the first gRPC message could be:
   //
   // *   ConverseRequest.config
+  // *   ConverseRequest.audio_in
   // *   ConverseRequest.audio_in
   // *   ConverseRequest.audio_in
   // *   ConverseRequest.audio_in
@@ -45,10 +48,10 @@ service EmbeddedAssistant {
   // *   ConverseResponse.audio_out
   // *   ConverseResponse.audio_out
   //
-  // The user then says *Two minutes* and the assistant responds
-  // *Two minute timer, starting now*. This is sent as another gRPC connection
-  // call to the `Converse` method, again with streamed requests and responses,
-  // such as:
+  // The user then says *bagels* and the assistant responds
+  // *OK, I've added bagels to your shopping list*. This is sent as another gRPC
+  // connection call to the `Converse` method, again with streamed requests and
+  // responses, such as:
   //
   // *   ConverseRequest.config
   // *   ConverseRequest.audio_in
@@ -56,10 +59,14 @@ service EmbeddedAssistant {
   // *   ConverseRequest.audio_in
   // *   ConverseResponse.event_type.END_OF_UTTERANCE
   // *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
-  // *   ConverseResponse.result
   // *   ConverseResponse.audio_out
   // *   ConverseResponse.audio_out
   // *   ConverseResponse.audio_out
+  // *   ConverseResponse.audio_out
+  //
+  // Although the precise order of responses is not guaranteed, sequential
+  // ConverseResponse.audio_out messages will always contain sequential portions
+  // of audio.
   rpc Converse(stream ConverseRequest) returns (stream ConverseResponse);
 }
 
@@ -72,7 +79,7 @@ message ConverseConfig {
   AudioOutConfig audio_out_config = 2;
 
   // *Required* Represents the current dialog state.
-  State state = 3;
+  ConverseState converse_state = 3;
 }
 
 // Specifies how to process the `audio_in` data that will be provided in
@@ -146,12 +153,13 @@ message AudioOutConfig {
 }
 
 // Provides information about the current dialog state.
-message State {
-  // *Required* The `converse_state` value returned in the prior
+message ConverseState {
+  // *Required* The `conversation_state` value returned in the prior
   // `ConverseResponse`. Omit (do not set the field) if there was no prior
   // `ConverseResponse`. If there was a prior `ConverseResponse`, do not omit
-  // this field; doing so will end that conversation.
-  bytes converse_state = 1;
+  // this field; doing so will end that conversation (and this new request will
+  // start a new conversation).
+  bytes conversation_state = 1;
 }
 
 // The audio containing the assistant's response to the query. Sequential chunks
@@ -164,19 +172,18 @@ message AudioOut {
 }
 
 // The semantic result for the user's spoken query.
-message Result {
+message ConverseResult {
   // Possible states of the microphone after a `Converse` RPC completes.
   enum MicrophoneMode {
     // No mode specified.
     MICROPHONE_MODE_UNSPECIFIED = 0;
 
     // The service is not expecting a follow-on question from the user.
-    // Typically the microphone should remain off until the user re-activates
-    // it.
+    // The microphone should remain off until the user re-activates it.
     CLOSE_MICROPHONE = 1;
 
-    // The service is expecting a follow-on question from the user. Typically
-    // the microphone should be re-opened when the `AudioOut` playback completes
+    // The service is expecting a follow-on question from the user. The
+    // microphone should be re-opened when the `AudioOut` playback completes
     // (by starting a new `Converse` RPC call to send the new audio).
     DIALOG_FOLLOW_ON = 2;
   }
@@ -189,14 +196,14 @@ message Result {
   string spoken_response_text = 2;
 
   // *Output-only* State information for subsequent `ConverseRequest`. This
-  // value should be saved in the client and returned in the `converse_state`
-  // with the next `ConverseRequest`. (The client does not need to interpret or
-  // otherwise use this value.) There is no need to save this information across
-  // device restarts.
-  bytes converse_state = 3;
+  // value should be saved in the client and returned in the
+  // `conversation_state` with the next `ConverseRequest`. (The client does not
+  // need to interpret or otherwise use this value.) There is no need to save
+  // this information across device restarts.
+  bytes conversation_state = 3;
 
-  // *Output-only* Specifies preferred mode of the microphone after this
-  // `Converse` RPC is processed.
+  // *Output-only* Specifies the mode of the microphone after this `Converse`
+  // RPC is processed.
   MicrophoneMode microphone_mode = 4;
 
   // *Output-only* Updated volume level. The value will be 0 or omitted
@@ -268,6 +275,6 @@ message ConverseResponse {
     AudioOut audio_out = 3;
 
     // *Output-only* The semantic result for the user's spoken query.
-    Result result = 5;
+    ConverseResult result = 5;
   }
 }

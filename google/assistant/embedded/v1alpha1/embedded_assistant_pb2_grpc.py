@@ -34,10 +34,13 @@ class EmbeddedAssistantServicer(object):
     results, such as the `END_OF_UTTERANCE` event, while sending audio.
 
     A conversation is one or more gRPC connections, each consisting of several
-    streamed requests and responses. For example, the user says *Set timer*
-    and the assistant responds *For how long?*. The sequence could be:
+    streamed requests and responses.
+    For example, the user says *Add to my shopping list* and the assistant
+    responds *What do you want to add?*. The sequence of streamed requests and
+    responses in the first gRPC message could be:
 
     *   ConverseRequest.config
+    *   ConverseRequest.audio_in
     *   ConverseRequest.audio_in
     *   ConverseRequest.audio_in
     *   ConverseRequest.audio_in
@@ -47,10 +50,10 @@ class EmbeddedAssistantServicer(object):
     *   ConverseResponse.audio_out
     *   ConverseResponse.audio_out
 
-    The user then says *Two minutes* and the assistant responds
-    *Two minute timer, starting now*. This is sent as another gRPC connection
-    call to the `Converse` method, again with streamed requests and responses,
-    such as:
+    The user then says *bagels* and the assistant responds
+    *OK, I've added bagels to your shopping list*. This is sent as another gRPC
+    connection call to the `Converse` method, again with streamed requests and
+    responses, such as:
 
     *   ConverseRequest.config
     *   ConverseRequest.audio_in
@@ -58,10 +61,14 @@ class EmbeddedAssistantServicer(object):
     *   ConverseRequest.audio_in
     *   ConverseResponse.event_type.END_OF_UTTERANCE
     *   ConverseResponse.result.microphone_mode.CLOSE_MICROPHONE
-    *   ConverseResponse.result
     *   ConverseResponse.audio_out
     *   ConverseResponse.audio_out
     *   ConverseResponse.audio_out
+    *   ConverseResponse.audio_out
+
+    Although the precise order of responses is not guaranteed, sequential
+    ConverseResponse.audio_out messages will always contain sequential portions
+    of audio.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')

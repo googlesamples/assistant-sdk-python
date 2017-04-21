@@ -60,7 +60,7 @@ def log_converse_response_without_audio(converse_response):
 
 def gen_converse_requests(samples,
                           sample_rate=AUDIO_SAMPLE_RATE_HZ,
-                          converse_state=None,
+                          conversation_state=None,
                           volume_percentage=50):
     """Returns a generator of ConverseRequest proto messages from the
        given audio samples.
@@ -68,7 +68,7 @@ def gen_converse_requests(samples,
     Args:
       samples: generator of audio samples.
       sample_rate: audio data sample rate.
-      converse_state: opaque bytes describing current conversation state.
+      conversation_state: opaque bytes describing current conversation state.
     """
     audio_in_config = embedded_assistant_pb2.AudioInConfig(
         encoding='LINEAR16',
@@ -80,15 +80,15 @@ def gen_converse_requests(samples,
         volume_percentage=volume_percentage,
     )
     state_config = None
-    if converse_state:
-        logging.debug('Sending converse_state: %s', converse_state)
-        state_config = embedded_assistant_pb2.State(
-            converse_state=converse_state,
+    if conversation_state:
+        logging.debug('Sending converse_state: %s', conversation_state)
+        state_config = embedded_assistant_pb2.ConverseState(
+            conversation_state=conversation_state,
         )
     converse_config = embedded_assistant_pb2.ConverseConfig(
         audio_in_config=audio_in_config,
         audio_out_config=audio_out_config,
-        state=state_config,
+        converse_state=state_config,
     )
     # The first ConverseRequest must contain the ConverseConfig
     # and no audio data

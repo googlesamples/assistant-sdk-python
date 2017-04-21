@@ -30,8 +30,8 @@ from . import (
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
-DIALOG_FOLLOW_ON = embedded_assistant_pb2.Result.DIALOG_FOLLOW_ON
-CLOSE_MICROPHONE = embedded_assistant_pb2.Result.CLOSE_MICROPHONE
+DIALOG_FOLLOW_ON = embedded_assistant_pb2.ConverseResult.DIALOG_FOLLOW_ON
+CLOSE_MICROPHONE = embedded_assistant_pb2.ConverseResult.CLOSE_MICROPHONE
 
 
 @click.command()
@@ -138,7 +138,7 @@ def main(api_endpoint, credentials, verbose,
     # of the multi-Converse()-RPC "conversation".
     # This value, along with MicrophoneMode, supports a more natural
     # "conversation" with the Assistant.
-    converse_state_bytes = None
+    conversation_state_bytes = None
 
     # Stores the current volument percentage.
     # Note: No volume change is currently implemented in this sample
@@ -155,7 +155,7 @@ def main(api_endpoint, credentials, verbose,
         # Google Assistant API.
         converse_requests = assistant_helpers.gen_converse_requests(
             conversation_stream,
-            converse_state=converse_state_bytes,
+            conversation_state=conversation_state_bytes,
             volume_percentage=volume_percentage
         )
 
@@ -186,8 +186,8 @@ def main(api_endpoint, credentials, verbose,
                     'Transcript of TTS response '
                     '(only populated from IFTTT): "%s".',
                     resp.result.spoken_response_text)
-            if resp.result.converse_state:
-                converse_state_bytes = resp.result.converse_state
+            if resp.result.conversation_state:
+                conversation_state_bytes = resp.result.conversation_state
             if resp.result.volume_percentage != volume_percentage:
                 volume_percentage = resp.result.volume_percentage
                 logging.info('Volume should be set to %s%%'
