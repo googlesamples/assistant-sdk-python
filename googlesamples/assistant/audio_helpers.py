@@ -277,7 +277,7 @@ if __name__ == '__main__':
     - Record 5 seconds of 16-bit samples at 16khz.
     - Playback the recorded samples.
     """
-    block_size = recommended_settings.AUDIO_BLOCK_SIZE
+    block_size = recommended_settings.AUDIO_DEVICE_BLOCK_SIZE
     record_time = 5
     end_time = time.time() + record_time
 
