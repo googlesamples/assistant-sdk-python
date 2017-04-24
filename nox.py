@@ -13,14 +13,18 @@
 # limitations under the License.
 
 import nox
+import os.path
+import tempfile
+
 
 @nox.session
 def lint(session):
     session.interpreter = 'python3.4'
     session.install('docutils', 'flake8')
-    session.run('flake8', 'googlesamples', 'tests')
+    session.run('flake8', 'googlesamples', 'tests', 'nox.py', 'setup.py')
     session.run('python', 'setup.py', 'check',
                 '--restructuredtext', '--strict')
+
 
 @nox.session
 @nox.parametrize('python_version', ['2.7', '3.4'])
@@ -29,6 +33,20 @@ def unittest(session, python_version):
     session.install('pytest')
     session.install('-e', '.[auth_helpers,audio_helpers]')
     session.run('py.test', 'tests')
+
+
+@nox.session
+@nox.parametrize('python_version', ['2.7', '3.4'])
+def endtoend_test(session, python_version):
+    session.interpreter = 'python' + python_version
+    session.install('-e', '.[samples]')
+    temp_dir = tempfile.mkdtemp()
+    audio_out_file = os.path.join(temp_dir, 'out.raw')
+    session.run('python', '-m', 'googlesamples.assistant',
+                '-i', 'tests/data/whattimeisit.riff',
+                '-o', audio_out_file)
+    session.run('test', '-s', audio_out_file)
+
 
 @nox.session
 def protoc(session):
@@ -40,6 +58,7 @@ def protoc(session):
                 '--grpc_python_out=.',
                 'proto/google/assistant/embedded/v1alpha1/'
                 'embedded_assistant.proto')
+
 
 @nox.session
 def release(session):
