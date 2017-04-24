@@ -5,7 +5,7 @@ Maintainer guide
 
 - Install automation tools
 
-        env/bin/pip install nox-automation
+        pip install --upgrade nox-automation
 
 ## Tasks
 

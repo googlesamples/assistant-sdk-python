@@ -12,56 +12,62 @@ Prerequisites
 - `Python <https://www.python.org/>`_ (3.x prefered)
 - `Google API Console Project <https://console.developers.google.com>`_ w/ Google Assistant API `enabled <https://console.developers.google.com/apis>`_.
 - `OAuth client ID credentials <https://console.developers.google.com/apis/credentials>`_ with application type ``Other``.
-- Create a virtualenv::
+- Use a new virtualenv (recommended)::
 
         # python3 (recommended)
         sudo apt-get update
         sudo apt-get install python3-dev python3-venv
         python3 -m venv env
-        env/bin/python -m pip install --upgrade pip
+        env/bin/python -m pip install --upgrade pip setuptools
+        source env/bin/activate
 
         # python2
         sudo apt-get update
         sudo apt-get install python-dev python-virtualenv
         virtualenv env --no-site-packages
-        env/bin/python -m pip install --upgrade pip
+        env/bin/python -m pip install --upgrade pip setuptools
+        source env/bin/activate
 
 Setup
 -----
 
 - Install the sample dependencies::
 
-        sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+       sudo apt-get install portaudio19-dev libffi-dev libssl-dev
 
-- Install the Google Assistant SDK and samples::
+- Install the latest Google Assistant SDK and samples package from `PyPI <https://pypi.python.org/pypi>`_::
 
-        env/bin/python -m pip install -e ".[samples]" --upgrade
+       python -m pip install --upgrade google-assistant-sdk[samples]
+
+        - Or if working from this repository's sources, run::
+
+                python -m pip install --upgrade -e ".[samples]"
 
 - Authorize access to the Google Assistant API::
 
-        env/bin/python -m googlesamples.assistant.auth_helpers --client-secrets client_secret_XXXX.json
+        python -m googlesamples.assistant.auth_helpers --client-secrets client_secret_XXXX.json
         Please go to this URL: ...
         Enter the authorization code:
 
 -  Verify audio setup::
 
         # Record a 5 sec sample and play it back
-        env/bin/python -m googlesamples.assistant.audio_helpers
+        python -m googlesamples.assistant.audio_helpers
 
 Run the Sample
 --------------
 
 - Record a voice query and the program should play back the Google Assistant's answer::
 
-        env/bin/python -m googlesamples.assistant
+        python -m googlesamples.assistant
 
 -  Record and send pre-recorded audio to the Assistant::
 
-        env/bin/python -m googlesamples.assistant -i in.wav
+        python -m googlesamples.assistant -i in.wav
 
 - Save Assistant response to a file::
 
-        env/bin/python -m googlesamples.assistant -o out.wav
+        python -m googlesamples.assistant -o out.wav
 
 Troubleshooting
 ---------------
@@ -77,7 +83,7 @@ Troubleshooting
 
 - Run the sample with verbose logging enabled::
 
-        env/bin/python -m googlesamples.assistant --verbose
+        python -m googlesamples.assistant --verbose
 
 For Maintainers
 ---------------
