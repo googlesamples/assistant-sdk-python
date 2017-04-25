@@ -122,8 +122,7 @@ class WaveSink(object):
 class SoundDeviceStream(object):
     """Audio stream based on an underlying sound device.
 
-    It can be used as an audio source (read) and a audio source
-    (write).
+    It can be used as an audio source (read) and a audio sink (write).
 
     Args:
       sample_rate: sample rate in hertz.

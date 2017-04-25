@@ -232,10 +232,9 @@ def main(api_endpoint, credentials, verbose,
                     resp.result.spoken_response_text)
             if resp.result.conversation_state:
                 conversation_state_bytes = resp.result.conversation_state
-            if resp.result.volume_percentage != volume_percentage:
+            if resp.result.volume_percentage != 0:
                 volume_percentage = resp.result.volume_percentage
-                logging.info('Volume should be set to %s%%'
-                             % volume_percentage)
+                logging.info('Volume should be set to %s%%', volume_percentage)
             if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
                 wait_for_user_trigger = False
                 logging.info('Expecting follow-on query from user.')
