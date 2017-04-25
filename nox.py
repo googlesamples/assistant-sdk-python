@@ -20,6 +20,7 @@ import tempfile
 @nox.session
 def lint(session):
     session.interpreter = 'python3.4'
+    session.install('pip', 'setuptools')
     session.install('docutils', 'flake8')
     session.run('flake8', 'googlesamples', 'tests', 'nox.py', 'setup.py')
     session.run('python', 'setup.py', 'check',
@@ -30,6 +31,7 @@ def lint(session):
 @nox.parametrize('python_version', ['2.7', '3.4'])
 def unittest(session, python_version):
     session.interpreter = 'python' + python_version
+    session.install('pip', 'setuptools')
     session.install('pytest')
     session.install('-e', '.[auth_helpers,audio_helpers]')
     session.run('py.test', 'tests')
@@ -39,6 +41,7 @@ def unittest(session, python_version):
 @nox.parametrize('python_version', ['2.7', '3.4'])
 def endtoend_test(session, python_version):
     session.interpreter = 'python' + python_version
+    session.install('pip', 'setuptools')
     session.install('-e', '.[samples]')
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
@@ -50,6 +53,7 @@ def endtoend_test(session, python_version):
 
 @nox.session
 def protoc(session):
+    session.install('pip', 'setuptools')
     session.install('grpcio-tools')
     session.run('python', '-m', 'grpc_tools.protoc',
                 '--proto_path=proto',
@@ -62,5 +66,5 @@ def protoc(session):
 
 @nox.session
 def release(session):
-    session.install('setuptools', 'wheel')
+    session.install('pip', 'setuptools', 'wheel')
     session.run('python', 'setup.py', 'sdist', 'bdist_wheel')
