@@ -85,8 +85,6 @@ For Maintainers
 See `MAINTAINER.md <MAINTAINER.md>`_ for more documentation on the
 development, maintainance and release of the Python package itself.
 
-- Internal settings are located in `recommended_settings.py <googlesamples/assistant/recommended_settings.py>`_.
-
 Contributing
 ------------
 

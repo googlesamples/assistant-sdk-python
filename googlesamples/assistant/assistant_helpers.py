@@ -17,7 +17,6 @@
 import logging
 
 from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
-from .recommended_settings import AUDIO_SAMPLE_RATE_HZ
 
 
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
@@ -59,7 +58,7 @@ def log_converse_response_without_audio(converse_response):
 
 
 def gen_converse_requests(samples,
-                          sample_rate=AUDIO_SAMPLE_RATE_HZ,
+                          sample_rate,
                           conversation_state=None,
                           volume_percentage=50):
     """Returns a generator of ConverseRequest proto messages from the
@@ -67,7 +66,7 @@ def gen_converse_requests(samples,
 
     Args:
       samples: generator of audio samples.
-      sample_rate: audio data sample rate.
+      sample_rate: audio data sample rate in hertz.
       conversation_state: opaque bytes describing current conversation state.
     """
     audio_in_config = embedded_assistant_pb2.AudioInConfig(
