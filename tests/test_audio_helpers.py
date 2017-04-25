@@ -101,7 +101,8 @@ class ConversationStreamTest(unittest.TestCase):
         self.source = DummyStream(b'audio data')
         self.sink = DummyStream()
         self.stream = ConversationStream(source=self.source,
-                                         sink=self.sink)
+                                         sink=self.sink,
+                                         iter_size=1024)
 
     def test_stop_recording(self):
         self.stream.start_recording()

@@ -25,7 +25,7 @@ from . import (
     assistant_helpers,
     audio_helpers,
     auth_helpers,
-    common_settings,
+    common_settings
 )
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
@@ -55,6 +55,31 @@ CLOSE_MICROPHONE = embedded_assistant_pb2.ConverseResult.CLOSE_MICROPHONE
               metavar='<output file>',
               help='Path to output audio file. '
               'If missing, uses audio playback')
+@click.option('--audio-sample-rate',
+              default=common_settings.DEFAULT_AUDIO_SAMPLE_RATE,
+              metavar='<audio sample rate>', show_default=True,
+              help='Audio sample rate in hertz.')
+@click.option('--audio-sample-width',
+              default=common_settings.DEFAULT_AUDIO_SAMPLE_WIDTH,
+              metavar='<audio sample width>', show_default=True,
+              help='Audio sample width in bytes.')
+@click.option('--audio-iter-size',
+              default=common_settings.DEFAULT_AUDIO_ITER_SIZE,
+              metavar='<audio iter size>', show_default=True,
+              help='Size of each read during audio stream iteration in bytes.')
+@click.option('--audio-block-size',
+              default=common_settings.DEFAULT_AUDIO_DEVICE_BLOCK_SIZE,
+              metavar='<audio block size>', show_default=True,
+              help=('Block size in bytes for each audio device '
+                    'read and write operation..'))
+@click.option('--audio-flush-size',
+              default=common_settings.DEFAULT_AUDIO_DEVICE_FLUSH_SIZE,
+              metavar='<audio flush size>', show_default=True,
+              help=('Size of silence data in bytes written '
+                    'during flush operation'))
+@click.option('--grpc-deadline', default=common_settings.DEFAULT_GRPC_DEADLINE,
+              metavar='<grpc deadline>', show_default=True,
+              help='gRPC deadline in seconds')
 @click.option('--ssl-credentials-for-testing',
               metavar='<ssl credentials>',
               help='Path to ssl_certificates.pem; for testing only.')
@@ -63,7 +88,9 @@ CLOSE_MICROPHONE = embedded_assistant_pb2.ConverseResult.CLOSE_MICROPHONE
               help='Options used to construct gRPC channel')
 def main(api_endpoint, credentials, verbose,
          input_audio_file, output_audio_file,
-         *args, **kwargs):
+         audio_sample_rate, audio_sample_width,
+         audio_iter_size, audio_block_size, audio_flush_size,
+         grpc_deadline, *args, **kwargs):
     """Samples for the Google Assistant API.
 
     Examples:
@@ -106,24 +133,39 @@ def main(api_endpoint, credentials, verbose,
     audio_device = None
     if input_audio_file:
         audio_source = audio_helpers.WaveSource(
-            open(input_audio_file, 'rb')
+            open(input_audio_file, 'rb'),
+            sample_rate=audio_sample_rate,
+            sample_width=audio_sample_width
         )
     else:
         audio_source = audio_device = (
-            audio_device or audio_helpers.SoundDeviceStream()
+            audio_device or audio_helpers.SoundDeviceStream(
+                sample_rate=audio_sample_rate,
+                sample_width=audio_sample_width,
+                block_size=audio_block_size,
+                flush_size=audio_flush_size
+            )
         )
     if output_audio_file:
         audio_sink = audio_helpers.WaveSink(
-            open(output_audio_file, 'wb')
+            open(output_audio_file, 'wb'),
+            sample_rate=audio_sample_rate,
+            sample_width=audio_sample_width
         )
     else:
         audio_sink = audio_device = (
-            audio_device or audio_helpers.SoundDeviceStream()
+            audio_device or audio_helpers.SoundDeviceStream(
+                sample_rate=audio_sample_rate,
+                sample_width=audio_sample_width,
+                block_size=audio_block_size,
+                flush_size=audio_flush_size
+            )
         )
     # Create conversation stream with the given audio source and sink.
     conversation_stream = audio_helpers.ConversationStream(
         source=audio_source,
-        sink=audio_sink
+        sink=audio_sink,
+        iter_size=audio_iter_size,
     )
 
     # Interactive by default.
@@ -155,6 +197,7 @@ def main(api_endpoint, credentials, verbose,
         # Google Assistant API.
         converse_requests = assistant_helpers.gen_converse_requests(
             conversation_stream,
+            sample_rate=audio_sample_rate,
             conversation_state=conversation_state_bytes,
             volume_percentage=volume_percentage
         )
@@ -167,7 +210,8 @@ def main(api_endpoint, credentials, verbose,
 
         # This generator yields ConverseResponse proto messages
         # received from the gRPC Google Assistant API.
-        for resp in assistant.Converse(iter_converse_requests()):
+        for resp in assistant.Converse(iter_converse_requests(),
+                                       grpc_deadline):
             assistant_helpers.log_converse_response_without_audio(resp)
             if resp.error.code != code_pb2.OK:
                 logging.error('server error: %s', resp.error.message)
