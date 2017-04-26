@@ -68,7 +68,6 @@ class WaveSource(object):
       fp: file-like stream object to read from.
       sample_rate: sample rate in hertz.
       sample_width: size of a single sample in bytes.
-
     """
     def __init__(self, fp, sample_rate, sample_width):
         self._fp = fp
@@ -118,6 +117,10 @@ class WaveSource(object):
 
     def stop(self):
         pass
+
+    @property
+    def sample_rate(self):
+        return self._sample_rate
 
 
 class WaveSink(object):
@@ -177,6 +180,7 @@ class SoundDeviceStream(object):
         )
         self._block_size = block_size
         self._flush_size = flush_size
+        self._sample_rate = sample_rate
 
     def read(self, size):
         """Read bytes from the stream."""
@@ -215,6 +219,10 @@ class SoundDeviceStream(object):
             self.stop()
             self._audio_stream.close()
             self._audio_stream = None
+
+    @property
+    def sample_rate(self):
+        return self._sample_rate
 
 
 class ConversationStream(object):
@@ -309,3 +317,7 @@ class ConversationStream(object):
     def __iter__(self):
         """Returns a generator reading data from the stream."""
         return iter(lambda: self.read(self._iter_size), b'')
+
+    @property
+    def sample_rate(self):
+        return self._source._sample_rate
