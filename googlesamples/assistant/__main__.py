@@ -195,15 +195,35 @@ def main(api_endpoint, credentials, verbose,
 
         # This generator yields ConverseRequest to send to the gRPC
         # Google Assistant API.
-        converse_requests = assistant_helpers.gen_converse_requests(
-            conversation_stream,
-            sample_rate=audio_sample_rate,
-            conversation_state=conversation_state_bytes,
-            volume_percentage=volume_percentage
-        )
+        def gen_converse_requests():
+            converse_state = None
+            if conversation_state_bytes:
+                logging.debug('Sending converse_state: %s',
+                              conversation_state_bytes)
+                converse_state = embedded_assistant_pb2.ConverseState(
+                    conversation_state=conversation_state_bytes,
+                )
+            config = embedded_assistant_pb2.ConverseConfig(
+                audio_in_config=embedded_assistant_pb2.AudioInConfig(
+                    encoding='LINEAR16',
+                    sample_rate_hertz=int(audio_sample_rate),
+                ),
+                audio_out_config=embedded_assistant_pb2.AudioOutConfig(
+                    encoding='LINEAR16',
+                    sample_rate_hertz=int(audio_sample_rate),
+                    volume_percentage=volume_percentage,
+                ),
+                converse_state=converse_state
+            )
+            # The first ConverseRequest must contain the ConverseConfig
+            # and no audio data.
+            yield embedded_assistant_pb2.ConverseRequest(config=config)
+            for data in conversation_stream:
+                # Subsequent requests need audio data, but not config.
+                yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
 
         def iter_converse_requests():
-            for c in converse_requests:
+            for c in gen_converse_requests():
                 assistant_helpers.log_converse_request_without_audio(c)
                 yield c
             conversation_stream.start_playback()
