@@ -21,7 +21,7 @@ import click
 from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 
-from . import (
+from googlesamples.assistant import (
     assistant_helpers,
     audio_helpers,
     auth_helpers,
