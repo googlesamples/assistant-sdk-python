@@ -40,10 +40,10 @@ setup(
     name='google-assistant-sdk',
     version='0.1.0',
     author='Google Assistant SDK team',
-    author_email='proppy@google.com',
-    description='Python SDK for the Google Assistant API',
+    author_email='proppy+assistant-sdk@google.com',
+    description='Samples and bindings for the Google Assistant API',
     long_description=long_description,
-    url='https://github.com/googlesamples/google-assistant-sdk-python',
+    url='https://github.com/googlesamples/assistant-sdk-python',
     packages=find_packages(exclude=['tests*']),
     namespace_packages=[
         'google',
@@ -66,7 +66,7 @@ setup(
         ],
     },
     license='Apache 2.0',
-    keywords='google assistant api sample',
+    keywords='google assistant api sdk sample',
     classifiers=(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
