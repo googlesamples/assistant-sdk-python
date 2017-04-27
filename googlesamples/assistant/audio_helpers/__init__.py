@@ -18,8 +18,44 @@ import logging
 import threading
 import time
 import wave
+import math
+import array
 
 import sounddevice as sd
+
+
+def normalize_audio_buffer(buf, volume_percentage, sample_width=2):
+    """Adjusts the loudness of the audio data in the given buffer.
+
+    Volume normalization is done by scaling the amplitude of the audio
+    in the buffer by a scale factor of 2^(volume_percentage/100)-1.
+    For example, 50% volume scales the amplitude by a factor of 0.414,
+    and 75% volume scales the amplitude by a factor of 0.681.
+    For now we only sample_width 2.
+
+    Args:
+      buf: byte string containing audio data to normalize.
+      volume_percentage: volume setting as an integer percentage (1-100).
+      sample_width: size of a single sample in bytes.
+    """
+    if sample_width != 2:
+        raise Exception('unsupported sample width:', sample_width)
+    scale = math.pow(2, 1.0*volume_percentage/100)-1
+    # Construct array from bytes based on sample_width, multiply by scale
+    # and convert it back to bytes
+    arr = array.array('h', buf)
+    for idx in range(0, len(arr)):
+        arr[idx] = int(arr[idx]*scale)
+    buf = arr.tostring()
+    return buf
+
+
+def align_buf(buf, sample_width):
+    """In case of buffer size not aligned to sample_width pad it with 0s"""
+    remainder = len(buf) % sample_width
+    if remainder != 0:
+        buf += b'\0' * (sample_width - remainder)
+    return buf
 
 
 class WaveSource(object):
@@ -134,7 +170,7 @@ class SoundDeviceStream(object):
         if sample_width == 2:
             audio_format = 'int16'
         else:
-            raise Exception('unsupported sample size:', sample_width)
+            raise Exception('unsupported sample width:', sample_width)
         self._audio_stream = sd.RawStream(
             samplerate=sample_rate, dtype=audio_format, channels=1,
             blocksize=int(block_size/2),  # blocksize is in number of frames.
@@ -205,13 +241,16 @@ class ConversationStream(object):
       source: file-like stream object to read input audio bytes from.
       sink: file-like stream object to write output audio bytes to.
       iter_size: read size in bytes for each iteration.
+      sample_width: size of a single sample in bytes.
     """
-    def __init__(self, source, sink, iter_size):
+    def __init__(self, source, sink, iter_size, sample_width):
         self._source = source
         self._sink = sink
         self._iter_size = iter_size
+        self._sample_width = sample_width
         self._stop_recording = threading.Event()
         self._start_playback = threading.Event()
+        self._volume_percentage = 50
 
     def start_recording(self):
         """Start recording from the audio source."""
@@ -233,6 +272,16 @@ class ConversationStream(object):
         self._source.stop()
         self._sink.stop()
 
+    @property
+    def volume_percentage(self):
+        """The current volume setting as an integer percentage (1-100)."""
+        return self._volume_percentage
+
+    @volume_percentage.setter
+    def volume_percentage(self, new_volume_percentage):
+        logging.info('Volume set to %s%%', new_volume_percentage)
+        self._volume_percentage = new_volume_percentage
+
     def read(self, size):
         """Read bytes from the source (if currently recording).
 
@@ -248,6 +297,8 @@ class ConversationStream(object):
         Will block until start_playback() is called.
         """
         self._start_playback.wait()
+        buf = align_buf(buf, self._sample_width)
+        buf = normalize_audio_buffer(buf, self.volume_percentage)
         return self._sink.write(buf)
 
     def close(self):
