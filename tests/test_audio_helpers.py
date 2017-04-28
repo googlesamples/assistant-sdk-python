@@ -20,7 +20,8 @@ import threading
 import wave
 
 from googlesamples.assistant.audio_helpers import (
-    WaveSource, WaveSink, ConversationStream
+    WaveSource, WaveSink, ConversationStream,
+    normalize_audio_buffer, align_buf
 )
 from six import BytesIO
 
@@ -102,7 +103,9 @@ class ConversationStreamTest(unittest.TestCase):
         self.sink = DummyStream()
         self.stream = ConversationStream(source=self.source,
                                          sink=self.sink,
-                                         iter_size=1024)
+                                         iter_size=1024,
+                                         sample_width=2)
+        self.stream.volume_percentage = 100
 
     def test_stop_recording(self):
         self.stream.start_recording()
@@ -121,7 +124,7 @@ class ConversationStreamTest(unittest.TestCase):
         # write will block until start_playback is called.
         self.stream.write(b'foo')
         self.assertEqual(True, self.playback_started)
-        self.assertEqual(b'foo', self.sink.getvalue())
+        self.assertEqual(b'foo\0', self.sink.getvalue())
 
     def test_oneshot_conversation(self):
         self.assertEqual(b'audio', self.stream.read(5))
@@ -129,6 +132,17 @@ class ConversationStreamTest(unittest.TestCase):
         self.stream.start_playback()
         self.stream.write(b'foo')
         self.stream.stop_playback()
+
+    def test_normalize_audio_buffer(self):
+        self.assertEqual(b'', normalize_audio_buffer(b'', 100))
+        self.assertEqual(b'foobar', normalize_audio_buffer(b'foobar', 100))
+        self.assertEqual(b'\xd4\x00\xa9\x01',
+                         normalize_audio_buffer(b'\x01\x02\x03\x04', 50))
+
+    def test_align_buf(self):
+        self.assertEqual(b'foo\0', align_buf(b'foo', 2))
+        self.assertEqual(b'foobar', align_buf(b'foobar', 2))
+        self.assertEqual(b'foo\0\0\0', align_buf(b'foo', 6))
 
 
 if __name__ == '__main__':

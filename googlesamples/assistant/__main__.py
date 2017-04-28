@@ -166,6 +166,7 @@ def main(api_endpoint, credentials, verbose,
         source=audio_source,
         sink=audio_sink,
         iter_size=audio_iter_size,
+        sample_width=audio_sample_width,
     )
 
     # Interactive by default.
@@ -181,10 +182,6 @@ def main(api_endpoint, credentials, verbose,
     # This value, along with MicrophoneMode, supports a more natural
     # "conversation" with the Assistant.
     conversation_state_bytes = None
-
-    # Stores the current volument percentage.
-    # Note: No volume change is currently implemented in this sample
-    volume_percentage = 50
 
     while True:
         if wait_for_user_trigger:
@@ -211,7 +208,7 @@ def main(api_endpoint, credentials, verbose,
                 audio_out_config=embedded_assistant_pb2.AudioOutConfig(
                     encoding='LINEAR16',
                     sample_rate_hertz=int(audio_sample_rate),
-                    volume_percentage=volume_percentage,
+                    volume_percentage=conversation_stream.volume_percentage,
                 ),
                 converse_state=converse_state
             )
@@ -253,8 +250,8 @@ def main(api_endpoint, credentials, verbose,
             if resp.result.conversation_state:
                 conversation_state_bytes = resp.result.conversation_state
             if resp.result.volume_percentage != 0:
-                volume_percentage = resp.result.volume_percentage
-                logging.info('Volume should be set to %s%%', volume_percentage)
+                conversation_stream.volume_percentage = (
+                  resp.result.volume_percentage)
             if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
                 wait_for_user_trigger = False
                 logging.info('Expecting follow-on query from user.')
