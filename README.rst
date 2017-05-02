@@ -33,15 +33,15 @@ Setup
 
 - Install the sample dependencies::
 
-       sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+        sudo apt-get install portaudio19-dev libffi-dev libssl-dev
 
 - Install the latest Google Assistant SDK and samples package from `PyPI <https://pypi.python.org/pypi>`_::
 
-       python -m pip install --upgrade google-assistant-sdk[samples]
+        python -m pip install --upgrade google-assistant-sdk[samples]
 
-        - Or if working from this repository's sources, run::
+  - Or if working from this repository's sources, run::
 
-                python -m pip install --upgrade -e ".[samples]"
+          python -m pip install --upgrade -e ".[samples]"
 
 - Authorize access to the Google Assistant API::
 
