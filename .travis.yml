@@ -1,6 +1,9 @@
 language: python
 python:
   - "3.6"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y portaudio19-dev libffi-dev libssl-dev
 install:
   - pip install nox-automation
 script:
