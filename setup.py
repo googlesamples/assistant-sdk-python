@@ -31,6 +31,7 @@ audio_helpers_requires = [
 
 samples_requires = [
     'click==6.7',
+    'tenacity==4.1.0',
 ] + auth_helpers_requires + audio_helpers_requires
 
 with io.open('README.rst', 'r') as fh:
