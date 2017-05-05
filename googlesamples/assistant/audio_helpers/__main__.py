@@ -67,7 +67,8 @@ def main(record_time, audio_sample_rate, audio_sample_width,
                                      flush_size=audio_flush_size)
     stream = ConversationStream(source=audio_device,
                                 sink=audio_device,
-                                iter_size=audio_iter_size)
+                                iter_size=audio_iter_size,
+                                sample_width=audio_sample_width)
     samples = []
     logging.basicConfig(level=logging.INFO)
     logging.info('Starting audio test.')
