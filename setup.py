@@ -39,7 +39,7 @@ with io.open('README.rst', 'r') as fh:
 
 setup(
     name='google-assistant-sdk',
-    version='0.2.0',
+    version='0.2.1',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
     description='Samples and bindings for the Google Assistant API',
