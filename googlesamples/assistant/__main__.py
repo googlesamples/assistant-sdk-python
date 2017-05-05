@@ -214,11 +214,13 @@ class SampleAssistant(object):
 @click.option('--grpc-channel-option', multiple=True, nargs=2,
               metavar='<option> <value>',
               help='Options used to construct gRPC channel')
+@click.option('--once', default=False, is_flag=True,
+              help='Force termination after a single conversation.')
 def main(api_endpoint, credentials, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
          audio_iter_size, audio_block_size, audio_flush_size,
-         grpc_deadline, *args, **kwargs):
+         grpc_deadline, once, *args, **kwargs):
     """Samples for the Google Assistant API.
 
     Examples:
@@ -306,7 +308,8 @@ def main(api_endpoint, credentials, verbose,
         # If no file arguments supplied:
         # keep recording voice requests using the microphone
         # and playing back assistant response using the speaker.
-        wait_for_user_trigger = True
+        # When the once flag is set, don't wait for a trigger. Otherwise, wait.
+        wait_for_user_trigger = not once
         while True:
             if wait_for_user_trigger:
                 click.pause(info='Press Enter to send a new request...')
@@ -314,6 +317,10 @@ def main(api_endpoint, credentials, verbose,
             # wait for user trigger if there is no follow-up turn in
             # the conversation.
             wait_for_user_trigger = not continue_conversation
+
+            # If we only want one conversation, break.
+            if once and (not continue_conversation):
+                break
 
 
 if __name__ == '__main__':
