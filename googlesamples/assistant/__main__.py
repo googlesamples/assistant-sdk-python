@@ -116,7 +116,7 @@ class SampleAssistant(object):
                 logging.info(
                     'Transcript of TTS response '
                     '(only populated from IFTTT): "%s".',
-                    resp.result.spnoken_response_text)
+                    resp.result.spoken_response_text)
             if resp.result.conversation_state:
                 self.conversation_state = resp.result.conversation_state
             if resp.result.volume_percentage != 0:
