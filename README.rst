@@ -85,6 +85,25 @@ Troubleshooting
 
         python -m googlesamples.assistant --verbose
 
+- If Assistant audio is choppy, try adjusting the sound device's block size::
+
+        # If using a USB speaker or dedicated soundcard, set block size to "0"
+        # to automatically adjust the buffer size
+        python -m googlesamples.assistant.audio_helpers --audio-block-size=0
+
+        # If using the line-out 3.5mm audio jack on the device, set block size
+        # to a value larger than the `ConverseResponse` audio payload size
+        python -m googlesamples.assistant.audio_helpers --audio-block-size=3200
+
+        # Run the Assistant sample using the best block size value found above
+        python -m googlesamples.assistant --audio-block-size=value
+
+- If Assistant audio is truncated, try adjusting the sound device's flush size::
+
+        # Set flush size to a value larger than the audio block size. You can
+        # run the sample using the --audio-flush-size flag as well.
+        python -m googlesamples.assistant.audio_helpers --audio-block-size=3200 --audio-flush-size=6400
+
 For Maintainers
 ---------------
 
