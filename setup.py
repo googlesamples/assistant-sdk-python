@@ -42,7 +42,7 @@ setup(
     version='0.3.0',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
-    description='Samples the Google Assistant SDK',
+    description='Samples and Tools the Google Assistant SDK',
     long_description=long_description,
     url='https://github.com/googlesamples/assistant-sdk-python',
     packages=find_packages(exclude=['tests*']),

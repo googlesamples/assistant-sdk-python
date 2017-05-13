@@ -35,6 +35,7 @@ def unittest(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
     session.install('pytest')
+    session.install('google-assistant-grpc/')
     session.install('-e', '.[samples]')
     session.run('py.test', 'tests')
 
@@ -44,6 +45,7 @@ def unittest(session, python_version):
 def endtoend_test(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
+    session.install('google-assistant-grpc/')    
     session.install('-e', '.[samples]')
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
@@ -51,18 +53,6 @@ def endtoend_test(session, python_version):
                 '-i', 'tests/data/whattimeisit.riff',
                 '-o', audio_out_file)
     session.run('test', '-s', audio_out_file)
-
-
-@nox.session
-def protoc(session):
-    session.install('pip', 'setuptools')
-    session.install('grpcio-tools')
-    session.run('python', '-m', 'grpc_tools.protoc',
-                '--proto_path=googleapis',
-                '--python_out=.',
-                '--grpc_python_out=.',
-                'googleapis/google/assistant/embedded/v1alpha1/'
-                'embedded_assistant.proto')
 
 
 @nox.session
