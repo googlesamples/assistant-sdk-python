@@ -45,7 +45,7 @@ def unittest(session, python_version):
 def endtoend_test(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
-    session.install('google-assistant-grpc/')    
+    session.install('google-assistant-grpc/')
     session.install('-e', '.[samples]')
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
