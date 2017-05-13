@@ -16,43 +16,30 @@ from setuptools import setup, find_packages
 import io
 
 install_requires = [
-    'google-auth-oauthlib[tool]==0.1.0'
-]
-
-samples_requires = [
-    'google-assistant-grpc==0.0.1',
-    'sounddevice==0.3.7',
-    'click==6.7',
-    'tenacity==4.1.0',
+    'googleapis-common-protos==1.5.2',
+    'grpcio==1.2.1',
 ]
 
 with io.open('README.rst', 'r') as fh:
     long_description = fh.read()
 
 setup(
-    name='google-assistant-sdk',
-    version='0.3.0',
+    name='google-assistant-grpc',
+    version='0.0.1',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
-    description='Samples the Google Assistant SDK',
+    description='Google Assistant API gRPC bindings',
     long_description=long_description,
     url='https://github.com/googlesamples/assistant-sdk-python',
-    packages=find_packages('samples/grpc', exclude=['tests*']),
+    packages=find_packages(),
     namespace_packages=[
-        'googlesamples',
+        'google',
+        'google.assistant',
+        'google.assistant.embedded',
     ],
     install_requires=install_requires,
-    extras_require={
-        'samples': samples_requires,
-     },
-    entry_points={
-        'console_scripts': [
-            'googlesamples-assistant'
-            '=googlesamples.assistant.__main__:main [samples]',
-        ],
-    },
     license='Apache 2.0',
-    keywords='google assistant api sdk sample',
+    keywords='google assistant api grpc',
     classifiers=(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',

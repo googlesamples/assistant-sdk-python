@@ -18,7 +18,7 @@ ASSISTANT_APP_NAME = 'googlesamples-assistant'
 ASSISTANT_OAUTH_SCOPE = (
     'https://www.googleapis.com/auth/assistant-sdk-prototype'
 )
-ASSISTANT_CREDENTIALS_FILENAME = 'assistant_credentials.json'
+ASSISTANT_CREDENTIALS_FILENAME = 'credentials.json'
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
 DEFAULT_AUDIO_SAMPLE_RATE = 16000
 DEFAULT_AUDIO_SAMPLE_WIDTH = 2

@@ -22,8 +22,13 @@ def lint(session):
     session.interpreter = 'python3.4'
     session.install('pip', 'setuptools')
     session.install('docutils', 'flake8')
-    session.run('flake8', 'googlesamples', 'tests', 'nox.py', 'setup.py')
+    session.run('flake8',
+                'samples/grpc/googlesamples', 'samples/grpc/tests',
+                'sdk/grpc/setup.py',
+                'nox.py', 'setup.py')
     session.run('python', 'setup.py', 'check',
+                '--restructuredtext', '--strict')
+    session.run('python', 'sdk/grpc/setup.py', 'check',
                 '--restructuredtext', '--strict')
 
 
@@ -33,8 +38,8 @@ def unittest(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
     session.install('pytest')
-    session.install('-e', '.[auth_helpers,audio_helpers]')
-    session.run('py.test', 'tests')
+    session.install('-e', '.[samples]')
+    session.run('py.test', 'samples/grpc/tests')
 
 
 @nox.session
@@ -58,7 +63,7 @@ def protoc(session):
     session.run('python', '-m', 'grpc_tools.protoc',
                 '--proto_path=googleapis',
                 '--python_out=.',
-                '--grpc_python_out=.',
+                '--grpc_python_out=sdk/grpc/',
                 'googleapis/google/assistant/embedded/v1alpha1/'
                 'embedded_assistant.proto')
 
@@ -67,3 +72,4 @@ def protoc(session):
 def release(session):
     session.install('pip', 'setuptools', 'wheel')
     session.run('python', 'setup.py', 'sdist', 'bdist_wheel')
+    session.run('python', 'sdk/grpc/setup.py', 'sdist', 'bdist_wheel')
