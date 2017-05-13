@@ -1,52 +1,37 @@
 Google Assistant gRPC API bindings for Python
 =============================================
 
-This repository contains the generated Python bindings for the `Google Assistant gRPC API <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
+This package contains the generated Python bindings for the `Google Assistant gRPC API <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
 
 It is part of the `Google Assistant SDK <https://developers.google.com/assistant/sdk>`_.
 
 It should be compatible with any POSIX platform with Python.
 
-Prerequisites
--------------
+Installing
+----------
 
-- `Python <https://www.python.org/>`_ (>= 3.4 recommended).
-- A `Google API Console Project <https://console.developers.google.com>`_.
-- A `Google Account <https://myaccount.google.com/>`_.
-
-Setup
------
-
-- Follow `the steps to configure the project and the google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
-
-- Install Python 3
-
-    - Ubuntu/Debian GNU/Linux::
-
-        sudo apt-get update
-        sudo apt-get install python3 python3-venv
-	
-    - `MacOSX, Windows, Other <https://www.python.org/downloads/>`_
-
-- Create a new virtualenv (recommended)::
-
-    python3 -m venv env
-    env/bin/python -m pip install --upgrade pip setuptools
-    source env/bin/activate
-
-- Install the latest ``google-assistant-grpc`` package from `PyPI <https://pypi.python.org/pypi>`_ with `pip <https://pip.pypa.io/>`_::
+- You can install using pip `pip <https://pip.pypa.io/>`_::
 
     pip install --upgrade google-assistant-grpc
 
 Authorization
 -------------
 
+- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google Account to use with the Google Assistant SDK.
+
 - Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
 
     pip install --upgrade google-auth-oauthlib[tool]
     google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save
 
-- Load the credentials using `google.oauth2.credentials <https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html>`_.
+- Load the credentials using `google.oauth2.credentials <https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html>`_.::
+
+    import io
+    import google.oauth2.credentials
+
+    with io.open('/path/to/credentials.json', 'r') as f:
+        credentials = google.oauth2.credentials.Credentials(token=None,
+                                                            **json.load(f))
 
 - Initialize the gRPC channel using `google.auth.transport.grpc <https://google-auth.readthedocs.io/en/latest/reference/google.auth.transport.grpc.html>`_.
 
@@ -109,6 +94,12 @@ Reference
 
 - `gRPC reference sample <https://github.com/googlesamples/assistant-sdk-python/tree/master/samples/grpc>`_.
 - `Google Assistant gRPC API reference <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
+
+For Maintainers
+---------------
+
+See `MAINTAINER.md <MAINTAINER.md>`_ for more documentation on the
+development, maintainance and release of the Python package itself.
 
 License
 -------

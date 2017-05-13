@@ -13,18 +13,26 @@
 # limitations under the License.
 
 from setuptools import setup, find_packages
+
 import io
+import os.path
 
 install_requires = [
     'google-auth-oauthlib[tool]==0.1.0'
 ]
 
-samples_requires = [
-    'google-assistant-grpc==0.0.1',
-    'sounddevice==0.3.7',
-    'click==6.7',
-    'tenacity==4.1.0',
+samples_packages = [
+    'grpc'
 ]
+
+
+def samples_requirements():
+    for p in samples_packages:
+        with io.open(os.path.join('googlesamples', 'assistant', p,
+                                  'requirements.txt')) as f:
+            for p in f.readlines():
+                yield p.strip()
+
 
 with io.open('README.rst', 'r') as fh:
     long_description = fh.read()
@@ -37,14 +45,15 @@ setup(
     description='Samples the Google Assistant SDK',
     long_description=long_description,
     url='https://github.com/googlesamples/assistant-sdk-python',
-    packages=find_packages('samples/grpc', exclude=['tests*']),
+    packages=find_packages(exclude=['tests*']),
     namespace_packages=[
         'googlesamples',
+        'googlesamples.assistant',
     ],
     install_requires=install_requires,
     extras_require={
-        'samples': samples_requires,
-     },
+        'samples': list(samples_requirements()),
+    },
     entry_points={
         'console_scripts': [
             'googlesamples-assistant'

@@ -28,11 +28,10 @@ from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 from tenacity import retry, stop_after_attempt, retry_if_exception
 
-from googlesamples.assistant import (
-    assistant_helpers,
-    audio_helpers,
-    common_settings
-)
+import assistant_helpers
+import audio_helpers
+import common_settings
+
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE

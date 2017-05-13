@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Sample and helpers for Google Assistant API."""
+"""Samples for Google Assistant gRPC API."""

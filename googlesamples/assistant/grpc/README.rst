@@ -1,7 +1,7 @@
-Google Assistant gRPC API Sample for Python
-===========================================
+Python samples for the Google Assistant gRPC API
+================================================
 
-This repository contains a reference sample for the ``google-assistant-grpc`` Python package.
+This repository contains reference samples for the ``google-assistant-grpc`` Python package.
 
 Prerequisites
 -------------
@@ -12,8 +12,6 @@ Prerequisites
 
 Setup
 -----
-
-- Follow `the steps to configure the project and the google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
 
 - Install Python 3
 
@@ -30,13 +28,11 @@ Setup
     env/bin/python -m pip install --upgrade pip setuptools
     source env/bin/activate
 
-- Install the sample dependencies::
-
-    sudo apt-get install libffi-dev
-    pip install --upgrade -r requirements.txt
-
 Authorization
 -------------
+
+- Follow `the steps to configure the project and the google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
+
 
 - Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
 
@@ -46,22 +42,27 @@ Authorization
 Run the sample
 --------------
 
+- Install the sample dependencies::
+
+    sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade -r requirements.txt
+
 -  Verify audio setup::
 
     # Record a 5 sec sample and play it back
-    python -m googlesamples.assistant.audio_helpers
+    python -m audio_helpers
 
 - Record a voice query and the program should play back the Google Assistant's answer::
 
-    python -m googlesamples.assistant
+    python -m pushtotalk
 
 -  Record and send pre-recorded audio to the Assistant::
 
-    python -m googlesamples.assistant -i in.wav
+    python -m pushtotalk -i in.wav
 
 - Save Assistant response to a file::
 
-    python -m googlesamples.assistant -o out.wav
+    python -m pushtotalk -o out.wav
 
 Troubleshooting
 ---------------
@@ -77,26 +78,26 @@ Troubleshooting
 
 - Run the sample with verbose logging enabled::
 
-    python -m googlesamples.assistant --verbose
+    python -m pushtotalk --verbose
 
 - If Assistant audio is choppy, try adjusting the sound device's block size::
 
     # If using a USB speaker or dedicated soundcard, set block size to "0"
     # to automatically adjust the buffer size
-    python -m googlesamples.assistant.audio_helpers --audio-block-size=0
+    python -m audio_helpers --audio-block-size=0
 
     # If using the line-out 3.5mm audio jack on the device, set block size
     # to a value larger than the `ConverseResponse` audio payload size
-    python -m googlesamples.assistant.audio_helpers --audio-block-size=3200
+    python -m audio_helpers --audio-block-size=3200
 
     # Run the Assistant sample using the best block size value found above
-    python -m googlesamples.assistant --audio-block-size=value
+    python -m pushtotalk --audio-block-size=value
 
 - If Assistant audio is truncated, try adjusting the sound device's flush size::
 
     # Set flush size to a value larger than the audio block size. You can
     # run the sample using the --audio-flush-size flag as well.
-    python -m googlesamples.assistant.audio_helpers --audio-block-size=3200 --audio-flush-size=6400
+    python -m audio_helpers --audio-block-size=3200 --audio-flush-size=6400
 
 License
 -------

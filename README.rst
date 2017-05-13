@@ -1,108 +1,42 @@
-Google Assistant Python Sample
-==============================
+Google Assistant SDK for Python
+===============================
 
-This repository contains a Python sample for the Google Assistant API.
+This package contains a collection of samples and tools to help you get started with the `Google Assistant SDK`_ using `Python`_.
 
-See `Getting Started with the Raspberry Pi 3 <https://developers.google.com/assistant/>`_ for
-instructions on how to run the sample on supported hardware.
+Installing
+----------
 
-Prerequisites
+- You can install using `pip`_::
+
+    pip install --upgrade google-assistant-grpc
+  
+Authorization
 -------------
 
-- `Python <https://www.python.org/>`_ (3.x prefered)
-- `Google API Console Project <https://console.developers.google.com>`_ w/ Google Assistant API `enabled <https://console.developers.google.com/apis>`_.
-- `OAuth client ID credentials <https://console.developers.google.com/apis/credentials>`_ with application type ``Other``.
-- Use a new virtualenv (recommended)::
+- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google Account to use with the Google Assistant SDK.
 
-        # python3 (recommended)
-        sudo apt-get update
-        sudo apt-get install python3-dev python3-venv
-        python3 -m venv env
-        env/bin/python -m pip install --upgrade pip setuptools
-        source env/bin/activate
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
 
-        # python2
-        sudo apt-get update
-        sudo apt-get install python-dev python-virtualenv
-        virtualenv env --no-site-packages
-        env/bin/python -m pip install --upgrade pip setuptools
-        source env/bin/activate
+    pip install --upgrade google-auth-oauthlib[tool]
+    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save
 
-Setup
------
-
-- Install the sample dependencies::
-
-        sudo apt-get install portaudio19-dev libffi-dev libssl-dev
-
-- Install the latest Google Assistant SDK and samples package from `PyPI <https://pypi.python.org/pypi>`_::
-
-        python -m pip install --upgrade google-assistant-sdk[samples]
-
-  - Or if working from this repository's sources, run::
-
-          python -m pip install --upgrade -e ".[samples]"
-
-- Authorize access to the Google Assistant API::
-
-        python -m googlesamples.assistant.auth_helpers --client-secrets client_secret_XXXX.json
-        Please go to this URL: ...
-        Enter the authorization code:
-
--  Verify audio setup::
-
-        # Record a 5 sec sample and play it back
-        python -m googlesamples.assistant.audio_helpers
-
-Run the Sample
---------------
-
-- Record a voice query and the program should play back the Google Assistant's answer::
-
-        python -m googlesamples.assistant
-
--  Record and send pre-recorded audio to the Assistant::
-
-        python -m googlesamples.assistant -i in.wav
-
-- Save Assistant response to a file::
-
-        python -m googlesamples.assistant -o out.wav
-
-Troubleshooting
+Run the Samples
 ---------------
 
-- Verify ALSA setup::
+- Install the samples dependencies.
 
-        # Play a test sound
-        speaker-test -t wav
+    - Ubuntu/Debian GNU/Linux::
 
-        # Record and play back some audio using ALSA command-line tools
-        arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
-        aplay --format=S16_LE --rate=16k --file-type=raw out.raw
+        sudo apt-get install portaudio19-dev libffi-dev libssl-dev  
 
-- Run the sample with verbose logging enabled::
+- Install the samples package using `pip`_::
 
-        python -m googlesamples.assistant --verbose
+    pip install --upgrade google-assistant-sdk[samples]
 
-- If Assistant audio is choppy, try adjusting the sound device's block size::
+- Try the `push to talk sample <googlesamples/assistant/grpc>`_:
 
-        # If using a USB speaker or dedicated soundcard, set block size to "0"
-        # to automatically adjust the buffer size
-        python -m googlesamples.assistant.audio_helpers --audio-block-size=0
+    python -m googlesamples.assistant.grpc.pushtotalk
 
-        # If using the line-out 3.5mm audio jack on the device, set block size
-        # to a value larger than the `ConverseResponse` audio payload size
-        python -m googlesamples.assistant.audio_helpers --audio-block-size=3200
-
-        # Run the Assistant sample using the best block size value found above
-        python -m googlesamples.assistant --audio-block-size=value
-
-- If Assistant audio is truncated, try adjusting the sound device's flush size::
-
-        # Set flush size to a value larger than the audio block size. You can
-        # run the sample using the --audio-flush-size flag as well.
-        python -m googlesamples.assistant.audio_helpers --audio-block-size=3200 --audio-flush-size=6400
 
 For Maintainers
 ---------------
@@ -136,3 +70,7 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 License for the specific language governing permissions and limitations under
 the License.
+
+.. _Python: https://python.org/
+.. _pip: https://pip.pypa.io/
+.. _Google Assistant SDK: https://developers.google.com/assistant/sdk
