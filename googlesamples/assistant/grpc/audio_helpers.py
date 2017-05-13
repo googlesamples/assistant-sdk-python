@@ -24,7 +24,12 @@ import array
 import click
 import sounddevice as sd
 
-import common_settings
+
+DEFAULT_AUDIO_SAMPLE_RATE = 16000
+DEFAULT_AUDIO_SAMPLE_WIDTH = 2
+DEFAULT_AUDIO_ITER_SIZE = 3200
+DEFAULT_AUDIO_DEVICE_BLOCK_SIZE = 6400
+DEFAULT_AUDIO_DEVICE_FLUSH_SIZE = 25600
 
 
 def normalize_audio_buffer(buf, volume_percentage, sample_width=2):
@@ -331,24 +336,24 @@ class ConversationStream(object):
               metavar='<record time>', show_default=True,
               help='Record time in secs')
 @click.option('--audio-sample-rate',
-              default=common_settings.DEFAULT_AUDIO_SAMPLE_RATE,
+              default=DEFAULT_AUDIO_SAMPLE_RATE,
               metavar='<audio sample rate>', show_default=True,
               help='Audio sample rate in hertz.')
 @click.option('--audio-sample-width',
-              default=common_settings.DEFAULT_AUDIO_SAMPLE_WIDTH,
+              default=DEFAULT_AUDIO_SAMPLE_WIDTH,
               metavar='<audio sample width>', show_default=True,
               help='Audio sample width in bytes.')
 @click.option('--audio-iter-size',
-              default=common_settings.DEFAULT_AUDIO_ITER_SIZE,
+              default=DEFAULT_AUDIO_ITER_SIZE,
               metavar='<audio iter size>', show_default=True,
               help='Size of each read during audio stream iteration in bytes.')
 @click.option('--audio-block-size',
-              default=common_settings.DEFAULT_AUDIO_DEVICE_BLOCK_SIZE,
+              default=DEFAULT_AUDIO_DEVICE_BLOCK_SIZE,
               metavar='<audio block size>', show_default=True,
               help=('Block size in bytes for each audio device '
                     'read and write operation..'))
 @click.option('--audio-flush-size',
-              default=common_settings.DEFAULT_AUDIO_DEVICE_FLUSH_SIZE,
+              default=DEFAULT_AUDIO_DEVICE_FLUSH_SIZE,
               metavar='<audio flush size>', show_default=True,
               help=('Size of silence data in bytes written '
                     'during flush operation'))
