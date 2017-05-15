@@ -10,7 +10,7 @@ Installing
 - You can install using `pip`_::
 
     pip install --upgrade google-assistant-grpc
-  
+
 Usage
 -----
 
@@ -20,23 +20,23 @@ google-oauthlib-tool
 This tool creates test credentials to authorize devices to call the
 Google Assistant API when prototyping.
 
-- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google Account to use with the Google Assistant SDK.
+- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials.::
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save
+    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 googlesamples-assistant-audiotest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This tool verifies device setup for audio recording and playback.
 
-- Record 10 seconds of audio samples and play them back.::
+- Record 10 seconds of audio samples and play them back::
 
     googlesamples-assistant-audiotest --duration 10
 
-- Adjust the sound device block size and flush size for soundcard with limited throughput.::
+- Adjust the sound device block size and flush size for a soundcard with limited throughput::
 
     googlesamples-assistant-audiotest --duration 10 --audio-block-size=3200 --audio-flush-size=6400
 
@@ -48,12 +48,12 @@ googlesamples-assistant-pushtotalk
 
 This reference sample implements a simple but functional client for the `Google Assistant gRPC API`_.
 
-- Install the samples dependencies.::
+- Install the sample's dependencies::
 
-    sudo apt-get install portaudio19-dev libffi-dev libssl-dev  
+    sudo apt-get install portaudio19-dev libffi-dev libssl-dev
     pip install --upgrade google-assistant-sdk[samples]
 
-- Try the push to talk sample.::
+- Try the push to talk sample::
 
     googlesamples-assistant-pushtotalk
 

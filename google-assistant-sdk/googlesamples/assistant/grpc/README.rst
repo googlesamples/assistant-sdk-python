@@ -1,21 +1,22 @@
-Python samples for the Google Assistant gRPC API
+Python Samples for the Google Assistant gRPC API
 ================================================
 
 This repository contains a reference sample for the ``google-assistant-grpc`` Python package.
 
 It implements the following features:
-- Trigger conversation using a key press.
-- Audio recording of user query.
-- Playback of assistant answer.
-- Conversation State management.
-- Volume control.
+
+- Triggering a conversation using a key press
+- Audio recording of user queries (single or multiple consecutive queries)
+- Playback of the Assistant response
+- Conversation state management
+- Volume control
 
 Prerequisites
 -------------
 
-- `Python <https://www.python.org/>`_ (>= 3.4 recommended).
-- A `Google API Console Project <https://console.developers.google.com>`_.
-- A `Google Account <https://myaccount.google.com/>`_.
+- `Python <https://www.python.org/>`_ (>= 3.4 recommended)
+- A `Google API Console Project <https://console.developers.google.com>`_
+- A `Google account <https://myaccount.google.com/>`_
 
 Setup
 -----
@@ -26,10 +27,10 @@ Setup
 
         sudo apt-get update
         sudo apt-get install python3 python3-venv
-	
+
     - `MacOSX, Windows, Other <https://www.python.org/downloads/>`_
 
-- Create a new virtualenv (recommended)::
+- Create a new virtual environment (recommended)::
 
     python3 -m venv env
     env/bin/python -m pip install --upgrade pip setuptools
@@ -38,13 +39,13 @@ Setup
 Authorization
 -------------
 
-- Follow `the steps to configure the project and the google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
+- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
 
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save
+    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 Run the sample
 --------------
@@ -59,15 +60,15 @@ Run the sample
     # Record a 5 sec sample and play it back
     python -m audio_helpers
 
-- Record a voice query after a key press and the sample should play back the Google Assistant's answer::
+- Record a voice query after a key press; the sample should play back the Google Assistant's answer::
 
     python -m pushtotalk
 
-- Record and send pre-recorded audio to the Assistant::
+- Send a pre-recorded request to the Assistant::
 
     python -m pushtotalk -i in.wav
 
-- Save Assistant response to a file::
+- Save the Assistant response to a file::
 
     python -m pushtotalk -o out.wav
 
