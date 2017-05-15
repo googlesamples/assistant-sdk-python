@@ -1,11 +1,16 @@
-Google Assistant gRPC API bindings for Python
-=============================================
+Google Assistant gRPC API bindings
+==================================
 
-This package contains the generated Python bindings for the `Google Assistant gRPC API <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
+This package contains the generated Python_ bindings for the `Google Assistant gRPC API`_.
 
-It is part of the `Google Assistant SDK <https://developers.google.com/assistant/sdk>`_.
+It is part of the `Google Assistant SDK`_.
 
-It should be compatible with any POSIX platform with Python.
+It should be compatible with POSIX platform supporting gRPC_ and Python_.
+
+.. _Python: https://www.python.org/
+.. _gRPC: https://www.grpc.io
+.. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc/
+.. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 
 Installing
 ----------

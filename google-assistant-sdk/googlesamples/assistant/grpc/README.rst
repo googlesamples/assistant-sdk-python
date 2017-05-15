@@ -1,7 +1,14 @@
 Python samples for the Google Assistant gRPC API
 ================================================
 
-This repository contains reference samples for the ``google-assistant-grpc`` Python package.
+This repository contains a reference sample for the ``google-assistant-grpc`` Python package.
+
+It implements the following features:
+- Trigger conversation using a key press.
+- Audio recording of user query.
+- Playback of assistant answer.
+- Conversation State management.
+- Volume control.
 
 Prerequisites
 -------------
@@ -52,11 +59,11 @@ Run the sample
     # Record a 5 sec sample and play it back
     python -m audio_helpers
 
-- Record a voice query and the program should play back the Google Assistant's answer::
+- Record a voice query after a key press and the sample should play back the Google Assistant's answer::
 
     python -m pushtotalk
 
--  Record and send pre-recorded audio to the Assistant::
+- Record and send pre-recorded audio to the Assistant::
 
     python -m pushtotalk -i in.wav
 

@@ -30,7 +30,7 @@ def samples_requirements():
     for p in samples_packages:
         with io.open(os.path.join('googlesamples', 'assistant', p,
                                   'requirements.txt')) as f:
-            for p in f.readlines():
+            for p in f:
                 yield p.strip()
 
 
@@ -56,8 +56,10 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'googlesamples-assistant'
-            '=googlesamples.assistant.__main__:main [samples]',
+            'googlesamples-assistant-audiotest'
+            '=googlesamples.assistant.grpc.audio_helpers:main',            
+            'googlesamples-assistant-pushtotalk'
+            '=googlesamples.assistant.grpc.pushtotalk:main [samples]',
         ],
     },
     license='Apache 2.0',
