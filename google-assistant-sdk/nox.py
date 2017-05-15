@@ -39,7 +39,7 @@ def unittest(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
     session.install('pytest')
-    session.install('google-assistant-grpc/')
+    session.install('../google-assistant-grpc/')
     session.install('-e', '.[samples]')
     session.run('py.test', 'tests')
 
@@ -49,7 +49,7 @@ def unittest(session, python_version):
 def endtoend_test(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
-    session.install('google-assistant-grpc/')
+    session.install('../google-assistant-grpc/')
     session.install('-e', '.[samples]')
     old_credentials = os.path.expanduser(
         '~/.config/googlesamples-assistant/assistant_credentials.json')

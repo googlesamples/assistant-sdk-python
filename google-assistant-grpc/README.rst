@@ -1,5 +1,5 @@
-Google Assistant gRPC API bindings
-==================================
+Google Assistant gRPC API bindings for Python
+=============================================
 
 This package contains the generated Python_ bindings for the `Google Assistant gRPC API`_.
 

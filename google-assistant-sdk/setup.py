@@ -57,7 +57,7 @@ setup(
     entry_points={
         'console_scripts': [
             'googlesamples-assistant-audiotest'
-            '=googlesamples.assistant.grpc.audio_helpers:main',            
+            '=googlesamples.assistant.grpc.audio_helpers:main',
             'googlesamples-assistant-pushtotalk'
             '=googlesamples.assistant.grpc.pushtotalk:main [samples]',
         ],

@@ -1,4 +1,4 @@
-Google Assistant SDK
+Google Assistant SDK for Python
 ===============================
 
 This package contains a collection of samples and tools to help you
