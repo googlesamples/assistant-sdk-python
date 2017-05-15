@@ -19,10 +19,7 @@ import time
 import threading
 import wave
 
-from googlesamples.assistant.audio_helpers import (
-    WaveSource, WaveSink, ConversationStream,
-    normalize_audio_buffer, align_buf
-)
+from googlesamples.assistant.grpc import audio_helpers
 from six import BytesIO
 
 
@@ -37,7 +34,8 @@ class WaveSourceTest(unittest.TestCase):
         w.setnchannels(1)
         w.writeframes(b'audiodata')
         self.stream = BytesIO(stream.getvalue())
-        self.source = WaveSource(self.stream, sample_rate, bytes_per_sample)
+        self.source = audio_helpers.WaveSource(
+            self.stream, sample_rate, bytes_per_sample)
         self.sleep_time_1024 = self.source._sleep_time(1024)
         self.sleep_time_512 = self.source._sleep_time(512)
 
@@ -71,7 +69,7 @@ class WaveSourceTest(unittest.TestCase):
 
     def test_raw(self):
         self.stream = BytesIO(b'audiodata')
-        self.source = WaveSource(self.stream, 16000, 2)
+        self.source = audio_helpers.WaveSource(self.stream, 16000, 2)
         self.assertEqual(b'audiodata', self.source.read(9))
 
     def test_silence(self):
@@ -82,7 +80,7 @@ class WaveSourceTest(unittest.TestCase):
 class WaveSinkTest(unittest.TestCase):
     def setUp(self):
         self.stream = BytesIO()
-        self.sink = WaveSink(self.stream, 16000, 2)
+        self.sink = audio_helpers.WaveSink(self.stream, 16000, 2)
 
     def test_write_header(self):
         self.sink.write(b'abcd')
@@ -101,10 +99,11 @@ class ConversationStreamTest(unittest.TestCase):
     def setUp(self):
         self.source = DummyStream(b'audio data')
         self.sink = DummyStream()
-        self.stream = ConversationStream(source=self.source,
-                                         sink=self.sink,
-                                         iter_size=1024,
-                                         sample_width=2)
+        self.stream = audio_helpers.ConversationStream(
+            source=self.source,
+            sink=self.sink,
+            iter_size=1024,
+            sample_width=2)
         self.stream.volume_percentage = 100
 
     def test_stop_recording(self):
@@ -134,15 +133,18 @@ class ConversationStreamTest(unittest.TestCase):
         self.stream.stop_playback()
 
     def test_normalize_audio_buffer(self):
-        self.assertEqual(b'', normalize_audio_buffer(b'', 100))
-        self.assertEqual(b'foobar', normalize_audio_buffer(b'foobar', 100))
+        self.assertEqual(b'',
+                         audio_helpers.normalize_audio_buffer(b'', 100))
+        self.assertEqual(b'foobar',
+                         audio_helpers.normalize_audio_buffer(b'foobar', 100))
         self.assertEqual(b'\xd4\x00\xa9\x01',
-                         normalize_audio_buffer(b'\x01\x02\x03\x04', 50))
+                         audio_helpers.normalize_audio_buffer(
+                             b'\x01\x02\x03\x04', 50))
 
     def test_align_buf(self):
-        self.assertEqual(b'foo\0', align_buf(b'foo', 2))
-        self.assertEqual(b'foobar', align_buf(b'foobar', 2))
-        self.assertEqual(b'foo\0\0\0', align_buf(b'foo', 6))
+        self.assertEqual(b'foo\0', audio_helpers.align_buf(b'foo', 2))
+        self.assertEqual(b'foobar', audio_helpers.align_buf(b'foobar', 2))
+        self.assertEqual(b'foo\0\0\0', audio_helpers.align_buf(b'foo', 6))
 
 
 if __name__ == '__main__':

@@ -20,54 +20,26 @@ install_requires = [
     'grpcio==1.2.1',
 ]
 
-auth_helpers_requires = [
-    'google-auth-oauthlib==0.0.1',
-    'urllib3[secure]==1.20',
-]
-
-audio_helpers_requires = [
-    'sounddevice==0.3.7',
-]
-
-samples_requires = [
-    'click==6.7',
-    'tenacity==4.1.0',
-] + auth_helpers_requires + audio_helpers_requires
-
 with io.open('README.rst', 'r') as fh:
     long_description = fh.read()
 
 setup(
-    name='google-assistant-sdk',
-    version='0.2.1',
+    name='google-assistant-grpc',
+    version='0.0.1',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
-    description='Samples and bindings for the Google Assistant API',
+    description='Google Assistant API gRPC bindings',
     long_description=long_description,
     url='https://github.com/googlesamples/assistant-sdk-python',
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(),
     namespace_packages=[
         'google',
         'google.assistant',
         'google.assistant.embedded',
-        'googlesamples',
     ],
     install_requires=install_requires,
-    extras_require={
-        'samples': samples_requires,
-        'auth_helpers': auth_helpers_requires,
-        'audio_helpers': audio_helpers_requires,
-    },
-    entry_points={
-        'console_scripts': [
-            'googlesamples-assistant'
-            '=googlesamples.assistant.__main__:main [samples]',
-            'googlesamples-assistant-auth'
-            '=googlesamples.assistant.auth_helpers.__main__:main [samples]',
-        ],
-    },
     license='Apache 2.0',
-    keywords='google assistant api sdk sample',
+    keywords='google assistant api grpc',
     classifiers=(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',

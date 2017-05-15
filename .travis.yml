@@ -7,4 +7,5 @@ before_install:
 install:
   - pip install nox-automation
 script:
-  - nox -s lint unittest
+  - nox -f google-assistant-grpc/nox.py -s lint
+  - nox -f google-assistant-sdk/nox.py -s lint unittest  

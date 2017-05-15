@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import nox
+
+import io
+import json
 import os.path
 import tempfile
 
@@ -22,7 +26,9 @@ def lint(session):
     session.interpreter = 'python3.4'
     session.install('pip', 'setuptools')
     session.install('docutils', 'flake8')
-    session.run('flake8', 'googlesamples', 'tests', 'nox.py', 'setup.py')
+    session.run('flake8',
+                'googlesamples', 'tests',
+                'nox.py', 'setup.py')
     session.run('python', 'setup.py', 'check',
                 '--restructuredtext', '--strict')
 
@@ -33,7 +39,8 @@ def unittest(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
     session.install('pytest')
-    session.install('-e', '.[auth_helpers,audio_helpers]')
+    session.install('../google-assistant-grpc/')
+    session.install('-e', '.[samples]')
     session.run('py.test', 'tests')
 
 
@@ -42,28 +49,32 @@ def unittest(session, python_version):
 def endtoend_test(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
+    session.install('../google-assistant-grpc/')
     session.install('-e', '.[samples]')
+    old_credentials = os.path.expanduser(
+        '~/.config/googlesamples-assistant/assistant_credentials.json')
+    new_credentials = os.path.expanduser(
+        '~/.config/google-oauthlib-tool/credentials.json')
+    if not os.path.exists(new_credentials):
+        # use previous credentials location
+        # TODO(proppy): remove when e2e job is using google-oauthlib-tool
+        def migrate_credentials(old, new):
+            with io.open(old) as f:
+                creds = json.load(f)
+                del creds['access_token']
+            with io.open(new, 'w') as f:
+                json.dump(f, creds)
+        session.run(migrate_credentials, old_credentials, new_credentials)
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
-    session.run('python', '-m', 'googlesamples.assistant',
+    session.run('python', '-m', 'googlesamples.assistant.grpc.pushtotalk',
                 '-i', 'tests/data/whattimeisit.riff',
                 '-o', audio_out_file)
     session.run('test', '-s', audio_out_file)
 
 
 @nox.session
-def protoc(session):
-    session.install('pip', 'setuptools')
-    session.install('grpcio-tools')
-    session.run('python', '-m', 'grpc_tools.protoc',
-                '--proto_path=googleapis',
-                '--python_out=.',
-                '--grpc_python_out=.',
-                'googleapis/google/assistant/embedded/v1alpha1/'
-                'embedded_assistant.proto')
-
-
-@nox.session
 def release(session):
     session.install('pip', 'setuptools', 'wheel')
     session.run('python', 'setup.py', 'sdist', 'bdist_wheel')
+    session.run('python', 'sdk/grpc/setup.py', 'sdist', 'bdist_wheel')
