@@ -14,7 +14,7 @@ This package should be compatible with POSIX platforms supporting gRPC_ and Pyth
 Installing
 ----------
 
-- You can install using `pip <https://pip.pypa.io/>`_::
+- You can install using `pip <https://pip.pypa.io/>`_.::
 
     pip install --upgrade google-assistant-grpc
 
@@ -23,12 +23,12 @@ Authorization
 
 - `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``::
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
 
     pip install --upgrade google-auth-oauthlib[tool]
     google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
-- Load the credentials using `google.oauth2.credentials <https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html>`_::
+- Load the credentials using `google.oauth2.credentials <https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html>`_.::
 
     import io
     import google.oauth2.credentials
@@ -42,18 +42,17 @@ Authorization
 Usage
 -----
 
-- Initialize the gRPC stubs using ``google.assistant.embedded.v1alpha1.embedded_assistant_pb2_grpc``::
+- Initialize the gRPC stubs using ``google.assistant.embedded.v1alpha1.embedded_assistant_pb2_grpc``.::
 
     import google.assistant.embedded.v1alpha1.embedded_assistant_pb2_grpc
     assistant = embedded_assistant_pb2.EmbeddedAssistantStub(channel)
 
-- Call the `Converse`_ streaming method. It takes a generator of `ConverseRequest`_
-and returns a generator of `ConverseResponse`_::
+- Call the `Converse`_ streaming method. It takes a generator of `ConverseRequest`_ and returns a generator of `ConverseResponse`_.::
 
     converse_responses_generator = assistant.Converse(converse_requests_generator)
     start_acquiring_audio()
 
-- Send a `ConverseRequest`_ message with audio configuration parameters followed by multiple outgoing `ConverseRequest`_ messages containing the audio data of the Assistant request::
+- Send a `ConverseRequest`_ message with audio configuration parameters followed by multiple outgoing `ConverseRequest`_ messages containing the audio data of the Assistant request.::
 
     import google.assistant.embedded.v1alpha1.embedded_assistant_pb2
 
@@ -74,10 +73,8 @@ and returns a generator of `ConverseResponse`_::
 - Handle the incoming stream of `ConverseResponse`_ messages:
 
   - Stop recording when receiving a `ConverseResponse`_ with the `EventType`_ message set to ``END_OF_UTTERANCE``.
-  - Get conversation metadata from the stream of `ConverseResponse`_ messages
-  (with the `ConverseResult`_ field set).
-  - Extract the audio data of the Assistant response from the stream of `ConverseResponse`_
-  messages (with the `AudioOut`_ field set).
+  - Get conversation metadata from the stream of `ConverseResponse`_ messages. (with the `ConverseResult`_ field set).
+  - Extract the audio data of the Assistant response from the stream of `ConverseResponse`_ messages (with the `AudioOut`_ field set).
 
 ::
 

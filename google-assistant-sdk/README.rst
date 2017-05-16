@@ -9,7 +9,7 @@ Installing
 
 - You can install using `pip`_::
 
-    pip install --upgrade google-assistant-grpc
+    pip install --upgrade google-assistant-sdk
 
 Usage
 -----
