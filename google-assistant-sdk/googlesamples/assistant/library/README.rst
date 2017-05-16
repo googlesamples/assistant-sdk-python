@@ -1,22 +1,24 @@
-Python Samples for the Google Assistant gRPC API
-================================================
+Python samples for the Google Assistant library
+===============================================
 
-This repository contains a reference sample for the ``google-assistant-grpc`` Python package_.
+This repository contains a reference sample for the ``google-assistant-library`` Python package_.
 
 It implements the following features:
 
-- Triggering a conversation using a key press.
-- Audio recording of user queries (single or multiple consecutive queries).
-- Playback of the Assistant response.
-- Conversation state management.
-- Volume control.
+- "Ok Google" or "Hey Google" hotword detection.
+- Audio recording.
+- Assistant response playback.
+- Timer and alarm features.
+- Volume ducking and control.
+- Conversation state management.  
 
-.. _package: https://pypi.python.org/pypi/google-assistant-grpc
+.. _package: https://pypi.python.org/pypi/google-assistant-library
 
 Prerequisites
 -------------
 
-- `Python <https://www.python.org/>`_ (>= 3.4 recommended)
+- `Python <https://www.python.org/>`_ >= 3.4.
+- Raspberry Pi 3 running Rasbian (or any other ``linux-arm7l`` SBC).
 - A `Google API Console Project <https://console.developers.google.com>`_
 - A `Google account <https://myaccount.google.com/>`_
 
@@ -54,30 +56,16 @@ Run the sample
 
 - Install the sample dependencies::
 
-    sudo apt-get install portaudio19-dev libffi-dev libssl-dev
     pip install --upgrade -r requirements.txt
 
--  Verify audio setup::
+- Run the hotword sample: the sample waits for the "Ok Google" hotword", then records a voice query and plays back the Google Assistant's answer::
 
-    # Record a 5 sec sample and play it back
-    python -m audio_helpers
-
-- Run the push to talk sample: the sample records a voice query after a key press and plays back the Google Assistant's answer::
-
-    python -m pushtotalk
-
-- Send a pre-recorded request to the Assistant::
-
-    python -m pushtotalk -i in.wav
-
-- Save the Assistant response to a file::
-
-    python -m pushtotalk -o out.wav
+    python -m hotword
 
 Troubleshooting
 ---------------
 
-- Verify ALSA setup::
+- If audio is not working: verify ALSA setup::
 
     # Play a test sound
     speaker-test -t wav
@@ -86,28 +74,7 @@ Troubleshooting
     arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
     aplay --format=S16_LE --rate=16k --file-type=raw out.raw
 
-- Run the sample with verbose logging enabled::
-
-    python -m pushtotalk --verbose
-
-- If Assistant audio is choppy, try adjusting the sound device's block size::
-
-    # If using a USB speaker or dedicated soundcard, set block size to "0"
-    # to automatically adjust the buffer size
-    python -m audio_helpers --audio-block-size=0
-
-    # If using the line-out 3.5mm audio jack on the device, set block size
-    # to a value larger than the `ConverseResponse` audio payload size
-    python -m audio_helpers --audio-block-size=3200
-
-    # Run the Assistant sample using the best block size value found above
-    python -m pushtotalk --audio-block-size=value
-
-- If Assistant audio is truncated, try adjusting the sound device's flush size::
-
-    # Set flush size to a value larger than the audio block size. You can
-    # run the sample using the --audio-flush-size flag as well.
-    python -m audio_helpers --audio-block-size=3200 --audio-flush-size=6400
+See also the `troubleshooting section <https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/troubleshooting>`_ of the official documentation.
 
 License
 -------

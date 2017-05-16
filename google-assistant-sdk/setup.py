@@ -60,6 +60,8 @@ setup(
             '=googlesamples.assistant.grpc.audio_helpers:main',
             'googlesamples-assistant-pushtotalk'
             '=googlesamples.assistant.grpc.pushtotalk:main [samples]',
+            'googlesamples-assistant-hotword'
+            '=googlesamples.assistant.library.hotword:main [samples]',
         ],
     },
     license='Apache 2.0',

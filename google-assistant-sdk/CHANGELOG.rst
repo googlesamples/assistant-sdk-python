@@ -7,6 +7,7 @@ Changelog
 - Moved reference sample to ``googlesamples.assistant.grpc.pushtotalk`` with `updated instructions <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesamples/assistant/grpc>`_.
 - Replaced ``auth_helpers`` with ``google-oauthlibtool``:
   - Follow the `updated instructions <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-grpc#authorization>_ to generate and use new credentials.
+- Add `google-assistant-library sample <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesamples/assistant/library>`_.
 
 0.2.1
 -----

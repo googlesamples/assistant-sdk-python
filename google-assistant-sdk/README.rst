@@ -57,6 +57,19 @@ This reference sample implements a simple but functional client for the `Google 
 
     googlesamples-assistant-pushtotalk
 
+googlesamples-assistant-hotword
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This reference sample implements a simple but functional client for the `Google Assistant library`_.
+
+- Install the sample's dependencies::
+
+    pip install --upgrade google-assistant-library
+    pip install --upgrade google-assistant-sdk[samples]
+
+- Try the hotword sample::
+
+    googlesamples-assistant-hotword
 
 For Maintainers
 ---------------
@@ -95,3 +108,4 @@ the License.
 .. _pip: https://pip.pypa.io/
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 .. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc
+.. _Google Assistant library: https://developers.google.com/assistant/sdk/reference/library
