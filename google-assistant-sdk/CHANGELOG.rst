@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3.0
+-----
+- Move grpc bindings to the `google-assistant-grpc <https://pypi.python.org/pypi/google-assistant-grpc>`_ package.
+- Moved reference sample to ``googlesamples.assistant.grpc.pushtotalk`` with `updated instructions <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesamples/assistant/grpc>`_.
+- Replaced ``auth_helpers`` with ``google-oauthlibtool``:
+  - Follow the `updated instructions <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-grpc#authorization>_ to generate and use new credentials.
+
 0.2.1
 -----
 - Fix audio helpers.
