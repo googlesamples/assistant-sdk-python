@@ -6,21 +6,20 @@ This package contains high level Python_ bindings for the `Google Assistant Libr
 It is part of the `Google Assistant SDK`_.
 
 It includes the following features:
-- "Ok Google" or "Hey Google" hotword detection.
-- Audio recording.
-- Assistant response playback.
-- Timer and alarm features.
-- Volume ducking and control.
-- Conversation state management.
+- "Ok Google" or "Hey Google" hotword detection
+- Audio recording
+- Assistant response playback
+- Timer and alarm features
+- Volume ducking and control
+- Conversation state management
 
-See `Getting Started Guide for Raspberry Pi`_ for a step by step guide on how to get started with the library on Raspberry Pi 3.
+See `Getting Started with the Raspberry Pi and Python`_ for a step by step guide on how to get started with the library on Raspberry Pi 3.
 
 Supported configuration
 -----------------------
 
 - Python ``>= 3.4``
 - Architecture: ``linux-arm7l``
-
 
 Installing
 ----------
@@ -33,12 +32,12 @@ Installing
 Authorization
 -------------
 
-- `Follow the steps`_ to configure a Google API Console Project and a Google Account to use with the Google Assistant SDK.
+- `Follow the steps`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section`_ and generatte credentials using ``google-oauth-tool``.::
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section`_ and generate credentials using ``google-oauth-tool``.::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save
+    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 Usage
 -----
@@ -47,14 +46,14 @@ Usage
 
     google-assistant-demo
 
-- Say "Ok Google", followed by a voice query: the demo should
-  playback the assistant answer and log events to the screen.
+- Say "Ok Google", followed by a voice query. The demo should
+  play back the Assistant's response and log events to the screen.
 
 Reference
 ---------
 
-- `Reference sample`_ for the Google Assistant Library for Python.
-- `Google Assistant Library`_ reference.
+- `Reference sample`_ for the Google Assistant Library for Python
+- `Google Assistant Library`_ reference
 
 License
 -------

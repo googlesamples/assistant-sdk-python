@@ -4,7 +4,7 @@ Python samples for the Google Assistant library
 This repository contains a reference sample for the ``google-assistant-library`` Python package_.
 
 It demonstrates:
-- Initialization of the Assistant.
+- Initialization of the Assistant
 - Basic event handling including hotword detection.
 
 .. _package: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library.
@@ -12,8 +12,8 @@ It demonstrates:
 Prerequisites
 -------------
 
-- `Python <https://www.python.org/>`_ >= 3.4.
-- Raspberry Pi 3 running Rasbian (or any other ``linux-arm7l`` SBC).
+- `Python <https://www.python.org/>`_ >= 3.4
+- Raspberry Pi 3 running Rasbian (or any other ``linux-arm7l`` SBC)
 - A `Google API Console Project <https://console.developers.google.com>`_
 - A `Google account <https://myaccount.google.com/>`_
 
@@ -58,14 +58,14 @@ Run the sample
 .. _pip: https://pip.pypa.io/
 .. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
 
-- Run the hotword sample: the sample waits for the "Ok Google" hotword", then records a voice query and plays back the Google Assistant's answer::
+- Run the hotword sample. The sample waits for the "Ok Google" hotword, then records a voice query and plays back the Google Assistant's answer::
 
     python -m hotword
 
 Troubleshooting
 ---------------
 
-- If audio is not working: verify ALSA setup::
+- If audio is not working, verify the ALSA setup::
 
     # Play a test sound
     speaker-test -t wav
