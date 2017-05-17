@@ -39,11 +39,11 @@ This tool verifies device setup for audio recording and playback.
 
 - Record 10 seconds of audio samples and play them back::
 
-    googlesamples-assistant-audiotest --duration 10
+    googlesamples-assistant-audiotest --record-time 10
 
 - Adjust the sound device block size and flush size for a soundcard with limited throughput::
 
-    googlesamples-assistant-audiotest --duration 10 --audio-block-size=3200 --audio-flush-size=6400
+    googlesamples-assistant-audiotest --record-time 10 --audio-block-size=3200 --audio-flush-size=6400
 
 The same ``--audio-block-size`` and ``--audio-flush-size`` options can
 be used on the ``gRPC`` samples included in the SDK.
