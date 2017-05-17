@@ -28,10 +28,14 @@ from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
 from google.rpc import code_pb2
 from tenacity import retry, stop_after_attempt, retry_if_exception
 
-from . import (
-    assistant_helpers,
-    audio_helpers
-)
+try:
+    from . import (
+        assistant_helpers,
+        audio_helpers
+    )
+except SystemError:
+    import assistant_helpers
+    import audio_helpers
 
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
