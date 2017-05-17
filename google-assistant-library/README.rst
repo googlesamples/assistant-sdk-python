@@ -6,6 +6,7 @@ This package contains high level Python_ bindings for the `Google Assistant Libr
 It is part of the `Google Assistant SDK`_.
 
 It includes the following features:
+
 - "Ok Google" or "Hey Google" hotword detection
 - Audio recording
 - Assistant response playback
@@ -61,13 +62,14 @@ License
 See `LICENSE`_ and `LICENSE.third_party`_.
 
 .. _Python: https://www.python.org/
-.. _Google Assistant Library: https://developers.google.com/assistant/sdk/reference/library/
+.. _Google Assistant Library: https://developers.google.com/assistant/sdk/reference/library/python
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
-.. _Getting Started Guide for Raspberry Pi: https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/>
+.. _Getting Started Guide for Raspberry Pi and Python: https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/>
 .. _pip: https://pip.pypa.io/
 .. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
 .. _Follow the steps: https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account
 .. _Google API Console Project credentials section: https://console.developers.google.com/apis/credentials
 .. _LICENSE: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE
+.. _LICENSE.third_party: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE.third_party
 .. _google/assistant/library/LICENSE.third_party: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/google/assistant/library/LICENSE.third_party
 .. _sample: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesample/assistant/library
