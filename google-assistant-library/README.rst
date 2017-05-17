@@ -72,4 +72,4 @@ See `LICENSE`_ and `LICENSE.third_party`_.
 .. _LICENSE: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE
 .. _LICENSE.third_party: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE.third_party
 .. _google/assistant/library/LICENSE.third_party: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/google/assistant/library/LICENSE.third_party
-.. _Reference sample: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesample/assistant/library
+.. _Reference sample: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesamples/assistant/library
