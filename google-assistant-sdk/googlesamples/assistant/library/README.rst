@@ -3,16 +3,11 @@ Python samples for the Google Assistant library
 
 This repository contains a reference sample for the ``google-assistant-library`` Python package_.
 
-It implements the following features:
+It demonstrates:
+- Initialization of the Assistant.
+- Basic event handling including hotword detection.
 
-- "Ok Google" or "Hey Google" hotword detection.
-- Audio recording.
-- Assistant response playback.
-- Timer and alarm features.
-- Volume ducking and control.
-- Conversation state management.  
-
-.. _package: https://pypi.python.org/pypi/google-assistant-library
+.. _package: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library.
 
 Prerequisites
 -------------
@@ -54,9 +49,14 @@ Authorization
 Run the sample
 --------------
 
-- Install the sample dependencies::
+- Download the latest ``linux_arm7l`` wheel for the ``google_assistant_library`` from the `GitHub releases page`_.
+- Install the package and the sample dependencies using pip_::
 
+    pip install --upgrade google_assistant_library-0.0.2-py2.py3-none-linux_armv7l.whl
     pip install --upgrade -r requirements.txt
+
+.. _pip: https://pip.pypa.io/
+.. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
 
 - Run the hotword sample: the sample waits for the "Ok Google" hotword", then records a voice query and plays back the Google Assistant's answer::
 
@@ -95,3 +95,4 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 License for the specific language governing permissions and limitations under
 the License.
+
