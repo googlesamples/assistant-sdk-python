@@ -110,3 +110,5 @@ the License.
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 .. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc
 .. _Google Assistant library: https://developers.google.com/assistant/sdk/reference/library
+.. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
+
