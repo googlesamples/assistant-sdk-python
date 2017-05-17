@@ -77,4 +77,3 @@ def endtoend_test(session, python_version):
 def release(session):
     session.install('pip', 'setuptools', 'wheel')
     session.run('python', 'setup.py', 'sdist', 'bdist_wheel')
-    session.run('python', 'sdk/grpc/setup.py', 'sdist', 'bdist_wheel')
