@@ -32,6 +32,11 @@ googlesamples-assistant-audiotest
 
 This tool verifies device setup for audio recording and playback.
 
+- Install the sample's dependencies::
+
+    sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade google-assistant-sdk[samples]
+
 - Record 10 seconds of audio samples and play them back::
 
     googlesamples-assistant-audiotest --duration 10
