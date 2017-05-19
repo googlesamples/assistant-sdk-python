@@ -97,7 +97,7 @@ Usage
 Reference
 ---------
 
-- `gRPC reference sample <https://github.com/googlesamples/assistant-sdk-python/tree/master/samples/grpc>`_.
+- `gRPC reference sample <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesamples/assistant/grpc>`_.
 - `Google Assistant gRPC API reference <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
 
 For Maintainers
