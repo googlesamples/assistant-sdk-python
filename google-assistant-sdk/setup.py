@@ -18,7 +18,7 @@ import io
 import os.path
 
 install_requires = [
-    'google-auth-oauthlib[tool]==0.1.0'
+    'google-auth-oauthlib[tool]>=0.1.0'
 ]
 
 samples_packages = [

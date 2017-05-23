@@ -16,8 +16,8 @@ from setuptools import setup, find_packages
 import io
 
 install_requires = [
-    'googleapis-common-protos==1.5.2',
-    'grpcio==1.3.5',
+    'googleapis-common-protos>=1.5.2',
+    'grpcio>=1.3.5',
 ]
 
 with io.open('README.rst', 'r') as fh:
