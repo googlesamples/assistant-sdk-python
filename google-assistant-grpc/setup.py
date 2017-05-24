@@ -16,8 +16,8 @@ from setuptools import setup, find_packages
 import io
 
 install_requires = [
-    'googleapis-common-protos==1.5.2',
-    'grpcio==1.2.1',
+    'googleapis-common-protos>=1.5.2',
+    'grpcio>=1.3.5',
 ]
 
 with io.open('README.rst', 'r') as fh:
@@ -25,7 +25,7 @@ with io.open('README.rst', 'r') as fh:
 
 setup(
     name='google-assistant-grpc',
-    version='0.0.1',
+    version='0.0.2',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
     description='Google Assistant API gRPC bindings',
