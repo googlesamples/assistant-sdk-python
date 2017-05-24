@@ -9,6 +9,10 @@ Maintainer guide
 
 ## Tasks
 
+- Install package with local modifications
+
+        pip install -e .
+
 - Regenerate the python gRPC stubs
 
         git clone https://github.com/googleapis/googleapis
