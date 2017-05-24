@@ -9,6 +9,10 @@ Maintainer guide
 
 ## Tasks
 
+- Install package with local modifications
+
+        pip install -e .[samples]
+
 - Run lint tool
 
         nox -s lint
