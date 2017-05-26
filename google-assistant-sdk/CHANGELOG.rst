@@ -3,7 +3,7 @@ Changelog
 
 0.3.1
 --------
-- Bump dependencies
+- Bump dependencies to use new ``google-assistant-grpc`` package (faster install).
 
 
 0.3.0
