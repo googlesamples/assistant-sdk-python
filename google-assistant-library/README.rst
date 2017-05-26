@@ -63,7 +63,7 @@ See `LICENSE`_ and `LICENSE.third_party`_.
 .. _Python: https://www.python.org/
 .. _Google Assistant Library: https://developers.google.com/assistant/sdk/reference/library/python
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
-.. _Getting Started Guide for Raspberry Pi and Python: https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/>
+.. _Getting Started with the Raspberry Pi and Python: https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/
 .. _pip: https://pip.pypa.io/
 .. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
 .. _Follow the steps: https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account
