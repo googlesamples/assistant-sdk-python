@@ -7,7 +7,7 @@ It demonstrates:
 - Initialization of the Assistant
 - Basic event handling including hotword detection.
 
-.. _package: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library.
+.. _package: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library
 
 Prerequisites
 -------------
