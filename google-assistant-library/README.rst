@@ -25,9 +25,9 @@ Supported configuration
 Installing
 ----------
 
-- Install the latest ``linux_arm7l`` wheel for the ``google_assistant_library`` package and its dependencies using pip_::
+- You can install using pip_.::
 
-    pip install --upgrade https://github.com/googlesamples/assistant-sdk-python/releases/download/0.3.0/google_assistant_library-0.0.2-py2.py3-none-linux_armv7l.whl
+    pip install --upgrade google-assistant-library
 
 Authorization
 -------------
