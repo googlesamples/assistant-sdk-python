@@ -51,7 +51,6 @@ Run the sample
 
 - Install the package and the sample dependencies using pip_::
 
-    pip install --upgrade google-assistant-library
     pip install --upgrade -r requirements.txt
 
 .. _pip: https://pip.pypa.io/
