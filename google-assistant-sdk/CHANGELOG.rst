@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.3.2
+--------
+- Bump urllib3 dependency.
+
+
 0.3.1
 --------
 - Bump dependencies to use new ``google-assistant-grpc`` package (faster install).
