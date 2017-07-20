@@ -1,5 +1,8 @@
 Changelog
 =========
+0.3.3
+-------
+- Update Google Assistant Library from 0.0.2 to 0.0.3
 
 0.3.2
 --------
