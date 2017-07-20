@@ -65,12 +65,11 @@ This reference sample implements a simple but functional client for the `Google 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This reference sample implements a simple but functional client for the `Google Assistant library`_.
+This reference sample implements a simple but functional client for the `Google Assistant library`_ (``linux_arm7l`` and ``linux_x86_64``).
 
-- Download the latest ``linux_arm7l`` wheel for the ``google_assistant_library`` from the `GitHub releases page`_.
-- Install the ``google_assistant_library`` wheel and the samples dependencies using pip_::
+- Install the ``google-assistant-library`` package:
 
-    pip install --upgrade google_assistant_library-0.0.2-py2.py3-none-linux_armv7l.whl
+    pip install --upgrade google-assistant-library
     pip install --upgrade google-assistant-sdk[samples]
 
 - Try the hotword sample::
