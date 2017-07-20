@@ -13,7 +13,7 @@ Prerequisites
 -------------
 
 - `Python <https://www.python.org/>`_ >= 3.4
-- Raspberry Pi 3 running Rasbian (or any other ``linux-arm7l`` SBC)
+- SBC with ``linux-arm7l`` (eg: Rasbperry Pi 3) or ``linux-x86`` architecture.
 - A `Google API Console Project <https://console.developers.google.com>`_
 - A `Google account <https://myaccount.google.com/>`_
 
@@ -22,12 +22,10 @@ Setup
 
 - Install Python 3
 
-    - Ubuntu/Debian GNU/Linux::
+  - Ubuntu/Debian GNU/Linux::
 
-        sudo apt-get update
-        sudo apt-get install python3 python3-venv
-
-    - `MacOSX, Windows, Other <https://www.python.org/downloads/>`_
+      sudo apt-get update
+      sudo apt-get install python3 python3-venv
 
 - Create a new virtual environment (recommended)::
 
