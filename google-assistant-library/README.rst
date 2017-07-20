@@ -20,7 +20,7 @@ Supported configuration
 -----------------------
 
 - Python ``>= 3.4``
-- Architecture: ``linux-arm7l``
+- Architecture: ``linux-arm7l`` and ``linux-x86_64``
 
 Installing
 ----------
@@ -46,7 +46,7 @@ Usage
 
     google-assistant-demo
 
-- Say "Ok Google", followed by a voice query. The demo should
+- Say "Ok Google" or "Hey Google" followed by a voice query. The demo should
   play back the Assistant's response and log events to the screen.
 
 Reference
