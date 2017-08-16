@@ -295,7 +295,6 @@ class ConversationStream(object):
 
     @volume_percentage.setter
     def volume_percentage(self, new_volume_percentage):
-        logging.info('Volume set to %s%%', new_volume_percentage)
         self._volume_percentage = new_volume_percentage
 
     def read(self, size):

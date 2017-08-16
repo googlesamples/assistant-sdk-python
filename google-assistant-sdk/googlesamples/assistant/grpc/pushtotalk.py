@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Sample that implements gRPC client for Google Assistant API."""
+"""Sample that implements a gRPC client for the Google Assistant API."""
 
+import concurrent.futures
 import json
 import logging
 import os.path
+import time
 
 import click
 import grpc
@@ -31,32 +33,39 @@ from tenacity import retry, stop_after_attempt, retry_if_exception
 try:
     from . import (
         assistant_helpers,
-        audio_helpers
+        audio_helpers,
+        device_helpers
     )
 except SystemError:
     import assistant_helpers
     import audio_helpers
+    import device_helpers
 
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
 DIALOG_FOLLOW_ON = embedded_assistant_pb2.ConverseResult.DIALOG_FOLLOW_ON
 CLOSE_MICROPHONE = embedded_assistant_pb2.ConverseResult.CLOSE_MICROPHONE
+DEFAULT_DEVICE_ID = 'googlesamples-pushtotalk-device'
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
 
 
 class SampleAssistant(object):
-    """Sample Assistant that supports follow-on conversations.
+    """Sample Assistant that supports conversations and device actions.
 
     Args:
+      device_id: identifier of the device.
       conversation_stream(ConversationStream): audio stream
         for recording query and playing back assistant answer.
       channel: authorized gRPC channel for connection to the
         Google Assistant API.
       deadline_sec: gRPC deadline in seconds for Google Assistant API call.
+      device_handler: callback for device actions.
     """
 
-    def __init__(self, conversation_stream, channel, deadline_sec):
+    def __init__(self, device_id, conversation_stream, channel, deadline_sec,
+                 device_handler):
+        self.device_id = device_id
         self.conversation_stream = conversation_stream
 
         # Opaque blob provided in ConverseResponse that,
@@ -70,6 +79,8 @@ class SampleAssistant(object):
         # Create Google Assistant API gRPC client.
         self.assistant = embedded_assistant_pb2.EmbeddedAssistantStub(channel)
         self.deadline = deadline_sec
+
+        self.device_handler = device_handler
 
     def __enter__(self):
         return self
@@ -94,6 +105,7 @@ class SampleAssistant(object):
         Returns: True if conversation should continue.
         """
         continue_conversation = False
+        device_actions_futures = []
 
         self.conversation_stream.start_recording()
         logging.info('Recording audio request.')
@@ -129,6 +141,8 @@ class SampleAssistant(object):
             if resp.result.conversation_state:
                 self.conversation_state = resp.result.conversation_state
             if resp.result.volume_percentage != 0:
+                logging.info('Setting volume to %s%%',
+                             resp.result.volume_percentage)
                 self.conversation_stream.volume_percentage = (
                     resp.result.volume_percentage
                 )
@@ -137,6 +151,18 @@ class SampleAssistant(object):
                 logging.info('Expecting follow-on query from user.')
             elif resp.result.microphone_mode == CLOSE_MICROPHONE:
                 continue_conversation = False
+            if resp.device_action.device_request_json:
+                device_request = json.loads(
+                    resp.device_action.device_request_json
+                )
+                fs = self.device_handler(device_request)
+                if fs:
+                    device_actions_futures.extend(fs)
+
+        if len(device_actions_futures):
+            logging.info('Waiting for device executions to complete.')
+            concurrent.futures.wait(device_actions_futures)
+
         logging.info('Finished playing assistant response.')
         self.conversation_stream.stop_playback()
         return continue_conversation
@@ -161,7 +187,10 @@ class SampleAssistant(object):
                 sample_rate_hertz=self.conversation_stream.sample_rate,
                 volume_percentage=self.conversation_stream.volume_percentage,
             ),
-            converse_state=converse_state
+            converse_state=converse_state,
+            device_config=embedded_assistant_pb2.DeviceConfig(
+                device_id=self.device_id,
+            )
         )
         # The first ConverseRequest must contain the ConverseConfig
         # and no audio data.
@@ -180,6 +209,9 @@ class SampleAssistant(object):
               default=os.path.join(click.get_app_dir('google-oauthlib-tool'),
                                    'credentials.json'),
               help='Path to read OAuth2 credentials.')
+@click.option('--device-id', default=DEFAULT_DEVICE_ID,
+              metavar='<device id>', show_default=True,
+              help='Unique device instance identifier.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--input-audio-file', '-i',
@@ -217,7 +249,7 @@ class SampleAssistant(object):
               help='gRPC deadline in seconds')
 @click.option('--once', default=False, is_flag=True,
               help='Force termination after a single conversation.')
-def main(api_endpoint, credentials, verbose,
+def main(api_endpoint, credentials, device_id, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
          audio_iter_size, audio_block_size, audio_flush_size,
@@ -298,8 +330,18 @@ def main(api_endpoint, credentials, verbose,
         sample_width=audio_sample_width,
     )
 
-    with SampleAssistant(conversation_stream,
-                         grpc_channel, grpc_deadline) as assistant:
+    device_handler = device_helpers.DeviceRequestHandler(device_id)
+
+    @device_handler.command('BLINK')
+    def blink(number):
+        logging.info('Blinking device %s times.' % number)
+        for i in range(int(number)):
+            logging.info('Device is blinking.')
+            time.sleep(1)
+
+    with SampleAssistant(device_id, conversation_stream,
+                         grpc_channel, grpc_deadline,
+                         device_handler) as assistant:
         # If file arguments are supplied:
         # exit after the first turn of the conversation.
         if input_audio_file or output_audio_file:

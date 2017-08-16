@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import nox
 
 
@@ -29,12 +31,21 @@ def lint(session):
 def protoc(session):
     session.install('pip', 'setuptools')
     session.install('grpcio-tools')
-    session.run('python', '-m', 'grpc_tools.protoc',
-                '--proto_path=googleapis',
-                '--python_out=.',
-                '--grpc_python_out=sdk/grpc/',
-                'googleapis/google/assistant/embedded/v1alpha1/'
-                'embedded_assistant.proto')
+    if os.path.exists('proto'):
+        session.run('python', '-m', 'grpc_tools.protoc',
+                    '--proto_path=proto',
+                    '--proto_path=googleapis',
+                    '--python_out=.',
+                    '--grpc_python_out=.',
+                    'proto/google/assistant/embedded/v1alpha1/'
+                    'embedded_assistant.proto')
+    else:
+        session.run('python', '-m', 'grpc_tools.protoc',
+                    '--proto_path=googleapis',
+                    '--python_out=.',
+                    '--grpc_python_out=.',
+                    'googleapis/google/assistant/embedded/v1alpha1/'
+                    'embedded_assistant.proto')
 
 
 @nox.session

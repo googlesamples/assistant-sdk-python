@@ -13,6 +13,7 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
+from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.rpc import status_pb2 as google_dot_rpc_dot_status__pb2
 
 
@@ -20,10 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='google/assistant/embedded/v1alpha1/embedded_assistant.proto',
   package='google.assistant.embedded.v1alpha1',
   syntax='proto3',
-  serialized_pb=_b('\n;google/assistant/embedded/v1alpha1/embedded_assistant.proto\x12\"google.assistant.embedded.v1alpha1\x1a\x17google/rpc/status.proto\"\xf5\x01\n\x0e\x43onverseConfig\x12J\n\x0f\x61udio_in_config\x18\x01 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha1.AudioInConfig\x12L\n\x10\x61udio_out_config\x18\x02 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.AudioOutConfig\x12I\n\x0e\x63onverse_state\x18\x03 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha1.ConverseState\"\xb6\x01\n\rAudioInConfig\x12L\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32:.google.assistant.embedded.v1alpha1.AudioInConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\"<\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x08\n\x04\x46LAC\x10\x02\"\xe3\x01\n\x0e\x41udioOutConfig\x12M\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32;.google.assistant.embedded.v1alpha1.AudioOutConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"L\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x07\n\x03MP3\x10\x02\x12\x0f\n\x0bOPUS_IN_OGG\x10\x03\"+\n\rConverseState\x12\x1a\n\x12\x63onversation_state\x18\x01 \x01(\x0c\"\x1e\n\x08\x41udioOut\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\"\xbd\x02\n\x0e\x43onverseResult\x12\x1b\n\x13spoken_request_text\x18\x01 \x01(\t\x12\x1c\n\x14spoken_response_text\x18\x02 \x01(\t\x12\x1a\n\x12\x63onversation_state\x18\x03 \x01(\x0c\x12Z\n\x0fmicrophone_mode\x18\x04 \x01(\x0e\x32\x41.google.assistant.embedded.v1alpha1.ConverseResult.MicrophoneMode\x12\x19\n\x11volume_percentage\x18\x05 \x01(\x05\"]\n\x0eMicrophoneMode\x12\x1f\n\x1bMICROPHONE_MODE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x43LOSE_MICROPHONE\x10\x01\x12\x14\n\x10\x44IALOG_FOLLOW_ON\x10\x02\"\x7f\n\x0f\x43onverseRequest\x12\x44\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.ConverseConfigH\x00\x12\x12\n\x08\x61udio_in\x18\x02 \x01(\x0cH\x00\x42\x12\n\x10\x63onverse_request\"\xea\x02\n\x10\x43onverseResponse\x12#\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x12.google.rpc.StatusH\x00\x12T\n\nevent_type\x18\x02 \x01(\x0e\x32>.google.assistant.embedded.v1alpha1.ConverseResponse.EventTypeH\x00\x12\x41\n\taudio_out\x18\x03 \x01(\x0b\x32,.google.assistant.embedded.v1alpha1.AudioOutH\x00\x12\x44\n\x06result\x18\x05 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.ConverseResultH\x00\"=\n\tEventType\x12\x1a\n\x16\x45VENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x45ND_OF_UTTERANCE\x10\x01\x42\x13\n\x11\x63onverse_response2\x8e\x01\n\x11\x45mbeddedAssistant\x12y\n\x08\x43onverse\x12\x33.google.assistant.embedded.v1alpha1.ConverseRequest\x1a\x34.google.assistant.embedded.v1alpha1.ConverseResponse(\x01\x30\x01\x42\x86\x01\n&com.google.assistant.embedded.v1alpha1B\x0e\x41ssistantProtoP\x01ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha1;embeddedb\x06proto3')
+  serialized_pb=_b('\n;google/assistant/embedded/v1alpha1/embedded_assistant.proto\x12\"google.assistant.embedded.v1alpha1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/rpc/status.proto\"\xbe\x02\n\x0e\x43onverseConfig\x12J\n\x0f\x61udio_in_config\x18\x01 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha1.AudioInConfig\x12L\n\x10\x61udio_out_config\x18\x02 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.AudioOutConfig\x12I\n\x0e\x63onverse_state\x18\x03 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha1.ConverseState\x12G\n\rdevice_config\x18\x04 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha1.DeviceConfig\"\xb6\x01\n\rAudioInConfig\x12L\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32:.google.assistant.embedded.v1alpha1.AudioInConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\"<\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x08\n\x04\x46LAC\x10\x02\"\xe3\x01\n\x0e\x41udioOutConfig\x12M\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32;.google.assistant.embedded.v1alpha1.AudioOutConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"L\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x07\n\x03MP3\x10\x02\x12\x0f\n\x0bOPUS_IN_OGG\x10\x03\"+\n\rConverseState\x12\x1a\n\x12\x63onversation_state\x18\x01 \x01(\x0c\"\x1e\n\x08\x41udioOut\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\"\xbd\x02\n\x0e\x43onverseResult\x12\x1b\n\x13spoken_request_text\x18\x01 \x01(\t\x12\x1c\n\x14spoken_response_text\x18\x02 \x01(\t\x12\x1a\n\x12\x63onversation_state\x18\x03 \x01(\x0c\x12Z\n\x0fmicrophone_mode\x18\x04 \x01(\x0e\x32\x41.google.assistant.embedded.v1alpha1.ConverseResult.MicrophoneMode\x12\x19\n\x11volume_percentage\x18\x05 \x01(\x05\"]\n\x0eMicrophoneMode\x12\x1f\n\x1bMICROPHONE_MODE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x43LOSE_MICROPHONE\x10\x01\x12\x14\n\x10\x44IALOG_FOLLOW_ON\x10\x02\"\x7f\n\x0f\x43onverseRequest\x12\x44\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.ConverseConfigH\x00\x12\x12\n\x08\x61udio_in\x18\x02 \x01(\x0cH\x00\x42\x12\n\x10\x63onverse_request\"\xb5\x03\n\x10\x43onverseResponse\x12#\n\x05\x65rror\x18\x01 \x01(\x0b\x32\x12.google.rpc.StatusH\x00\x12T\n\nevent_type\x18\x02 \x01(\x0e\x32>.google.assistant.embedded.v1alpha1.ConverseResponse.EventTypeH\x00\x12\x41\n\taudio_out\x18\x03 \x01(\x0b\x32,.google.assistant.embedded.v1alpha1.AudioOutH\x00\x12I\n\rdevice_action\x18\t \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha1.DeviceActionH\x00\x12\x44\n\x06result\x18\x05 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha1.ConverseResultH\x00\"=\n\tEventType\x12\x1a\n\x16\x45VENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x45ND_OF_UTTERANCE\x10\x01\x42\x13\n\x11\x63onverse_response\"!\n\x0c\x44\x65viceConfig\x12\x11\n\tdevice_id\x18\x01 \x01(\t\"+\n\x0c\x44\x65viceAction\x12\x1b\n\x13\x64\x65vice_request_json\x18\x02 \x01(\t2\x8e\x01\n\x11\x45mbeddedAssistant\x12y\n\x08\x43onverse\x12\x33.google.assistant.embedded.v1alpha1.ConverseRequest\x1a\x34.google.assistant.embedded.v1alpha1.ConverseResponse(\x01\x30\x01\x42\x86\x01\n&com.google.assistant.embedded.v1alpha1B\x0e\x41ssistantProtoP\x01ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha1;embeddedb\x06proto3')
   ,
-  dependencies=[google_dot_rpc_dot_status__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
+  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_rpc_dot_status__pb2.DESCRIPTOR,])
 
 
 
@@ -48,8 +48,8 @@ _AUDIOINCONFIG_ENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=495,
-  serialized_end=555,
+  serialized_start=598,
+  serialized_end=658,
 )
 _sym_db.RegisterEnumDescriptor(_AUDIOINCONFIG_ENCODING)
 
@@ -78,8 +78,8 @@ _AUDIOOUTCONFIG_ENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=709,
-  serialized_end=785,
+  serialized_start=812,
+  serialized_end=888,
 )
 _sym_db.RegisterEnumDescriptor(_AUDIOOUTCONFIG_ENCODING)
 
@@ -104,8 +104,8 @@ _CONVERSERESULT_MICROPHONEMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1089,
-  serialized_end=1182,
+  serialized_start=1192,
+  serialized_end=1285,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSERESULT_MICROPHONEMODE)
 
@@ -126,8 +126,8 @@ _CONVERSERESPONSE_EVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1594,
-  serialized_end=1655,
+  serialized_start=1772,
+  serialized_end=1833,
 )
 _sym_db.RegisterEnumDescriptor(_CONVERSERESPONSE_EVENTTYPE)
 
@@ -160,6 +160,13 @@ _CONVERSECONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='device_config', full_name='google.assistant.embedded.v1alpha1.ConverseConfig.device_config', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -172,8 +179,8 @@ _CONVERSECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=125,
-  serialized_end=370,
+  serialized_start=155,
+  serialized_end=473,
 )
 
 
@@ -211,8 +218,8 @@ _AUDIOINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=373,
-  serialized_end=555,
+  serialized_start=476,
+  serialized_end=658,
 )
 
 
@@ -257,8 +264,8 @@ _AUDIOOUTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=558,
-  serialized_end=785,
+  serialized_start=661,
+  serialized_end=888,
 )
 
 
@@ -288,8 +295,8 @@ _CONVERSESTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=787,
-  serialized_end=830,
+  serialized_start=890,
+  serialized_end=933,
 )
 
 
@@ -319,8 +326,8 @@ _AUDIOOUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=832,
-  serialized_end=862,
+  serialized_start=935,
+  serialized_end=965,
 )
 
 
@@ -379,8 +386,8 @@ _CONVERSERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=865,
-  serialized_end=1182,
+  serialized_start=968,
+  serialized_end=1285,
 )
 
 
@@ -420,8 +427,8 @@ _CONVERSEREQUEST = _descriptor.Descriptor(
       name='converse_request', full_name='google.assistant.embedded.v1alpha1.ConverseRequest.converse_request',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1184,
-  serialized_end=1311,
+  serialized_start=1287,
+  serialized_end=1414,
 )
 
 
@@ -454,7 +461,14 @@ _CONVERSERESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='result', full_name='google.assistant.embedded.v1alpha1.ConverseResponse.result', index=3,
+      name='device_action', full_name='google.assistant.embedded.v1alpha1.ConverseResponse.device_action', index=3,
+      number=9, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='result', full_name='google.assistant.embedded.v1alpha1.ConverseResponse.result', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -476,13 +490,76 @@ _CONVERSERESPONSE = _descriptor.Descriptor(
       name='converse_response', full_name='google.assistant.embedded.v1alpha1.ConverseResponse.converse_response',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1314,
-  serialized_end=1676,
+  serialized_start=1417,
+  serialized_end=1854,
+)
+
+
+_DEVICECONFIG = _descriptor.Descriptor(
+  name='DeviceConfig',
+  full_name='google.assistant.embedded.v1alpha1.DeviceConfig',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='device_id', full_name='google.assistant.embedded.v1alpha1.DeviceConfig.device_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1856,
+  serialized_end=1889,
+)
+
+
+_DEVICEACTION = _descriptor.Descriptor(
+  name='DeviceAction',
+  full_name='google.assistant.embedded.v1alpha1.DeviceAction',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='device_request_json', full_name='google.assistant.embedded.v1alpha1.DeviceAction.device_request_json', index=0,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1891,
+  serialized_end=1934,
 )
 
 _CONVERSECONFIG.fields_by_name['audio_in_config'].message_type = _AUDIOINCONFIG
 _CONVERSECONFIG.fields_by_name['audio_out_config'].message_type = _AUDIOOUTCONFIG
 _CONVERSECONFIG.fields_by_name['converse_state'].message_type = _CONVERSESTATE
+_CONVERSECONFIG.fields_by_name['device_config'].message_type = _DEVICECONFIG
 _AUDIOINCONFIG.fields_by_name['encoding'].enum_type = _AUDIOINCONFIG_ENCODING
 _AUDIOINCONFIG_ENCODING.containing_type = _AUDIOINCONFIG
 _AUDIOOUTCONFIG.fields_by_name['encoding'].enum_type = _AUDIOOUTCONFIG_ENCODING
@@ -499,6 +576,7 @@ _CONVERSEREQUEST.fields_by_name['audio_in'].containing_oneof = _CONVERSEREQUEST.
 _CONVERSERESPONSE.fields_by_name['error'].message_type = google_dot_rpc_dot_status__pb2._STATUS
 _CONVERSERESPONSE.fields_by_name['event_type'].enum_type = _CONVERSERESPONSE_EVENTTYPE
 _CONVERSERESPONSE.fields_by_name['audio_out'].message_type = _AUDIOOUT
+_CONVERSERESPONSE.fields_by_name['device_action'].message_type = _DEVICEACTION
 _CONVERSERESPONSE.fields_by_name['result'].message_type = _CONVERSERESULT
 _CONVERSERESPONSE_EVENTTYPE.containing_type = _CONVERSERESPONSE
 _CONVERSERESPONSE.oneofs_by_name['converse_response'].fields.append(
@@ -511,6 +589,9 @@ _CONVERSERESPONSE.oneofs_by_name['converse_response'].fields.append(
   _CONVERSERESPONSE.fields_by_name['audio_out'])
 _CONVERSERESPONSE.fields_by_name['audio_out'].containing_oneof = _CONVERSERESPONSE.oneofs_by_name['converse_response']
 _CONVERSERESPONSE.oneofs_by_name['converse_response'].fields.append(
+  _CONVERSERESPONSE.fields_by_name['device_action'])
+_CONVERSERESPONSE.fields_by_name['device_action'].containing_oneof = _CONVERSERESPONSE.oneofs_by_name['converse_response']
+_CONVERSERESPONSE.oneofs_by_name['converse_response'].fields.append(
   _CONVERSERESPONSE.fields_by_name['result'])
 _CONVERSERESPONSE.fields_by_name['result'].containing_oneof = _CONVERSERESPONSE.oneofs_by_name['converse_response']
 DESCRIPTOR.message_types_by_name['ConverseConfig'] = _CONVERSECONFIG
@@ -521,6 +602,9 @@ DESCRIPTOR.message_types_by_name['AudioOut'] = _AUDIOOUT
 DESCRIPTOR.message_types_by_name['ConverseResult'] = _CONVERSERESULT
 DESCRIPTOR.message_types_by_name['ConverseRequest'] = _CONVERSEREQUEST
 DESCRIPTOR.message_types_by_name['ConverseResponse'] = _CONVERSERESPONSE
+DESCRIPTOR.message_types_by_name['DeviceConfig'] = _DEVICECONFIG
+DESCRIPTOR.message_types_by_name['DeviceAction'] = _DEVICEACTION
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ConverseConfig = _reflection.GeneratedProtocolMessageType('ConverseConfig', (_message.Message,), dict(
   DESCRIPTOR = _CONVERSECONFIG,
@@ -578,6 +662,20 @@ ConverseResponse = _reflection.GeneratedProtocolMessageType('ConverseResponse', 
   ))
 _sym_db.RegisterMessage(ConverseResponse)
 
+DeviceConfig = _reflection.GeneratedProtocolMessageType('DeviceConfig', (_message.Message,), dict(
+  DESCRIPTOR = _DEVICECONFIG,
+  __module__ = 'google.assistant.embedded.v1alpha1.embedded_assistant_pb2'
+  # @@protoc_insertion_point(class_scope:google.assistant.embedded.v1alpha1.DeviceConfig)
+  ))
+_sym_db.RegisterMessage(DeviceConfig)
+
+DeviceAction = _reflection.GeneratedProtocolMessageType('DeviceAction', (_message.Message,), dict(
+  DESCRIPTOR = _DEVICEACTION,
+  __module__ = 'google.assistant.embedded.v1alpha1.embedded_assistant_pb2'
+  # @@protoc_insertion_point(class_scope:google.assistant.embedded.v1alpha1.DeviceAction)
+  ))
+_sym_db.RegisterMessage(DeviceAction)
+
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n&com.google.assistant.embedded.v1alpha1B\016AssistantProtoP\001ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha1;embedded'))
@@ -585,10 +683,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 
 
   class EmbeddedAssistantStub(object):
@@ -634,6 +732,7 @@ try:
       *   ConverseResponse.audio_out
       *   ConverseResponse.audio_out
       *   ConverseResponse.audio_out
+
 
       The user then says *bagels* and the assistant responds
       *OK, I've added bagels to your shopping list*. This is sent as another gRPC
@@ -704,6 +803,7 @@ try:
       *   ConverseResponse.audio_out
       *   ConverseResponse.audio_out
 
+
       The user then says *bagels* and the assistant responds
       *OK, I've added bagels to your shopping list*. This is sent as another gRPC
       connection call to the `Converse` method, again with streamed requests and
@@ -757,6 +857,7 @@ try:
       *   ConverseResponse.audio_out
       *   ConverseResponse.audio_out
       *   ConverseResponse.audio_out
+
 
       The user then says *bagels* and the assistant responds
       *OK, I've added bagels to your shopping list*. This is sent as another gRPC

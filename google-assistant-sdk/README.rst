@@ -9,7 +9,7 @@ Installing
 
 - You can install using `pip`_::
 
-    pip install --upgrade google-assistant-sdk
+    pip install --upgrade google-assistant-sdk[samples]
 
 Usage
 -----
@@ -58,9 +58,57 @@ This reference sample implements a simple but functional client for the `Google 
     sudo apt-get install portaudio19-dev libffi-dev libssl-dev
     pip install --upgrade google-assistant-sdk[samples]
 
-- Try the push to talk sample::
+- Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
     googlesamples-assistant-pushtotalk
+
+- Try some Google Assistant voice query like "What time is it?".
+
+- Get the `gactions`_ CLI tool.
+
+- Create an `Action Package`_ describing the Device Actions traits that the device implements::
+
+    {
+        "manifest": {
+            "displayName": "Blinky light",
+            "invocationName": "Blinky light",
+            "category": "PRODUCTIVITY"
+        },
+        "actions": [{
+            "name": "actions.devices",
+            "config": {
+                "@type": "type.googleapis.com/google.actions.v2.devices.DeviceControl",
+                "commands": [{
+                    "intent": {
+                        "name": "BLINK",
+                        "parameters": [{
+                            "name": "number",
+                            "type": "SchemaOrg_Number"
+                        }],
+                        "trigger": {
+                            "queryPatterns": [
+                                "Blink $SchemaOrg_Number:number times"
+                            ]
+                        }
+                    },
+                    "directResponseFulfillment": {
+                        "ttsPattern": "Blinking the light $SchemaOrg_Number:number times"
+                    },
+                    "requiredTraits": ["Blink"]
+                }]
+            }
+        }]
+    }
+
+- Register the `Action package`_ using the `gactions`_ CLI tool::
+
+    gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
+
+- Try a custom device action query like "Blink 5 times".
+
+- Run in verbose mode to see the gRPC communication with the Google Assistant API::
+
+    googlesamples-assistant-pushtotalk -v
 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,5 +162,5 @@ the License.
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 .. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc
 .. _Google Assistant library: https://developers.google.com/assistant/sdk/reference/library/python
-.. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
-
+.. _Action Package: https://developers.google.com/actions/reference/rest/Shared.Types/ActionPackage
+.. _gactions: https://developers.google.com/actions/tools/gactions-cli

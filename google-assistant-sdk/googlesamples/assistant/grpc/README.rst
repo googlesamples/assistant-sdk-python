@@ -66,6 +66,18 @@ Run the sample
 
     python -m pushtotalk
 
+- Try some Google Assistant voice query like "What time is it?".
+
+- Register the `Action package <https://developers.google.com/actions/reference/rest/Shared.Types/ActionPackage>`_ for the device::
+
+    gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
+
+- Try a custom device action query like "Blink 5 times".
+
+- Run in verbose mode to see the gRPC communication with the Google Assistant API::
+
+    python -m pushtotalk -v
+
 - Send a pre-recorded request to the Assistant::
 
     python -m pushtotalk -i in.wav
