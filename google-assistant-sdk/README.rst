@@ -20,12 +20,14 @@ google-oauthlib-tool
 This tool creates test credentials to authorize devices to call the
 Google Assistant API when prototyping.
 
-- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
+- `Follow the steps <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials::
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
+
+- Generate credentials using ``google-oauth-tool``::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 googlesamples-assistant-audiotest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,21 +50,54 @@ This tool verifies device setup for audio recording and playback.
 The same ``--audio-block-size`` and ``--audio-flush-size`` options can
 be used on the ``gRPC`` samples included in the SDK.
 
-googlesamples-assistant-pushtotalk
+googlesamples-assistant-devicetool
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This reference sample implements a simple but functional client for the `Google Assistant gRPC API`_.
+This tool allows you to register Google Assistant device models and
+instances and associate them with Device Actions traits.
 
 - Install the sample's dependencies::
 
     sudo apt-get install portaudio19-dev libffi-dev libssl-dev
     pip install --upgrade google-assistant-sdk[samples]
 
-- Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
+- Show the CLI tool usage::
 
-    googlesamples-assistant-pushtotalk
+    googlesamples-assistant-devicetool --help
 
-- Try some Google Assistant voice query like "What time is it?".
+- Register a new device model and new device instance::
+
+   googlesamples-assistant-devicetool register --model my-model \
+                                               --type LIGHT --trait Blink \
+                                               --manufacturer 'Assistant SDK developer' \
+                                               --product-name 'Assistant SDK sample' \
+                                               --description 'Assistant SDK sample device' \
+                                               --device my-device \
+                                               --nickname 'My Assistant Device'
+
+- Register or update the device model with the supported traits::
+
+   googlesamples-assistant-devicetool register-model --model my-model \
+                                                     --type LIGHT --trait Blink \
+                                                     --manufacturer 'Assistant SDK developer' \
+                                                     --product-name 'Assistant SDK sample' \
+                                                     --description 'Assistant SDK sample device'
+
+- Register or update the device instance using the device model::
+
+    googlesamples-assistant-devicetool register-device --device my-device \
+                                                       --model my-model \
+                                                       --nickname 'My Assistant Device'
+
+- Verify that the device model and instance have been registered correctly::
+
+    googlesamples-assistant-devicetool get --model my-model
+    googlesamples-assistant-devicetool get --device my-device
+
+- List all device models and instances::
+
+    googlesamples-assistant-devicetool list --model
+    googlesamples-assistant-devicetool list --device
 
 - Get the `gactions`_ CLI tool.
 
@@ -104,7 +139,23 @@ This reference sample implements a simple but functional client for the `Google 
 
     gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
 
-- Try a custom device action query like "Blink 5 times".
+googlesamples-assistant-pushtotalk
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This reference sample implements a simple but functional client for the `Google Assistant gRPC API`_.
+
+- Install the sample's dependencies::
+
+    sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade google-assistant-sdk[samples]
+
+- Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
+
+    googlesamples-assistant-pushtotalk
+
+- Try some Google Assistant voice query like "What time is it?" or "Who am I?".
+
+- Try a custom device action query supported by the device like "Blink 5 times".
 
 - Run in verbose mode to see the gRPC communication with the Google Assistant API::
 

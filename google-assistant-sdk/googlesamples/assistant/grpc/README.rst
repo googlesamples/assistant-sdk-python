@@ -41,16 +41,17 @@ Setup
 Authorization
 -------------
 
-- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
+- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_.
 
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``::
+- Generate credentials using ``google-oauth-tool``::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
-Run the sample
---------------
+Run the samples
+---------------
 
 - Install the sample dependencies::
 
@@ -62,11 +63,24 @@ Run the sample
     # Record a 5 sec sample and play it back
     python -m audio_helpers
 
+- Register the `Action Package`_ describing the Device Actions traits that the device implements::
+
+    gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
+
+- Register or update the device model and device instance with the supported traits::
+
+    python -m devicetool register --type LIGHT --trait Blink \
+                                  --manufacturer 'Assistant SDK developer' \
+                                  --product-name 'Assistant SDK sample' \
+                                  --description 'Assistant SDK sample device' \
+                                  --device my-device \
+                                  --nickname 'My Assistant Device'
+
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
     python -m pushtotalk
 
-- Try some Google Assistant voice query like "What time is it?".
+- Try some Google Assistant voice query like "What time is it?" or "Who am I?".
 
 - Register the `Action package <https://developers.google.com/actions/reference/rest/Shared.Types/ActionPackage>`_ for the device::
 
