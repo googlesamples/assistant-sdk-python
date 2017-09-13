@@ -69,12 +69,17 @@ Run the samples
 
 - Register or update the device model and device instance with the supported traits::
 
-    python -m devicetool register --type LIGHT --trait Blink \
+    python -m devicetool register --model 'my-model-identifier' \
+                                  --type LIGHT --trait Blink \
                                   --manufacturer 'Assistant SDK developer' \
                                   --product-name 'Assistant SDK sample' \
                                   --description 'Assistant SDK sample device' \
-                                  --device my-device \
+                                  --device 'my-device-identifier' \
                                   --nickname 'My Assistant Device'
+
+*Note: The device model identifier must be globally unique, and
+ device instance identifier must be unique within the Google
+ Developer Project associated with the device.*
 
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 

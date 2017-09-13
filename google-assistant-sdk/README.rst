@@ -65,34 +65,39 @@ instances and associate them with Device Actions traits.
 
     googlesamples-assistant-devicetool --help
 
-- Register a new device model and new device instance::
+- Register a new device model and new device instance (after replacing the 'placeholder values' between quotes)::
 
-   googlesamples-assistant-devicetool register --model my-model \
+   googlesamples-assistant-devicetool register --model 'my-model-identifier' \
                                                --type LIGHT --trait Blink \
                                                --manufacturer 'Assistant SDK developer' \
                                                --product-name 'Assistant SDK sample' \
                                                --description 'Assistant SDK sample device' \
-                                               --device my-device \
+                                               --device 'my-device-identifier' \
                                                --nickname 'My Assistant Device'
 
-- Register or update the device model with the supported traits::
+- Register or update the device model with the supported traits (after replacing the 'placeholder values' between quotes)::
 
-   googlesamples-assistant-devicetool register-model --model my-model \
+   googlesamples-assistant-devicetool register-model --model 'my-model-identifier' \
                                                      --type LIGHT --trait Blink \
                                                      --manufacturer 'Assistant SDK developer' \
                                                      --product-name 'Assistant SDK sample' \
                                                      --description 'Assistant SDK sample device'
 
-- Register or update the device instance using the device model::
+*Note: The model identifier must be globally unique.*
 
-    googlesamples-assistant-devicetool register-device --device my-device \
-                                                       --model my-model \
+- Register or update the device instance using the device model (after replacing the 'placeholder values' between quotes)::
+
+    googlesamples-assistant-devicetool register-device --device 'my-device-identifier' \
+                                                       --model 'my-model-identifier' \
                                                        --nickname 'My Assistant Device'
+
+*Note: The device instance identifier should be unique within the
+ Google Developer Project associated with the device.*
 
 - Verify that the device model and instance have been registered correctly::
 
-    googlesamples-assistant-devicetool get --model my-model
-    googlesamples-assistant-devicetool get --device my-device
+    googlesamples-assistant-devicetool get --model 'my-model-identifier'
+    googlesamples-assistant-devicetool get --device 'my-device-identifier'
 
 - List all device models and instances::
 
