@@ -33,12 +33,8 @@ class DeviceRequestHandler(object):
 
     Args:
       device_id: device id to match command against
-      handlers: map of command name to callable.
 
     Example:
-      # Pass key value params to register handler for intent at creation time.
-      DeviceRequestHandler('my-device', INTENT_NAME=handler)
-
       # Use as as decorator to register handler.
       device_handler = DeviceRequestHandler('my-device')
       @device_handler.command('INTENT_NAME')
@@ -46,10 +42,10 @@ class DeviceRequestHandler(object):
           pass
     """
 
-    def __init__(self, device_id, **handlers):
+    def __init__(self, device_id):
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
         self.device_id = device_id
-        self.handlers = handlers
+        self.handlers = {}
 
     def __call__(self, device_request):
         """Handle incoming device request.

@@ -63,47 +63,37 @@ Run the samples
     # Record a 5 sec sample and play it back
     python -m audio_helpers
 
-- Register the `Action Package`_ describing the Device Actions traits that the device implements::
-
-    gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
-
-- Register or update the device model and device instance with the supported traits::
+- Register or overwrite the device model and device instance with the supported traits::
 
     python -m devicetool register --model 'my-model-identifier' \
-                                  --type LIGHT --trait Blink \
+                                  --type LIGHT --trait action.devices.traits.OnOff \
                                   --manufacturer 'Assistant SDK developer' \
-                                  --product-name 'Assistant SDK sample' \
-                                  --description 'Assistant SDK sample device' \
+                                  --product-name 'Assistant SDK light' \
+                                  --description 'Assistant SDK light device' \
                                   --device 'my-device-identifier' \
-                                  --nickname 'My Assistant Device'
+                                  --nickname 'My Assistant Light'
 
-*Note: The device model identifier must be globally unique, and
- device instance identifier must be unique within the Google
- Developer Project associated with the device.*
+*Note: The device model identifier must be globally unique, and device instance identifier must be unique within the Google Developer Project associated with the device.*
 
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
-    python -m pushtotalk
+    python -m pushtotalk --device-id 'my-device-identifier'
 
 - Try some Google Assistant voice query like "What time is it?" or "Who am I?".
 
-- Register the `Action package <https://developers.google.com/actions/reference/rest/Shared.Types/ActionPackage>`_ for the device::
-
-    gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
-
-- Try a custom device action query like "Blink 5 times".
+- Try a device action query like "Turn <nickname / model product name> on".
 
 - Run in verbose mode to see the gRPC communication with the Google Assistant API::
 
-    python -m pushtotalk -v
+    python -m pushtotalk --device-id 'my-device-identifier' -v
 
 - Send a pre-recorded request to the Assistant::
 
-    python -m pushtotalk -i in.wav
+    python -m pushtotalk --device-id 'my-device-identifier' -i in.wav
 
 - Save the Assistant response to a file::
 
-    python -m pushtotalk -o out.wav
+    python -m pushtotalk --device-id 'my-device-identifier' -o out.wav
 
 Troubleshooting
 ---------------
@@ -116,10 +106,6 @@ Troubleshooting
     # Record and play back some audio using ALSA command-line tools
     arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
     aplay --format=S16_LE --rate=16k --file-type=raw out.raw
-
-- Run the sample with verbose logging enabled::
-
-    python -m pushtotalk --verbose
 
 - If Assistant audio is choppy, try adjusting the sound device's block size::
 

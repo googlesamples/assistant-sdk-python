@@ -68,31 +68,30 @@ instances and associate them with Device Actions traits.
 - Register a new device model and new device instance (after replacing the 'placeholder values' between quotes)::
 
    googlesamples-assistant-devicetool register --model 'my-model-identifier' \
-                                               --type LIGHT --trait Blink \
+                                               --type LIGHT --trait action.devices.traits.OnOff \
                                                --manufacturer 'Assistant SDK developer' \
-                                               --product-name 'Assistant SDK sample' \
-                                               --description 'Assistant SDK sample device' \
+                                               --product-name 'Assistant SDK light' \
+                                               --description 'Assistant SDK light device' \
                                                --device 'my-device-identifier' \
-                                               --nickname 'My Assistant Device'
+                                               --nickname 'My Assistant Light'
 
-- Register or update the device model with the supported traits (after replacing the 'placeholder values' between quotes)::
+- Register or overwrite the device model with the supported traits (after replacing the 'placeholder values' between quotes)::
 
    googlesamples-assistant-devicetool register-model --model 'my-model-identifier' \
-                                                     --type LIGHT --trait Blink \
+                                                     --type LIGHT --trait action.devices.traits.OnOff \
                                                      --manufacturer 'Assistant SDK developer' \
-                                                     --product-name 'Assistant SDK sample' \
-                                                     --description 'Assistant SDK sample device'
+                                                     --product-name 'Assistant SDK light' \
+                                                     --description 'Assistant SDK light device'
 
 *Note: The model identifier must be globally unique.*
 
-- Register or update the device instance using the device model (after replacing the 'placeholder values' between quotes)::
+- Register or overwrite the device instance using the device model (after replacing the 'placeholder values' between quotes)::
 
     googlesamples-assistant-devicetool register-device --device 'my-device-identifier' \
                                                        --model 'my-model-identifier' \
-                                                       --nickname 'My Assistant Device'
+                                                       --nickname 'My Assistant Light'
 
-*Note: The device instance identifier should be unique within the
- Google Developer Project associated with the device.*
+*Note: The device instance identifier should be unique within the Google Developer Project associated with the device.*
 
 - Verify that the device model and instance have been registered correctly::
 
@@ -103,46 +102,6 @@ instances and associate them with Device Actions traits.
 
     googlesamples-assistant-devicetool list --model
     googlesamples-assistant-devicetool list --device
-
-- Get the `gactions`_ CLI tool.
-
-- Create an `Action Package`_ describing the Device Actions traits that the device implements::
-
-    {
-        "manifest": {
-            "displayName": "Blinky light",
-            "invocationName": "Blinky light",
-            "category": "PRODUCTIVITY"
-        },
-        "actions": [{
-            "name": "actions.devices",
-            "config": {
-                "@type": "type.googleapis.com/google.actions.v2.devices.DeviceControl",
-                "commands": [{
-                    "intent": {
-                        "name": "BLINK",
-                        "parameters": [{
-                            "name": "number",
-                            "type": "SchemaOrg_Number"
-                        }],
-                        "trigger": {
-                            "queryPatterns": [
-                                "Blink $SchemaOrg_Number:number times"
-                            ]
-                        }
-                    },
-                    "directResponseFulfillment": {
-                        "ttsPattern": "Blinking the light $SchemaOrg_Number:number times"
-                    },
-                    "requiredTraits": ["Blink"]
-                }]
-            }
-        }]
-    }
-
-- Register the `Action package`_ using the `gactions`_ CLI tool::
-
-    gactions test --action_package blink.json --project <YOUR_PROJECT_ID>
 
 googlesamples-assistant-pushtotalk
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,15 +115,15 @@ This reference sample implements a simple but functional client for the `Google 
 
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
-    googlesamples-assistant-pushtotalk
+    googlesamples-assistant-pushtotalk --device-id 'my-device-identifier'
 
 - Try some Google Assistant voice query like "What time is it?" or "Who am I?".
 
-- Try a custom device action query supported by the device like "Blink 5 times".
+- Try a device action query like "Turn <nickname / model product name> on".
 
 - Run in verbose mode to see the gRPC communication with the Google Assistant API::
 
-    googlesamples-assistant-pushtotalk -v
+    googlesamples-assistant-pushtotalk  --device-id 'my-device-identifier' -v
 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -218,5 +177,3 @@ the License.
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 .. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc
 .. _Google Assistant library: https://developers.google.com/assistant/sdk/reference/library/python
-.. _Action Package: https://developers.google.com/actions/reference/rest/Shared.Types/ActionPackage
-.. _gactions: https://developers.google.com/actions/tools/gactions-cli

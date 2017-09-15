@@ -68,6 +68,7 @@ def endtoend_test(session, python_version):
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
     session.run('python', '-m', 'googlesamples.assistant.grpc.pushtotalk',
+                '--device-id', 'test-device',
                 '-i', 'tests/data/whattimeisit.riff',
                 '-o', audio_out_file)
     session.run('test', '-s', audio_out_file)

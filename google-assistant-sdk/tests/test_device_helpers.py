@@ -49,8 +49,8 @@ class DeviceRequestHandlerTest(unittest.TestCase):
     def test_success(self):
         device_handler = device_helpers.DeviceRequestHandler(
             'some-device',
-            SOME_COMMAND=self.handler
         )
+        device_handler.command('SOME_COMMAND')(self.handler)
         device_request = build_device_request('some-device',
                                               'SOME_COMMAND',
                                               'some-arg')
@@ -62,8 +62,8 @@ class DeviceRequestHandlerTest(unittest.TestCase):
     def test_different_device(self):
         device_handler = device_helpers.DeviceRequestHandler(
             'some-device',
-            SOME_COMMAND=self.handler
         )
+        device_handler.command('SOME_COMMAND')(self.handler)
         device_request = build_device_request('other-device',
                                               'SOME_COMMAND',
                                               'some-arg')
@@ -74,8 +74,8 @@ class DeviceRequestHandlerTest(unittest.TestCase):
     def test_unknown_command(self):
         device_handler = device_helpers.DeviceRequestHandler(
             'some-device',
-            SOME_COMMAND=self.handler
         )
+        device_handler.command('SOME_COMMAND')(self.handler)
         device_request = build_device_request('some-device',
                                               'OTHER_COMMAND',
                                               'some-arg')
@@ -90,8 +90,8 @@ class DeviceRequestHandlerTest(unittest.TestCase):
             raise err
         device_handler = device_helpers.DeviceRequestHandler(
             'some-device',
-            FAILING_COMMAND=failing_command
         )
+        device_handler.command('FAILING_COMMAND')(failing_command)
         device_request = build_device_request('some-device',
                                               'FAILING_COMMAND',
                                               'some-arg')
@@ -99,17 +99,3 @@ class DeviceRequestHandlerTest(unittest.TestCase):
         self.assertEqual(len(fs), 1)
         concurrent.futures.wait(fs)
         self.assertEqual(fs[0].exception(), err)
-
-    def test_decorator(self):
-        device_handler = device_helpers.DeviceRequestHandler('some-device')
-
-        @device_handler.command('SOME_COMMAND')
-        def handler(arg):
-            self.handler_called = arg
-        device_request = build_device_request('some-device',
-                                              'SOME_COMMAND',
-                                              'some-arg')
-        fs = device_handler(device_request)
-        self.assertEqual(len(fs), 1)
-        concurrent.futures.wait(fs)
-        self.assertEqual(self.handler_called, 'some-arg')

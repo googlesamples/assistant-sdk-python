@@ -18,7 +18,6 @@ import concurrent.futures
 import json
 import logging
 import os.path
-import time
 
 import click
 import grpc
@@ -46,7 +45,6 @@ ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
 DIALOG_FOLLOW_ON = embedded_assistant_pb2.ConverseResult.DIALOG_FOLLOW_ON
 CLOSE_MICROPHONE = embedded_assistant_pb2.ConverseResult.CLOSE_MICROPHONE
-DEFAULT_DEVICE_ID = 'googlesamples-pushtotalk-device'
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
 
 
@@ -209,7 +207,7 @@ class SampleAssistant(object):
               default=os.path.join(click.get_app_dir('google-oauthlib-tool'),
                                    'credentials.json'),
               help='Path to read OAuth2 credentials.')
-@click.option('--device-id', default=DEFAULT_DEVICE_ID,
+@click.option('--device-id', required=True,
               metavar='<device id>', show_default=True,
               help='Unique device instance identifier.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
@@ -332,12 +330,12 @@ def main(api_endpoint, credentials, device_id, verbose,
 
     device_handler = device_helpers.DeviceRequestHandler(device_id)
 
-    @device_handler.command('BLINK')
-    def blink(number):
-        logging.info('Blinking device %s times.' % number)
-        for i in range(int(number)):
-            logging.info('Device is blinking.')
-            time.sleep(1)
+    @device_handler.command('action.devices.commands.OnOff')
+    def onoff(on):
+        if on:
+            logging.info('Turning device on')
+        else:
+            logging.info('Turning device off')
 
     with SampleAssistant(device_id, conversation_stream,
                          grpc_channel, grpc_deadline,

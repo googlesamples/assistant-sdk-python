@@ -26,9 +26,13 @@ def failed_request_exception(message, r):
     """Build ClickException from a failed request."""
     try:
         resp = json.loads(r.text)
-        return click.ClickException('%s: %d %s' % (message,
-                                                   resp['error']['code'],
-                                                   resp['error']['message']))
+        message = '%s: %d %s' % (message,
+                                 resp['error']['code'],
+                                 resp['error']['message'])
+        if 'details' in resp['error']:
+            details = '\n'.join(d['detail'] for d in resp['error']['details'])
+            message += ' ' + details
+        return click.ClickException(message)
     except ValueError:
         # fallback on raw text response if error is not structured.
         return click.ClickException('%s: %d\n%s' % (message,
@@ -84,9 +88,9 @@ def cli(ctx, project, client_secret, api_endpoint, credentials):
 @click.option('--trait', multiple=True)
 @click.option('--manufacturer', required=True)
 @click.option('--product-name', required=True)
-@click.option('--description', required=True)
+@click.option('--description')
 @click.option('--device', required=True)
-@click.option('--nickname', required=True)
+@click.option('--nickname')
 @click.pass_context
 def register(ctx, model, type, trait, manufacturer, product_name, description,
              device, nickname):
@@ -105,7 +109,7 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
 @click.option('--trait', multiple=True)
 @click.option('--manufacturer', required=True)
 @click.option('--product-name', required=True)
-@click.option('--description', required=True)
+@click.option('--description')
 @click.pass_context
 def register_model(ctx, model, type, trait,
                    manufacturer, product_name, description):
@@ -136,14 +140,14 @@ def register_model(ctx, model, type, trait,
     else:
         raise failed_request_exception('failed to check existing model', r)
     if r.status_code != 200:
-        raise failed_request_exception('failed to register new model', r)
+        raise failed_request_exception('failed to register model', r)
     click.echo(r.text)
 
 
 @cli.command('register-device')
 @click.option('--device', required=True)
 @click.option('--model', required=True)
-@click.option('--nickname', required=True)
+@click.option('--nickname')
 @click.pass_context
 def register_device(ctx, device, model, nickname):
     session = ctx.obj['SESSION']
@@ -168,7 +172,7 @@ def register_device(ctx, device, model, nickname):
     else:
         raise failed_request_exception('failed to check existing device', r)
     if r.status_code != 200:
-        raise failed_request_exception('failed to register new device', r)
+        raise failed_request_exception('failed to register device', r)
     click.echo(r.text)
 
 
