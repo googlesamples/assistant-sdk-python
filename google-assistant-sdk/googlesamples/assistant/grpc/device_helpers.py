@@ -67,18 +67,24 @@ class DeviceRequestHandler(object):
         return decorator
 
     def submit_commands(self, devices, execution):
-        """Submit device command executions."""
+        """Submit device command executions.
+
+        Returns: a list of concurrent.futures for scheduled executions.
+        """
         fs = []
         for device in devices:
-            if device[key_id_] == self.device_id:
-                for command in execution:
-                    f = self.executor.submit(
-                        self.dispatch_command, **command
-                    )
-                    fs.append(f)
-            else:
+            if device[key_id_] != self.device_id:
                 logging.warning('Ignoring command for unknown device: %s'
                                 % device[key_id_])
+                continue
+            if not execution:
+                logging.warning('Ignoring noop execution')
+                continue
+            for command in execution:
+                f = self.executor.submit(
+                    self.dispatch_command, **command
+                )
+                fs.append(f)
         return fs
 
     def dispatch_command(self, command, params=None):

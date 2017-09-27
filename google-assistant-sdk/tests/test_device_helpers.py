@@ -39,6 +39,23 @@ def build_device_request(device_id, command, arg):
     }
 
 
+def build_noop_device_request(device_id):
+    return {
+        'inputs': [{
+            'intent': 'action.devices.EXECUTE',
+            'payload': {
+                'commands': [{
+                    'devices': [
+                        {'id': device_id}
+                    ],
+                    'execution': None,
+                }]
+            }
+        }],
+        'requestId': '42'
+    }
+
+
 class DeviceRequestHandlerTest(unittest.TestCase):
     def setUp(self):
         self.handler_called = False
@@ -81,6 +98,16 @@ class DeviceRequestHandlerTest(unittest.TestCase):
                                               'some-arg')
         fs = device_handler(device_request)
         self.assertEqual(len(fs), 1)
+        self.assertFalse(self.handler_called)
+
+    def test_noop_execution(self):
+        device_handler = device_helpers.DeviceRequestHandler(
+            'some-device',
+        )
+        device_handler.command('SOME_COMMAND')(self.handler)
+        device_request = build_noop_device_request('some-device')
+        fs = device_handler(device_request)
+        self.assertEqual(len(fs), 0)
         self.assertFalse(self.handler_called)
 
     def test_exception(self):
