@@ -67,8 +67,8 @@ Troubleshooting
     speaker-test -t wav
 
     # Record and play back some audio using ALSA command-line tools
-    arecord --format=S16_LE --duration=5 --rate=16k --file-type=raw out.raw
-    aplay --format=S16_LE --rate=16k --file-type=raw out.raw
+    arecord --format=S16_LE --duration=5 --rate=16000 --file-type=raw out.raw
+    aplay --format=S16_LE --rate=16000 --file-type=raw out.raw
 
 See also the `troubleshooting section <https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/troubleshooting>`_ of the official documentation.
 
