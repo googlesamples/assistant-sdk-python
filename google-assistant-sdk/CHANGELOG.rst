@@ -1,6 +1,8 @@
 Changelog
 =========
-
+0.4.0
+-----
+- Adds Device Actions
 
 0.3.3
 -------
