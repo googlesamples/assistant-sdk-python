@@ -26,7 +26,7 @@ Authorization
 - Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-auth-oauthlib.tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 - Load the credentials using `google.oauth2.credentials <https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html>`_.::
 
