@@ -55,7 +55,8 @@ class SampleAssistant(object):
     """Sample Assistant that supports conversations and device actions.
 
     Args:
-      device_id: identifier of the device.
+      device_model_id: identifier of the device model.
+      device_id: identifier of the registered device instance.
       conversation_stream(ConversationStream): audio stream
         for recording query and playing back assistant answer.
       channel: authorized gRPC channel for connection to the
@@ -64,8 +65,9 @@ class SampleAssistant(object):
       device_handler: callback for device actions.
     """
 
-    def __init__(self, device_id, conversation_stream, channel, deadline_sec,
-                 device_handler):
+    def __init__(self, device_model_id, device_id, conversation_stream,
+                 channel, deadline_sec, device_handler):
+        self.device_model_id = device_model_id
         self.device_id = device_id
         self.conversation_stream = conversation_stream
 
@@ -192,6 +194,7 @@ class SampleAssistant(object):
             ),
             converse_state=converse_state,
             device_config=embedded_assistant_pb2.DeviceConfig(
+                device_model_id=self.device_model_id,
                 device_id=self.device_id,
             )
         )
@@ -212,9 +215,12 @@ class SampleAssistant(object):
               default=os.path.join(click.get_app_dir('google-oauthlib-tool'),
                                    'credentials.json'),
               help='Path to read OAuth2 credentials.')
+@click.option('--device-model-id', required=True,
+              metavar='<device model id>',
+              help='Unique device model identifier.')
 @click.option('--device-id', required=True,
-              metavar='<device id>', show_default=True,
-              help='Unique device instance identifier.')
+              metavar='<device id>',
+              help='Unique registered device instance identifier.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--input-audio-file', '-i',
@@ -252,7 +258,7 @@ class SampleAssistant(object):
               help='gRPC deadline in seconds')
 @click.option('--once', default=False, is_flag=True,
               help='Force termination after a single conversation.')
-def main(api_endpoint, credentials, device_id, verbose,
+def main(api_endpoint, credentials, device_model_id, device_id, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
          audio_iter_size, audio_block_size, audio_flush_size,
@@ -342,7 +348,7 @@ def main(api_endpoint, credentials, device_id, verbose,
         else:
             logging.info('Turning device off')
 
-    with SampleAssistant(device_id, conversation_stream,
+    with SampleAssistant(device_model_id, device_id, conversation_stream,
                          grpc_channel, grpc_deadline,
                          device_handler) as assistant:
         # If file arguments are supplied:
