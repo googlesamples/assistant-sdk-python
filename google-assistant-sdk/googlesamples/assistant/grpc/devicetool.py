@@ -283,6 +283,24 @@ def get(ctx, resource, id):
 
 
 @cli.command()
+@click.option('--model', 'resource', flag_value='deviceModels', required=True,
+              help='Enter the identifier for an existing device model.')
+@click.option('--device', 'resource', flag_value='devices', required=True,
+              help='Enter the identifier for an existing device instance.')
+@click.argument('id')
+@click.pass_context
+def delete(ctx, resource, id):
+    """Delete given device model or instance.
+    """
+    session = ctx.obj['SESSION']
+    url = '/'.join([ctx.obj['API_URL'], resource, id])
+    r = session.delete(url)
+    if r.status_code != 200:
+        raise failed_request_exception('failed to delete resource', r)
+    click.echo(r.text)
+
+
+@cli.command()
 @click.option('--model', 'resource', flag_value='deviceModels', required=True)
 @click.option('--device', 'resource', flag_value='devices', required=True)
 @click.pass_context
