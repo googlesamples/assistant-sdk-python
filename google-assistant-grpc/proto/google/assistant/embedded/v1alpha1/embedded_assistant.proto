@@ -44,6 +44,7 @@ service EmbeddedAssistant {
   // *   ConverseRequest.audio_in
   // *   ConverseRequest.audio_in
   // *   ConverseResponse.event_type.END_OF_UTTERANCE
+  // *   ConverseResponse.result.spoken_request_text "add to my shopping list"
   // *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
   // *   ConverseResponse.audio_out
   // *   ConverseResponse.audio_out
@@ -75,7 +76,7 @@ service EmbeddedAssistant {
 // Specifies how to process the `ConverseRequest` messages.
 message ConverseConfig {
   // Specifies how to process the subsequent incoming audio. Required if
-  // audio_in bytes are to be provided.
+  // [ConverseRequest.audio_in][google.assistant.embedded.v1alpha1.ConverseRequest.audio_in] bytes will be provided in subsequent requests.
   AudioInConfig audio_in_config = 1;
 
   // *Required* Specifies how to format the audio that will be returned.
@@ -90,7 +91,7 @@ message ConverseConfig {
 
 // Specifies how to process the `audio_in` data that will be provided in
 // subsequent requests. For recommended settings, see the Google Assistant SDK
-// [best practices](https://developers.google.com/assistant/sdk/best-practices/audio).
+// [best practices](https://developers.google.com/assistant/sdk/develop/grpc/best-practices/audio).
 message AudioInConfig {
   // Audio encoding of the data sent in the audio message.
   // Audio must be one-channel (mono). The only language supported is "en-US".
@@ -160,11 +161,11 @@ message AudioOutConfig {
 
 // Provides information about the current dialog state.
 message ConverseState {
-  // *Required* The `conversation_state` value returned in the prior
-  // `ConverseResponse`. Omit (do not set the field) if there was no prior
-  // `ConverseResponse`. If there was a prior `ConverseResponse`, do not omit
-  // this field; doing so will end that conversation (and this new request will
-  // start a new conversation).
+  // *Required* This field must always be set to the
+  // [ConverseResult.conversation_state][google.assistant.embedded.v1alpha1.ConverseResult.conversation_state] value that was returned in the prior
+  // `Converse` rpc. It should only be omitted (field not set) if there was no
+  // prior `Converse` rpc because this is the first `Converse` rpc made by this
+  // device after it was first setup and/or factory-default-reset.
   bytes conversation_state = 1;
 }
 
@@ -177,11 +178,8 @@ message AudioOut {
   bytes audio_data = 1;
 }
 
-// The semantic result for the user's spoken query. Multiple of these messages
-// could be received, for example one containing the recognized transcript in
-// spoken_request_text followed by one containing the semantics of the response,
-// i.e. containing the relevant data among conversation_state, microphone_mode,
-// and volume_percentage.
+// The dialog state resulting from the user's query. Multiple of these messages
+// may be received.
 message ConverseResult {
   // Possible states of the microphone after a `Converse` RPC completes.
   enum MicrophoneMode {
@@ -201,15 +199,17 @@ message ConverseResult {
   // *Output-only* The recognized transcript of what the user said.
   string spoken_request_text = 1;
 
-  // *Output-only* The text of the assistant's spoken response. This is only
-  // returned for an IFTTT action.
+  // *Output-only* The speech transcript of the Assistant's spoken response,
+  // i.e. the written form of what is returned in ConverseResponse.audio_out.
+  // This is only returned for an IFTTT action.
   string spoken_response_text = 2;
 
-  // *Output-only* State information for subsequent `ConverseRequest`. This
+  // *Output-only* State information for subsequent `Converse` rpc. This
   // value should be saved in the client and returned in the
-  // `conversation_state` with the next `ConverseRequest`. (The client does not
-  // need to interpret or otherwise use this value.) There is no need to save
-  // this information across device restarts.
+  // [ConverseState.conversation_state][google.assistant.embedded.v1alpha1.ConverseState.conversation_state] field with the next `Converse` rpc.
+  // (The client does not need to interpret or otherwise use this value.) This
+  // information should be saved across device reboots. However, this value
+  // should be cleared (not saved in the client) during a factory-default-reset.
   bytes conversation_state = 3;
 
   // *Output-only* Specifies the mode of the microphone after this `Converse`
@@ -288,7 +288,7 @@ message ConverseResponse {
     // appropriate payloads and semantic parsing.
     DeviceAction device_action = 9;
 
-    // *Output-only* The final semantic result for the user's spoken query.
+    // *Output-only* Contains output related to the user's query.
     ConverseResult result = 5;
   }
 }
@@ -296,23 +296,30 @@ message ConverseResponse {
 // The identification information for devices integrated with the Assistant.
 // These fields should be populated for any queries sent from 3P devices.
 message DeviceConfig {
-  // *Required* Unique identifier for the device. Example: DBCDW098234. This
-  // MUST match the device_id returned from device registration. This device_id
-  // is used matched against the user's registered devices to lookup the
-  // supported traits and capabilities of this device.
+  // *Required* Unique identifier for the device. The id length must be 128
+  // characters or less. Example: DBCDW098234. This MUST match the device_id
+  // returned from device registration. This device_id is used to match against
+  // the user's registered devices to lookup the supported traits and
+  // capabilities of this device. This information should not change across
+  // device reboots. However, it should not be saved across
+  // factory-default-resets.
   string device_id = 1;
+
+  // *Optional* The model of this device as registered in the Device Model
+  // Registration API. This is only required for syndication partners.
+  string device_model_id = 3;
 }
 
-// The response returned to the device if any 3P Custom Device Grammar is
-// triggered. The 3P Custom Device Grammar is enabled through the specific
+// The response returned to the device if any Custom Device Grammar is
+// triggered. The Custom Device Grammar is enabled through the specific
 // [DeviceConfig](google.assistant.embedded.v1alpha1.DeviceConfig) provided by
-// this device, and should be handled appropriately. For example, a 3P device
+// this device, and should be handled appropriately. For example, a device
 // which supports the customized query "do a dance" would receive a DeviceAction
 // with a JSON payload containing the semantics of the request.
 message DeviceAction {
   // JSON containing the device control response generated from the triggered 3P
-  // Custom Device Grammar. The format is given by the [action.devices.EXECUTE](
-  // https://developers.google.com/actions/smarthome/create-app#actiondevicesexecute)
+  // Custom Device Grammar. The format is given by the
+  // [action.devices.EXECUTE](https://developers.google.com/actions/smarthome/create-app#actiondevicesexecute)
   // request type.
   string device_request_json = 2;
 }

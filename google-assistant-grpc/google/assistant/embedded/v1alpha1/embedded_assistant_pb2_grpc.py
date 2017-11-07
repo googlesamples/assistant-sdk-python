@@ -43,6 +43,7 @@ class EmbeddedAssistantServicer(object):
     *   ConverseRequest.audio_in
     *   ConverseRequest.audio_in
     *   ConverseResponse.event_type.END_OF_UTTERANCE
+    *   ConverseResponse.result.spoken_request_text "add to my shopping list"
     *   ConverseResponse.result.microphone_mode.DIALOG_FOLLOW_ON
     *   ConverseResponse.audio_out
     *   ConverseResponse.audio_out

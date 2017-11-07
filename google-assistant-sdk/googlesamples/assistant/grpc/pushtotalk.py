@@ -25,7 +25,10 @@ import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.credentials
 
-from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
+from google.assistant.embedded.v1alpha1 import (
+    embedded_assistant_pb2,
+    embedded_assistant_pb2_grpc
+)
 from google.rpc import code_pb2
 from tenacity import retry, stop_after_attempt, retry_if_exception
 
@@ -75,7 +78,9 @@ class SampleAssistant(object):
         self.conversation_state = None
 
         # Create Google Assistant API gRPC client.
-        self.assistant = embedded_assistant_pb2.EmbeddedAssistantStub(channel)
+        self.assistant = embedded_assistant_pb2_grpc.EmbeddedAssistantStub(
+            channel
+        )
         self.deadline = deadline_sec
 
         self.device_handler = device_handler
