@@ -17,7 +17,9 @@
 import concurrent.futures
 import json
 import logging
+import os
 import os.path
+import uuid
 
 import click
 import grpc
@@ -215,12 +217,26 @@ class SampleAssistant(object):
               default=os.path.join(click.get_app_dir('google-oauthlib-tool'),
                                    'credentials.json'),
               help='Path to read OAuth2 credentials.')
-@click.option('--device-model-id', required=True,
+@click.option('--project',
+              metavar='<project>',
+              help=('Google Developer Project ID used for registration '
+                    'if --device-id is not specified'))
+@click.option('--device-model-id',
               metavar='<device model id>',
-              help='Unique device model identifier.')
-@click.option('--device-id', required=True,
+              help=(('Unique device model identifier, '
+                     'if not specifed, it is read from --device-config')))
+@click.option('--device-id',
               metavar='<device id>',
-              help='Unique registered device instance identifier.')
+              help=(('Unique registered device instance identifier, '
+                     'if not specified, it is read from --device-config, '
+                     'if no device_config found: a new device is registered '
+                     'using a unique id and a new device config is saved')))
+@click.option('--device-config', show_default=True,
+              metavar='<device config>',
+              default=os.path.join(
+                  click.get_app_dir('googlesamples-assistant'),
+                  'device_config.json'),
+              help='Path to save and restore the device configuration')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--input-audio-file', '-i',
@@ -247,7 +263,7 @@ class SampleAssistant(object):
               default=audio_helpers.DEFAULT_AUDIO_DEVICE_BLOCK_SIZE,
               metavar='<audio block size>', show_default=True,
               help=('Block size in bytes for each audio device '
-                    'read and write operation..'))
+                    'read and write operation.'))
 @click.option('--audio-flush-size',
               default=audio_helpers.DEFAULT_AUDIO_DEVICE_FLUSH_SIZE,
               metavar='<audio flush size>', show_default=True,
@@ -258,7 +274,8 @@ class SampleAssistant(object):
               help='gRPC deadline in seconds')
 @click.option('--once', default=False, is_flag=True,
               help='Force termination after a single conversation.')
-def main(api_endpoint, credentials, device_model_id, device_id, verbose,
+def main(api_endpoint, credentials, project,
+         device_model_id, device_id, device_config, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
          audio_iter_size, audio_block_size, audio_flush_size,
@@ -347,6 +364,39 @@ def main(api_endpoint, credentials, device_model_id, device_id, verbose,
             logging.info('Turning device on')
         else:
             logging.info('Turning device off')
+
+    if not device_id or not device_model_id:
+        try:
+            with open(device_config) as f:
+                device = json.load(f)
+                device_id = device['id']
+                device_model_id = device['model_id']
+        except Exception as e:
+            logging.error('Error loading device config: %s' % e)
+            logging.info('Registering device')
+            if not device_model_id:
+                logging.error('--device-model-id parameter required '
+                              'when registrering a model.')
+                return
+            device_base_url = (
+                'https://%s/v1alpha2/projects/%s/devices' % (api_endpoint,
+                                                             project)
+            )
+            device_id = str(uuid.uuid1())
+            payload = {
+                'id': device_id,
+                'model_id': device_model_id
+            }
+            session = google.auth.transport.requests.AuthorizedSession(
+                credentials
+            )
+            r = session.post(device_base_url, data=json.dumps(payload))
+            if r.status_code != 200:
+                logging.error('Failed to register device: %s', r.text)
+                return
+            os.makedirs(os.path.dirname(device_config), exist_ok=True)
+            with open(device_config, 'w') as f:
+                json.dump(payload, f)
 
     with SampleAssistant(device_model_id, device_id, conversation_stream,
                          grpc_channel, grpc_deadline,
