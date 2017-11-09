@@ -15,6 +15,7 @@
 """Sample that implements device registration for the Google Assistant API."""
 
 import json
+import logging
 import os
 
 import click
@@ -40,6 +41,27 @@ def failed_request_exception(message, r):
                                                     r.text))
 
 
+# Prints out a device model in the terminal by parsing dict
+def pretty_print_model(devicemodel):
+    PRETTY_PRINT_MODEL = """Device Model Id: %(deviceModelId)s
+        Project Id: %(projectId)s
+        Device Type: %(deviceType)s"""
+    logging.info(PRETTY_PRINT_MODEL % devicemodel)
+    for trait in devicemodel['traits']:
+        logging.info('        Trait %s' % trait)
+    logging.info('')  # Newline
+
+
+# Prints out a device instance in the terminal by parsing dict
+def pretty_print_device(device):
+    logging.info('Device Instance Id: %s' % device['id'])
+    if 'nickname' in device:
+        logging.info('    Nickname: %s' % device['nickname'])
+    if 'modelId' in device:
+        logging.info('    Model: %s' % device['modelId'])
+    logging.info('')  # Newline
+
+
 @click.group()
 @click.option('--project',
               help='Enter the Google Developer Project ID that you want to '
@@ -56,6 +78,8 @@ def failed_request_exception(message, r):
               'tool will look for this file in the current directory (by '
               'searching for a file named after the client_id stored in the '
               'credentials file).')
+@click.option('--verbose', flag_value=True,
+              help='Shows detailed JSON response')
 @click.option('--api-endpoint', default='embeddedassistant.googleapis.com',
               show_default=True,
               help='Hostname for the Google Assistant API. Do not use this '
@@ -70,7 +94,7 @@ def failed_request_exception(message, r):
               'API. You can use this flag if the credentials were generated '
               'in a location that is different than the default.')
 @click.pass_context
-def cli(ctx, project, client_secret, api_endpoint, credentials):
+def cli(ctx, project, client_secret, verbose, api_endpoint, credentials):
     try:
         with open(credentials, 'r') as f:
             c = google.oauth2.credentials.Credentials(token=None,
@@ -90,16 +114,18 @@ def cli(ctx, project, client_secret, api_endpoint, credentials):
                 project = secret['installed']['project_id']
         except Exception as e:
             raise click.ClickException('Error loading client secret: %s.\n'
-                                       'Run the register tool'
+                                       'Run the register tool '
                                        'with --client-secret '
                                        'or --project option.\n'
-                                       'Or copy the %s file'
+                                       'Or copy the %s file '
                                        'in the current directory.'
                                        % (e, client_secret))
     ctx.obj['SESSION'] = google.auth.transport.requests.AuthorizedSession(c)
     ctx.obj['API_URL'] = ('https://%s/v1alpha2/projects/%s'
                           % (api_endpoint, project))
     ctx.obj['PROJECT_ID'] = project
+    logging.basicConfig(format='',
+                        level=logging.DEBUG if verbose else logging.INFO)
 
 
 @cli.command()
@@ -204,18 +230,20 @@ def register_model(ctx, model, type, trait,
         payload.setdefault('manifest', {})['productName'] = product_name
     if description:
         payload.setdefault('manifest', {})['deviceDescription'] = description
+    logging.debug(json.dumps(payload))
     r = session.get(model_url)
+    logging.debug(r.text)
     if r.status_code == 200:
-        click.echo('updating existing device model: %s' % model)
+        click.echo('Updating existing device model: %s' % model)
         r = session.put(model_url, data=json.dumps(payload))
     elif r.status_code in (400, 404):
-        click.echo('creating new device model')
+        click.echo('Creating new device model')
         r = session.post(model_base_url, data=json.dumps(payload))
     else:
-        raise failed_request_exception('failed to check existing model', r)
+        raise failed_request_exception('Unknown error occurred', r)
     if r.status_code != 200:
-        raise failed_request_exception('failed to register model', r)
-    click.echo(r.text)
+        raise failed_request_exception('Failed to register model', r)
+    click.echo('Model %s successfully registered' % model)
 
 
 @cli.command('register-device')
@@ -248,19 +276,21 @@ def register_device(ctx, device, model, nickname):
     if nickname:
         payload['nickname'] = nickname
 
+    logging.debug(json.dumps(payload))
     r = session.get(device_url)
     if r.status_code == 200:
-        click.echo('updating existing device: %s' % device)
+        click.echo('Updating existing device: %s' % device)
         session.delete(device_url)
         r = session.post(device_base_url, data=json.dumps(payload))
     elif r.status_code in (400, 404):
-        click.echo('creating new device')
+        click.echo('Creating new device')
         r = session.post(device_base_url, data=json.dumps(payload))
     else:
-        raise failed_request_exception('failed to check existing device', r)
+        raise failed_request_exception('Failed to check existing device', r)
     if r.status_code != 200:
-        raise failed_request_exception('failed to register device', r)
-    click.echo(r.text)
+        raise failed_request_exception('Failed to register device', r)
+    click.echo('Device instance %s successfully registered' % device)
+    logging.debug(r.text)
 
 
 @cli.command()
@@ -275,11 +305,18 @@ def get(ctx, resource, id):
     instance.
     """
     session = ctx.obj['SESSION']
+
     url = '/'.join([ctx.obj['API_URL'], resource, id])
     r = session.get(url)
     if r.status_code != 200:
-        raise failed_request_exception('failed to get resource', r)
-    click.echo(r.text)
+        raise failed_request_exception('Failed to get resource', r)
+
+    response = json.loads(r.text)
+    if resource == 'deviceModels':
+        pretty_print_model(response)
+    elif resource == 'devices':
+        pretty_print_device(response)
+    logging.debug(r.text)
 
 
 @cli.command()
@@ -310,11 +347,20 @@ def list(ctx, resource):
     devicetool's --project flag.
     """
     session = ctx.obj['SESSION']
+
     url = '/'.join([ctx.obj['API_URL'], resource])
     r = session.get(url)
     if r.status_code != 200:
-        raise failed_request_exception('failed to list resources', r)
-    click.echo(r.text)
+        raise failed_request_exception('Failed to list resources', r)
+
+    response = json.loads(r.text)
+    logging.debug(r.text)
+    if resource == 'deviceModels':
+        for devicemodel in response['deviceModels']:
+            pretty_print_model(devicemodel)
+    elif resource == 'devices':
+        for device in response['devices']:
+            pretty_print_device(device)
 
 
 def main():
