@@ -27,12 +27,8 @@ def failed_request_exception(message, r):
     """Build ClickException from a failed request."""
     try:
         resp = json.loads(r.text)
-        message = '%s: %d %s' % (message,
-                                 resp['error']['code'],
-                                 resp['error']['message'])
-        if 'details' in resp['error']:
-            details = '\n'.join(d['detail'] for d in resp['error']['details'])
-            message += ' ' + details
+        message = '%s: %d\n%s' % (message, resp['error']['code'],
+                                  resp['error']['message'])
         return click.ClickException(message)
     except ValueError:
         # fallback on raw text response if error is not structured.
