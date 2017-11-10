@@ -43,8 +43,11 @@ def pretty_print_model(devicemodel):
         Project Id: %(projectId)s
         Device Type: %(deviceType)s"""
     logging.info(PRETTY_PRINT_MODEL % devicemodel)
-    for trait in devicemodel['traits']:
-        logging.info('        Trait %s' % trait)
+    if 'traits' in devicemodel:
+        for trait in devicemodel['traits']:
+            logging.info('        Trait %s' % trait)
+    else:
+        logging.info('No traits')
     logging.info('')  # Newline
 
 
