@@ -16,42 +16,39 @@
 
 import logging
 
-from google.assistant.embedded.v1alpha1 import embedded_assistant_pb2
+from google.assistant.embedded.v1alpha2 import embedded_assistant_pb2
 
 
-END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
-
-
-def log_converse_request_without_audio(converse_request):
-    """Log ConverseRequest fields without audio data."""
+def log_assist_request_without_audio(assist_request):
+    """Log AssistRequest fields without audio data."""
     if logging.getLogger().isEnabledFor(logging.DEBUG):
-        resp_copy = embedded_assistant_pb2.ConverseRequest()
-        resp_copy.CopyFrom(converse_request)
+        resp_copy = embedded_assistant_pb2.AssistRequest()
+        resp_copy.CopyFrom(assist_request)
         if len(resp_copy.audio_in) > 0:
             size = len(resp_copy.audio_in)
             resp_copy.ClearField('audio_in')
-            logging.debug('ConverseRequest: audio_in (%d bytes)',
+            logging.debug('AssistRequest: audio_in (%d bytes)',
                           size)
             return
-        logging.debug('ConverseRequest: %s', resp_copy)
+        logging.debug('AssistRequest: %s', resp_copy)
 
 
-def log_converse_response_without_audio(converse_response):
-    """Log ConverseResponse fields without audio data."""
+def log_assist_response_without_audio(assist_response):
+    """Log AssistResponse fields without audio data."""
     if logging.getLogger().isEnabledFor(logging.DEBUG):
-        resp_copy = embedded_assistant_pb2.ConverseResponse()
-        resp_copy.CopyFrom(converse_response)
+        resp_copy = embedded_assistant_pb2.AssistResponse()
+        resp_copy.CopyFrom(assist_response)
         has_audio_data = (resp_copy.HasField('audio_out') and
                           len(resp_copy.audio_out.audio_data) > 0)
         if has_audio_data:
             size = len(resp_copy.audio_out.audio_data)
             resp_copy.audio_out.ClearField('audio_data')
             if resp_copy.audio_out.ListFields():
-                logging.debug('ConverseResponse: %s audio_data (%d bytes)',
+                logging.debug('AssistResponse: %s audio_data (%d bytes)',
                               resp_copy,
                               size)
             else:
-                logging.debug('ConverseResponse: audio_data (%d bytes)',
+                logging.debug('AssistResponse: audio_data (%d bytes)',
                               size)
             return
-        logging.debug('ConverseResponse: %s', resp_copy)
+        logging.debug('AssistResponse: %s', resp_copy)

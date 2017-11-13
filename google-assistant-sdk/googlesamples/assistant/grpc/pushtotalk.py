@@ -27,11 +27,10 @@ import google.auth.transport.grpc
 import google.auth.transport.requests
 import google.oauth2.credentials
 
-from google.assistant.embedded.v1alpha1 import (
+from google.assistant.embedded.v1alpha2 import (
     embedded_assistant_pb2,
     embedded_assistant_pb2_grpc
 )
-from google.rpc import code_pb2
 from tenacity import retry, stop_after_attempt, retry_if_exception
 
 try:
@@ -47,9 +46,9 @@ except SystemError:
 
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
-END_OF_UTTERANCE = embedded_assistant_pb2.ConverseResponse.END_OF_UTTERANCE
-DIALOG_FOLLOW_ON = embedded_assistant_pb2.ConverseResult.DIALOG_FOLLOW_ON
-CLOSE_MICROPHONE = embedded_assistant_pb2.ConverseResult.CLOSE_MICROPHONE
+END_OF_UTTERANCE = embedded_assistant_pb2.AssistResponse.END_OF_UTTERANCE
+DIALOG_FOLLOW_ON = embedded_assistant_pb2.DialogStateOut.DIALOG_FOLLOW_ON
+CLOSE_MICROPHONE = embedded_assistant_pb2.DialogStateOut.CLOSE_MICROPHONE
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
 
 
@@ -67,16 +66,18 @@ class SampleAssistant(object):
       device_handler: callback for device actions.
     """
 
-    def __init__(self, device_model_id, device_id, conversation_stream,
+    def __init__(self, language_code, device_model_id, device_id,
+                 conversation_stream,
                  channel, deadline_sec, device_handler):
+        self.language_code = language_code
         self.device_model_id = device_model_id
         self.device_id = device_id
         self.conversation_stream = conversation_stream
 
-        # Opaque blob provided in ConverseResponse that,
-        # when provided in a follow-up ConverseRequest,
+        # Opaque blob provided in AssistResponse that,
+        # when provided in a follow-up AssistRequest,
         # gives the Assistant a context marker within the current state
-        # of the multi-Converse()-RPC "conversation".
+        # of the multi-Assist()-RPC "conversation".
         # This value, along with MicrophoneMode, supports a more natural
         # "conversation" with the Assistant.
         self.conversation_state = None
@@ -106,7 +107,7 @@ class SampleAssistant(object):
 
     @retry(reraise=True, stop=stop_after_attempt(3),
            retry=retry_if_exception(is_grpc_error_unavailable))
-    def converse(self):
+    def assist(self):
         """Send a voice request to the Assistant and playback the response.
 
         Returns: True if conversation should continue.
@@ -117,46 +118,39 @@ class SampleAssistant(object):
         self.conversation_stream.start_recording()
         logging.info('Recording audio request.')
 
-        def iter_converse_requests():
-            for c in self.gen_converse_requests():
-                assistant_helpers.log_converse_request_without_audio(c)
+        def iter_assist_requests():
+            for c in self.gen_assist_requests():
+                assistant_helpers.log_assist_request_without_audio(c)
                 yield c
             self.conversation_stream.start_playback()
 
-        # This generator yields ConverseResponse proto messages
+        # This generator yields AssistResponse proto messages
         # received from the gRPC Google Assistant API.
-        for resp in self.assistant.Converse(iter_converse_requests(),
-                                            self.deadline):
-            assistant_helpers.log_converse_response_without_audio(resp)
-            if resp.error.code != code_pb2.OK:
-                logging.error('server error: %s', resp.error.message)
-                break
+        for resp in self.assistant.Assist(iter_assist_requests(),
+                                          self.deadline):
+            assistant_helpers.log_assist_response_without_audio(resp)
             if resp.event_type == END_OF_UTTERANCE:
                 logging.info('End of audio request detected')
                 self.conversation_stream.stop_recording()
-            if resp.result.spoken_request_text:
+            if resp.speech_results:
                 logging.info('Transcript of user request: "%s".',
-                             resp.result.spoken_request_text)
+                             ' '.join(r.transcript
+                                      for r in resp.speech_results))
                 logging.info('Playing assistant response.')
             if len(resp.audio_out.audio_data) > 0:
                 self.conversation_stream.write(resp.audio_out.audio_data)
-            if resp.result.spoken_response_text:
-                logging.info(
-                    'Transcript of TTS response '
-                    '(only populated from IFTTT): "%s".',
-                    resp.result.spoken_response_text)
-            if resp.result.conversation_state:
-                self.conversation_state = resp.result.conversation_state
-            if resp.result.volume_percentage != 0:
-                logging.info('Setting volume to %s%%',
-                             resp.result.volume_percentage)
-                self.conversation_stream.volume_percentage = (
-                    resp.result.volume_percentage
-                )
-            if resp.result.microphone_mode == DIALOG_FOLLOW_ON:
+            if resp.dialog_state_out.conversation_state:
+                conversation_state = resp.dialog_state_out.conversation_state
+                logging.debug('Updating conversation state.')
+                self.conversation_state = conversation_state
+            if resp.dialog_state_out.volume_percentage != 0:
+                volume_percentage = resp.dialog_state_out.volume_percentage
+                logging.info('Setting volume to %s%%', volume_percentage)
+                self.conversation_stream.volume_percentage = volume_percentage
+            if resp.dialog_state_out.microphone_mode == DIALOG_FOLLOW_ON:
                 continue_conversation = True
                 logging.info('Expecting follow-on query from user.')
-            elif resp.result.microphone_mode == CLOSE_MICROPHONE:
+            elif resp.dialog_state_out.microphone_mode == CLOSE_MICROPHONE:
                 continue_conversation = False
             if resp.device_action.device_request_json:
                 device_request = json.loads(
@@ -174,17 +168,17 @@ class SampleAssistant(object):
         self.conversation_stream.stop_playback()
         return continue_conversation
 
-    def gen_converse_requests(self):
-        """Yields: ConverseRequest messages to send to the API."""
+    def gen_assist_requests(self):
+        """Yields: AssistRequest messages to send to the API."""
 
-        converse_state = None
-        if self.conversation_state:
-            logging.debug('Sending converse_state: %s',
-                          self.conversation_state)
-            converse_state = embedded_assistant_pb2.ConverseState(
-                conversation_state=self.conversation_state,
+        dialog_state_in = embedded_assistant_pb2.DialogStateIn(
+                language_code=self.language_code,
+                conversation_state=b''
             )
-        config = embedded_assistant_pb2.ConverseConfig(
+        if self.conversation_state:
+            logging.debug('Sending conversation state.')
+            dialog_state_in.conversation_state = self.conversation_state
+        config = embedded_assistant_pb2.AssistConfig(
             audio_in_config=embedded_assistant_pb2.AudioInConfig(
                 encoding='LINEAR16',
                 sample_rate_hertz=self.conversation_stream.sample_rate,
@@ -194,18 +188,18 @@ class SampleAssistant(object):
                 sample_rate_hertz=self.conversation_stream.sample_rate,
                 volume_percentage=self.conversation_stream.volume_percentage,
             ),
-            converse_state=converse_state,
+            dialog_state_in=dialog_state_in,
             device_config=embedded_assistant_pb2.DeviceConfig(
-                device_model_id=self.device_model_id,
                 device_id=self.device_id,
+                device_model_id=self.device_model_id,
             )
         )
-        # The first ConverseRequest must contain the ConverseConfig
+        # The first AssistRequest must contain the AssistConfig
         # and no audio data.
-        yield embedded_assistant_pb2.ConverseRequest(config=config)
+        yield embedded_assistant_pb2.AssistRequest(config=config)
         for data in self.conversation_stream:
             # Subsequent requests need audio data, but not config.
-            yield embedded_assistant_pb2.ConverseRequest(audio_in=data)
+            yield embedded_assistant_pb2.AssistRequest(audio_in=data)
 
 
 @click.command()
@@ -237,6 +231,10 @@ class SampleAssistant(object):
                   click.get_app_dir('googlesamples-assistant'),
                   'device_config.json'),
               help='Path to save and restore the device configuration')
+@click.option('--lang', show_default=True,
+              metavar='<language code>',
+              default='en-US',
+              help='Language code of the Assistant')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--input-audio-file', '-i',
@@ -275,7 +273,7 @@ class SampleAssistant(object):
 @click.option('--once', default=False, is_flag=True,
               help='Force termination after a single conversation.')
 def main(api_endpoint, credentials, project,
-         device_model_id, device_id, device_config, verbose,
+         device_model_id, device_id, device_config, lang, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
          audio_iter_size, audio_block_size, audio_flush_size,
@@ -398,13 +396,14 @@ def main(api_endpoint, credentials, project,
             with open(device_config, 'w') as f:
                 json.dump(payload, f)
 
-    with SampleAssistant(device_model_id, device_id, conversation_stream,
+    with SampleAssistant(lang, device_model_id, device_id,
+                         conversation_stream,
                          grpc_channel, grpc_deadline,
                          device_handler) as assistant:
         # If file arguments are supplied:
         # exit after the first turn of the conversation.
         if input_audio_file or output_audio_file:
-            assistant.converse()
+            assistant.assist()
             return
 
         # If no file arguments supplied:
@@ -415,7 +414,7 @@ def main(api_endpoint, credentials, project,
         while True:
             if wait_for_user_trigger:
                 click.pause(info='Press Enter to send a new request...')
-            continue_conversation = assistant.converse()
+            continue_conversation = assistant.assist()
             # wait for user trigger if there is no follow-up turn in
             # the conversation.
             wait_for_user_trigger = not continue_conversation
