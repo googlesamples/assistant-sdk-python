@@ -1,5 +1,9 @@
 Changelog
 =========
+0.1.0
+-----
+- Support for local device actions
+
 0.0.3
 ----- 
 - Support for x86_64 Linux
