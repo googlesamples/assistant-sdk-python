@@ -157,9 +157,14 @@ def cli(ctx, project, client_secret, verbose, api_endpoint, credentials):
 @click.option('--nickname',
               help='Enter a nickname for the device. You can use this name '
               'when talking to your Assistant to refer to this device.')
+@click.option('--client-type', type=click.Choice(['SERVICE', 'LIBRARY']),
+              required=True,
+              help='Select the type of the client. Use SERVICE if using '
+              'the Google Assistant Service or LIBRARY if using '
+              'the Google Assistant Library.')
 @click.pass_context
 def register(ctx, model, type, trait, manufacturer, product_name, description,
-             device, nickname):
+             device, nickname, client_type):
     """Registers a device model and instance.
 
     Device model and instance fields can only contain letters, numbers, and the
@@ -171,7 +176,8 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
                manufacturer=manufacturer,
                product_name=product_name,
                description=description)
-    ctx.invoke(register_device, device=device, model=model, nickname=nickname)
+    ctx.invoke(register_device, device=device, model=model,
+               nickname=nickname, client_type=client_type)
 
 
 @cli.command('register-model')
@@ -247,14 +253,21 @@ def register_model(ctx, model, type, trait,
               help='Enter an identifier for the device instance. This ID must '
               'be unique within all of the devices registered under the same '
               'Google Developer project.')
+@click.option('--device', required=True,
+              help='Enter the identifier for an existing device model. This '
+              'new device instance will be associated with this device model.')
 @click.option('--model', required=True,
               help='Enter the identifier for an existing device model. This '
               'new device instance will be associated with this device model.')
 @click.option('--nickname',
               help='Enter a nickname for the device. You can use this name '
               'when talking to your Assistant to refer to this device.')
+@click.option('--client-type', type=click.Choice(['SERVICE', 'LIBRARY']),
+              help='Select the type of the client. Use SERVICE if using '
+              'the Google Assistant Service or LIBRARY if using '
+              'the Google Assistant Library.')
 @click.pass_context
-def register_device(ctx, device, model, nickname):
+def register_device(ctx, device, model, nickname, client_type):
     """Registers a device instance under an existing device model.
 
     Device model and instance fields can only contain letters, numbers, and the
@@ -269,6 +282,8 @@ def register_device(ctx, device, model, nickname):
         'id': device,
         'model_id': model,
     }
+    if client_type:
+        payload['client_type'] = 'SDK_' + client_type
     if nickname:
         payload['nickname'] = nickname
 
