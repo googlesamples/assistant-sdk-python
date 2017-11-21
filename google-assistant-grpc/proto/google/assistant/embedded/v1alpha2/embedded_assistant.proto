@@ -17,6 +17,7 @@ syntax = "proto3";
 package google.assistant.embedded.v1alpha2;
 
 import "google/api/annotations.proto";
+import "google/type/latlng.proto";
 
 option go_package = "google.golang.org/genproto/googleapis/assistant/embedded/v1alpha2;embedded";
 option java_multiple_files = true;
@@ -78,6 +79,10 @@ message AssistConfig {
     // Specifies how to process the subsequent incoming audio. Required if
     // [AssistRequest.audio_in][google.assistant.embedded.v1alpha2.AssistRequest.audio_in] bytes will be provided in subsequent requests.
     AudioInConfig audio_in_config = 1;
+
+    // The text input to be sent to the Assistant. This can be populated from a
+    // text interface if audio input is not available.
+    string text_query = 6;
   }
 
   // *Required* Specifies how to format the audio that will be returned.
@@ -172,6 +177,9 @@ message DialogStateIn {
   // *Required* Language of the request in IETF BCP 47 syntax
   // (https://tools.ietf.org/html/bcp47). For example: "en-US".
   string language_code = 2;
+
+  // *Optional* Location of the device where the query originated.
+  DeviceLocation device_location = 5;
 }
 
 // The audio containing the Assistant's response to the query. Sequential chunks
@@ -200,6 +208,11 @@ message DialogStateOut {
     // (by starting a new `Assist` RPC call to send the new audio).
     DIALOG_FOLLOW_ON = 2;
   }
+
+  // *Output-only* Supplemental display text from the Assistant. This could be
+  // the same as the speech spoken in AssistResponse.audio_out or it could
+  // be some additional information which aids the user's understanding.
+  string supplemental_display_text = 1;
 
   // *Output-only* State information for subsequent `Assist` rpc. This
   // value should be saved in the client and returned in the
@@ -332,4 +345,17 @@ message DeviceAction {
   // [action.devices.EXECUTE](https://developers.google.com/actions/smarthome/create-app#actiondevicesexecute)
   // request type.
   string device_request_json = 1;
+}
+
+// There are three sources of locations. They are used with this precedence:
+// 1. This DeviceLocation which is primarily used for mobile devices with GPS,
+//    or for signed-out mode.
+// 2. Location specified by user during device setup, this is per-user, per
+//    device. This location is used if DeviceLocation is not specified.
+// 3. Inferred location based on IP address. This is used only if neither of
+//    above are specified.
+message DeviceLocation {
+  oneof type {
+    google.type.LatLng coordinates = 1;
+  }
 }

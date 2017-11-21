@@ -14,15 +14,16 @@ _sym_db = _symbol_database.Default()
 
 
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from google.type import latlng_pb2 as google_dot_type_dot_latlng__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='google/assistant/embedded/v1alpha2/embedded_assistant.proto',
   package='google.assistant.embedded.v1alpha2',
   syntax='proto3',
-  serialized_pb=_b('\n;google/assistant/embedded/v1alpha2/embedded_assistant.proto\x12\"google.assistant.embedded.v1alpha2\x1a\x1cgoogle/api/annotations.proto\"\xc7\x02\n\x0c\x41ssistConfig\x12L\n\x0f\x61udio_in_config\x18\x01 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha2.AudioInConfigH\x00\x12L\n\x10\x61udio_out_config\x18\x02 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha2.AudioOutConfig\x12J\n\x0f\x64ialog_state_in\x18\x03 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha2.DialogStateIn\x12G\n\rdevice_config\x18\x04 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha2.DeviceConfigB\x06\n\x04type\"\xb6\x01\n\rAudioInConfig\x12L\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32:.google.assistant.embedded.v1alpha2.AudioInConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\"<\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x08\n\x04\x46LAC\x10\x02\"\xe3\x01\n\x0e\x41udioOutConfig\x12M\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32;.google.assistant.embedded.v1alpha2.AudioOutConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"L\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x07\n\x03MP3\x10\x02\x12\x0f\n\x0bOPUS_IN_OGG\x10\x03\"B\n\rDialogStateIn\x12\x1a\n\x12\x63onversation_state\x18\x01 \x01(\x0c\x12\x15\n\rlanguage_code\x18\x02 \x01(\t\"\x1e\n\x08\x41udioOut\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\"\x82\x02\n\x0e\x44ialogStateOut\x12\x1a\n\x12\x63onversation_state\x18\x02 \x01(\x0c\x12Z\n\x0fmicrophone_mode\x18\x03 \x01(\x0e\x32\x41.google.assistant.embedded.v1alpha2.DialogStateOut.MicrophoneMode\x12\x19\n\x11volume_percentage\x18\x04 \x01(\x05\"]\n\x0eMicrophoneMode\x12\x1f\n\x1bMICROPHONE_MODE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x43LOSE_MICROPHONE\x10\x01\x12\x14\n\x10\x44IALOG_FOLLOW_ON\x10\x02\"o\n\rAssistRequest\x12\x42\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha2.AssistConfigH\x00\x12\x12\n\x08\x61udio_in\x18\x02 \x01(\x0cH\x00\x42\x06\n\x04type\"\xce\x03\n\x0e\x41ssistResponse\x12P\n\nevent_type\x18\x01 \x01(\x0e\x32<.google.assistant.embedded.v1alpha2.AssistResponse.EventType\x12?\n\taudio_out\x18\x03 \x01(\x0b\x32,.google.assistant.embedded.v1alpha2.AudioOut\x12G\n\rdevice_action\x18\x06 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha2.DeviceAction\x12S\n\x0espeech_results\x18\x02 \x03(\x0b\x32;.google.assistant.embedded.v1alpha2.SpeechRecognitionResult\x12L\n\x10\x64ialog_state_out\x18\x05 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha2.DialogStateOut\"=\n\tEventType\x12\x1a\n\x16\x45VENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x45ND_OF_UTTERANCE\x10\x01\"@\n\x17SpeechRecognitionResult\x12\x12\n\ntranscript\x18\x01 \x01(\t\x12\x11\n\tstability\x18\x02 \x01(\x02\":\n\x0c\x44\x65viceConfig\x12\x11\n\tdevice_id\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x65vice_model_id\x18\x03 \x01(\t\"+\n\x0c\x44\x65viceAction\x12\x1b\n\x13\x64\x65vice_request_json\x18\x01 \x01(\t2\x88\x01\n\x11\x45mbeddedAssistant\x12s\n\x06\x41ssist\x12\x31.google.assistant.embedded.v1alpha2.AssistRequest\x1a\x32.google.assistant.embedded.v1alpha2.AssistResponse(\x01\x30\x01\x42\x86\x01\n&com.google.assistant.embedded.v1alpha2B\x0e\x41ssistantProtoP\x01ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha2;embeddedb\x06proto3')
+  serialized_pb=_b('\n;google/assistant/embedded/v1alpha2/embedded_assistant.proto\x12\"google.assistant.embedded.v1alpha2\x1a\x1cgoogle/api/annotations.proto\x1a\x18google/type/latlng.proto\"\xdd\x02\n\x0c\x41ssistConfig\x12L\n\x0f\x61udio_in_config\x18\x01 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha2.AudioInConfigH\x00\x12\x14\n\ntext_query\x18\x06 \x01(\tH\x00\x12L\n\x10\x61udio_out_config\x18\x02 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha2.AudioOutConfig\x12J\n\x0f\x64ialog_state_in\x18\x03 \x01(\x0b\x32\x31.google.assistant.embedded.v1alpha2.DialogStateIn\x12G\n\rdevice_config\x18\x04 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha2.DeviceConfigB\x06\n\x04type\"\xb6\x01\n\rAudioInConfig\x12L\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32:.google.assistant.embedded.v1alpha2.AudioInConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\"<\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x08\n\x04\x46LAC\x10\x02\"\xe3\x01\n\x0e\x41udioOutConfig\x12M\n\x08\x65ncoding\x18\x01 \x01(\x0e\x32;.google.assistant.embedded.v1alpha2.AudioOutConfig.Encoding\x12\x19\n\x11sample_rate_hertz\x18\x02 \x01(\x05\x12\x19\n\x11volume_percentage\x18\x03 \x01(\x05\"L\n\x08\x45ncoding\x12\x18\n\x14\x45NCODING_UNSPECIFIED\x10\x00\x12\x0c\n\x08LINEAR16\x10\x01\x12\x07\n\x03MP3\x10\x02\x12\x0f\n\x0bOPUS_IN_OGG\x10\x03\"\x8f\x01\n\rDialogStateIn\x12\x1a\n\x12\x63onversation_state\x18\x01 \x01(\x0c\x12\x15\n\rlanguage_code\x18\x02 \x01(\t\x12K\n\x0f\x64\x65vice_location\x18\x05 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha2.DeviceLocation\"\x1e\n\x08\x41udioOut\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\"\xa5\x02\n\x0e\x44ialogStateOut\x12!\n\x19supplemental_display_text\x18\x01 \x01(\t\x12\x1a\n\x12\x63onversation_state\x18\x02 \x01(\x0c\x12Z\n\x0fmicrophone_mode\x18\x03 \x01(\x0e\x32\x41.google.assistant.embedded.v1alpha2.DialogStateOut.MicrophoneMode\x12\x19\n\x11volume_percentage\x18\x04 \x01(\x05\"]\n\x0eMicrophoneMode\x12\x1f\n\x1bMICROPHONE_MODE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x43LOSE_MICROPHONE\x10\x01\x12\x14\n\x10\x44IALOG_FOLLOW_ON\x10\x02\"o\n\rAssistRequest\x12\x42\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha2.AssistConfigH\x00\x12\x12\n\x08\x61udio_in\x18\x02 \x01(\x0cH\x00\x42\x06\n\x04type\"\xce\x03\n\x0e\x41ssistResponse\x12P\n\nevent_type\x18\x01 \x01(\x0e\x32<.google.assistant.embedded.v1alpha2.AssistResponse.EventType\x12?\n\taudio_out\x18\x03 \x01(\x0b\x32,.google.assistant.embedded.v1alpha2.AudioOut\x12G\n\rdevice_action\x18\x06 \x01(\x0b\x32\x30.google.assistant.embedded.v1alpha2.DeviceAction\x12S\n\x0espeech_results\x18\x02 \x03(\x0b\x32;.google.assistant.embedded.v1alpha2.SpeechRecognitionResult\x12L\n\x10\x64ialog_state_out\x18\x05 \x01(\x0b\x32\x32.google.assistant.embedded.v1alpha2.DialogStateOut\"=\n\tEventType\x12\x1a\n\x16\x45VENT_TYPE_UNSPECIFIED\x10\x00\x12\x14\n\x10\x45ND_OF_UTTERANCE\x10\x01\"@\n\x17SpeechRecognitionResult\x12\x12\n\ntranscript\x18\x01 \x01(\t\x12\x11\n\tstability\x18\x02 \x01(\x02\":\n\x0c\x44\x65viceConfig\x12\x11\n\tdevice_id\x18\x01 \x01(\t\x12\x17\n\x0f\x64\x65vice_model_id\x18\x03 \x01(\t\"+\n\x0c\x44\x65viceAction\x12\x1b\n\x13\x64\x65vice_request_json\x18\x01 \x01(\t\"D\n\x0e\x44\x65viceLocation\x12*\n\x0b\x63oordinates\x18\x01 \x01(\x0b\x32\x13.google.type.LatLngH\x00\x42\x06\n\x04type2\x88\x01\n\x11\x45mbeddedAssistant\x12s\n\x06\x41ssist\x12\x31.google.assistant.embedded.v1alpha2.AssistRequest\x1a\x32.google.assistant.embedded.v1alpha2.AssistResponse(\x01\x30\x01\x42\x86\x01\n&com.google.assistant.embedded.v1alpha2B\x0e\x41ssistantProtoP\x01ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha2;embeddedb\x06proto3')
   ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_type_dot_latlng__pb2.DESCRIPTOR,])
 
 
 
@@ -47,8 +48,8 @@ _AUDIOINCONFIG_ENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=582,
-  serialized_end=642,
+  serialized_start=630,
+  serialized_end=690,
 )
 _sym_db.RegisterEnumDescriptor(_AUDIOINCONFIG_ENCODING)
 
@@ -77,8 +78,8 @@ _AUDIOOUTCONFIG_ENCODING = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=796,
-  serialized_end=872,
+  serialized_start=844,
+  serialized_end=920,
 )
 _sym_db.RegisterEnumDescriptor(_AUDIOOUTCONFIG_ENCODING)
 
@@ -103,8 +104,8 @@ _DIALOGSTATEOUT_MICROPHONEMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1140,
-  serialized_end=1233,
+  serialized_start=1301,
+  serialized_end=1394,
 )
 _sym_db.RegisterEnumDescriptor(_DIALOGSTATEOUT_MICROPHONEMODE)
 
@@ -125,8 +126,8 @@ _ASSISTRESPONSE_EVENTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1750,
-  serialized_end=1811,
+  serialized_start=1911,
+  serialized_end=1972,
 )
 _sym_db.RegisterEnumDescriptor(_ASSISTRESPONSE_EVENTTYPE)
 
@@ -146,21 +147,28 @@ _ASSISTCONFIG = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='audio_out_config', full_name='google.assistant.embedded.v1alpha2.AssistConfig.audio_out_config', index=1,
+      name='text_query', full_name='google.assistant.embedded.v1alpha2.AssistConfig.text_query', index=1,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='audio_out_config', full_name='google.assistant.embedded.v1alpha2.AssistConfig.audio_out_config', index=2,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='dialog_state_in', full_name='google.assistant.embedded.v1alpha2.AssistConfig.dialog_state_in', index=2,
+      name='dialog_state_in', full_name='google.assistant.embedded.v1alpha2.AssistConfig.dialog_state_in', index=3,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='device_config', full_name='google.assistant.embedded.v1alpha2.AssistConfig.device_config', index=3,
+      name='device_config', full_name='google.assistant.embedded.v1alpha2.AssistConfig.device_config', index=4,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -181,8 +189,8 @@ _ASSISTCONFIG = _descriptor.Descriptor(
       name='type', full_name='google.assistant.embedded.v1alpha2.AssistConfig.type',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=130,
-  serialized_end=457,
+  serialized_start=156,
+  serialized_end=505,
 )
 
 
@@ -220,8 +228,8 @@ _AUDIOINCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=460,
-  serialized_end=642,
+  serialized_start=508,
+  serialized_end=690,
 )
 
 
@@ -266,8 +274,8 @@ _AUDIOOUTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=645,
-  serialized_end=872,
+  serialized_start=693,
+  serialized_end=920,
 )
 
 
@@ -292,6 +300,13 @@ _DIALOGSTATEIN = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='device_location', full_name='google.assistant.embedded.v1alpha2.DialogStateIn.device_location', index=2,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -304,8 +319,8 @@ _DIALOGSTATEIN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=874,
-  serialized_end=940,
+  serialized_start=923,
+  serialized_end=1066,
 )
 
 
@@ -335,8 +350,8 @@ _AUDIOOUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=942,
-  serialized_end=972,
+  serialized_start=1068,
+  serialized_end=1098,
 )
 
 
@@ -348,21 +363,28 @@ _DIALOGSTATEOUT = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='conversation_state', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.conversation_state', index=0,
+      name='supplemental_display_text', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.supplemental_display_text', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='conversation_state', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.conversation_state', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='microphone_mode', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.microphone_mode', index=1,
+      name='microphone_mode', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.microphone_mode', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='volume_percentage', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.volume_percentage', index=2,
+      name='volume_percentage', full_name='google.assistant.embedded.v1alpha2.DialogStateOut.volume_percentage', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -381,8 +403,8 @@ _DIALOGSTATEOUT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=975,
-  serialized_end=1233,
+  serialized_start=1101,
+  serialized_end=1394,
 )
 
 
@@ -422,8 +444,8 @@ _ASSISTREQUEST = _descriptor.Descriptor(
       name='type', full_name='google.assistant.embedded.v1alpha2.AssistRequest.type',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1235,
-  serialized_end=1346,
+  serialized_start=1396,
+  serialized_end=1507,
 )
 
 
@@ -482,8 +504,8 @@ _ASSISTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1349,
-  serialized_end=1811,
+  serialized_start=1510,
+  serialized_end=1972,
 )
 
 
@@ -520,8 +542,8 @@ _SPEECHRECOGNITIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1813,
-  serialized_end=1877,
+  serialized_start=1974,
+  serialized_end=2038,
 )
 
 
@@ -558,8 +580,8 @@ _DEVICECONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1879,
-  serialized_end=1937,
+  serialized_start=2040,
+  serialized_end=2098,
 )
 
 
@@ -589,8 +611,42 @@ _DEVICEACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1939,
-  serialized_end=1982,
+  serialized_start=2100,
+  serialized_end=2143,
+)
+
+
+_DEVICELOCATION = _descriptor.Descriptor(
+  name='DeviceLocation',
+  full_name='google.assistant.embedded.v1alpha2.DeviceLocation',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='coordinates', full_name='google.assistant.embedded.v1alpha2.DeviceLocation.coordinates', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='type', full_name='google.assistant.embedded.v1alpha2.DeviceLocation.type',
+      index=0, containing_type=None, fields=[]),
+  ],
+  serialized_start=2145,
+  serialized_end=2213,
 )
 
 _ASSISTCONFIG.fields_by_name['audio_in_config'].message_type = _AUDIOINCONFIG
@@ -600,10 +656,14 @@ _ASSISTCONFIG.fields_by_name['device_config'].message_type = _DEVICECONFIG
 _ASSISTCONFIG.oneofs_by_name['type'].fields.append(
   _ASSISTCONFIG.fields_by_name['audio_in_config'])
 _ASSISTCONFIG.fields_by_name['audio_in_config'].containing_oneof = _ASSISTCONFIG.oneofs_by_name['type']
+_ASSISTCONFIG.oneofs_by_name['type'].fields.append(
+  _ASSISTCONFIG.fields_by_name['text_query'])
+_ASSISTCONFIG.fields_by_name['text_query'].containing_oneof = _ASSISTCONFIG.oneofs_by_name['type']
 _AUDIOINCONFIG.fields_by_name['encoding'].enum_type = _AUDIOINCONFIG_ENCODING
 _AUDIOINCONFIG_ENCODING.containing_type = _AUDIOINCONFIG
 _AUDIOOUTCONFIG.fields_by_name['encoding'].enum_type = _AUDIOOUTCONFIG_ENCODING
 _AUDIOOUTCONFIG_ENCODING.containing_type = _AUDIOOUTCONFIG
+_DIALOGSTATEIN.fields_by_name['device_location'].message_type = _DEVICELOCATION
 _DIALOGSTATEOUT.fields_by_name['microphone_mode'].enum_type = _DIALOGSTATEOUT_MICROPHONEMODE
 _DIALOGSTATEOUT_MICROPHONEMODE.containing_type = _DIALOGSTATEOUT
 _ASSISTREQUEST.fields_by_name['config'].message_type = _ASSISTCONFIG
@@ -619,6 +679,10 @@ _ASSISTRESPONSE.fields_by_name['device_action'].message_type = _DEVICEACTION
 _ASSISTRESPONSE.fields_by_name['speech_results'].message_type = _SPEECHRECOGNITIONRESULT
 _ASSISTRESPONSE.fields_by_name['dialog_state_out'].message_type = _DIALOGSTATEOUT
 _ASSISTRESPONSE_EVENTTYPE.containing_type = _ASSISTRESPONSE
+_DEVICELOCATION.fields_by_name['coordinates'].message_type = google_dot_type_dot_latlng__pb2._LATLNG
+_DEVICELOCATION.oneofs_by_name['type'].fields.append(
+  _DEVICELOCATION.fields_by_name['coordinates'])
+_DEVICELOCATION.fields_by_name['coordinates'].containing_oneof = _DEVICELOCATION.oneofs_by_name['type']
 DESCRIPTOR.message_types_by_name['AssistConfig'] = _ASSISTCONFIG
 DESCRIPTOR.message_types_by_name['AudioInConfig'] = _AUDIOINCONFIG
 DESCRIPTOR.message_types_by_name['AudioOutConfig'] = _AUDIOOUTCONFIG
@@ -630,6 +694,7 @@ DESCRIPTOR.message_types_by_name['AssistResponse'] = _ASSISTRESPONSE
 DESCRIPTOR.message_types_by_name['SpeechRecognitionResult'] = _SPEECHRECOGNITIONRESULT
 DESCRIPTOR.message_types_by_name['DeviceConfig'] = _DEVICECONFIG
 DESCRIPTOR.message_types_by_name['DeviceAction'] = _DEVICEACTION
+DESCRIPTOR.message_types_by_name['DeviceLocation'] = _DEVICELOCATION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 AssistConfig = _reflection.GeneratedProtocolMessageType('AssistConfig', (_message.Message,), dict(
@@ -709,6 +774,13 @@ DeviceAction = _reflection.GeneratedProtocolMessageType('DeviceAction', (_messag
   ))
 _sym_db.RegisterMessage(DeviceAction)
 
+DeviceLocation = _reflection.GeneratedProtocolMessageType('DeviceLocation', (_message.Message,), dict(
+  DESCRIPTOR = _DEVICELOCATION,
+  __module__ = 'google.assistant.embedded.v1alpha2.embedded_assistant_pb2'
+  # @@protoc_insertion_point(class_scope:google.assistant.embedded.v1alpha2.DeviceLocation)
+  ))
+_sym_db.RegisterMessage(DeviceLocation)
+
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n&com.google.assistant.embedded.v1alpha2B\016AssistantProtoP\001ZJgoogle.golang.org/genproto/googleapis/assistant/embedded/v1alpha2;embedded'))
@@ -719,8 +791,8 @@ _EMBEDDEDASSISTANT = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=1985,
-  serialized_end=2121,
+  serialized_start=2216,
+  serialized_end=2352,
   methods=[
   _descriptor.MethodDescriptor(
     name='Assist',
