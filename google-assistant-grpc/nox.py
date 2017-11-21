@@ -19,7 +19,7 @@ import nox
 
 @nox.session
 def lint(session):
-    session.interpreter = 'python3.4'
+    session.interpreter = 'python3'
     session.install('pip', 'setuptools')
     session.install('docutils', 'flake8')
     session.run('flake8', 'nox.py', 'setup.py')
