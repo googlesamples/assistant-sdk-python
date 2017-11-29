@@ -141,8 +141,8 @@ def cli(ctx, project, client_secret, verbose, api_endpoint, credentials):
 @click.option('--trait', multiple=True,
               help='Add traits (abilities) that the device supports. Pass '
               'this flag multiple times to create a list of traits. Refer to '
-              'https://developers.google.com/assistant/sdk for a list of '
-              'supported traits.')
+              'https://developers.google.com/assistant/sdk/reference/traits/ '
+              'for a list of supported traits.')
 @click.option('--manufacturer', required=True,
               help='Enter the manufacturer\'s name in this field (for '
               'example, "Assistant SDK developer"). This information may be '
@@ -197,8 +197,8 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
 @click.option('--trait', multiple=True,
               help='Add traits (abilities) that the device supports. Pass '
               'this flag multiple times to create a list of traits. Refer to '
-              'https://developers.google.com/assistant/sdk for a list of '
-              'supported traits.')
+              'https://developers.google.com/assistant/sdk/reference/traits/ '
+              'for a list of supported traits.')
 @click.option('--manufacturer', required=True,
               help='Enter the manufacturer\'s name in this field (for '
               'example, "Assistant SDK developer"). This information may be '
