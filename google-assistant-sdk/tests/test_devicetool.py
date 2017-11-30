@@ -22,6 +22,6 @@ def test_print_model_with_no_trait(caplog):
         'projectId': 'project-id',
         'deviceType': 'device-type'
     })
-    assert 'model-id' in caplog.text()
-    assert 'project-id' in caplog.text()
-    assert 'device-type' in caplog.text()
+    assert 'model-id' in caplog.text
+    assert 'project-id' in caplog.text
+    assert 'device-type' in caplog.text

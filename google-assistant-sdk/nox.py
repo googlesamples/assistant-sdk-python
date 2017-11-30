@@ -38,7 +38,7 @@ def lint(session):
 def unittest(session, python_version):
     session.interpreter = 'python' + python_version
     session.install('pip', 'setuptools')
-    session.install('pytest', 'pytest-capturelog')
+    session.install('pytest')
     session.install('../google-assistant-grpc/')
     session.install('-e', '.[samples]')
     session.run('py.test', 'tests')
