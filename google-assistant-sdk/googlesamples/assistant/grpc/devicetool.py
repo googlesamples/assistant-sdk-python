@@ -241,11 +241,12 @@ def register_model(ctx, model, type, trait,
     if r.status_code == 200:
         click.echo('Updating existing device model: %s' % model)
         r = session.put(model_url, data=json.dumps(payload))
-    elif r.status_code in (400, 404):
+    elif r.status_code in (400, 403, 404):
         click.echo('Creating new device model')
         r = session.post(model_base_url, data=json.dumps(payload))
     else:
-        raise failed_request_exception('Unknown error occurred', r)
+        raise failed_request_exception('Failed to check existing device model',
+                                       r)
     if r.status_code != 200:
         raise failed_request_exception('Failed to register model', r)
     click.echo('Model %s successfully registered' % model)
@@ -296,7 +297,7 @@ def register_device(ctx, device, model, nickname, client_type):
         click.echo('Updating existing device: %s' % device)
         session.delete(device_url)
         r = session.post(device_base_url, data=json.dumps(payload))
-    elif r.status_code in (400, 404):
+    elif r.status_code in (400, 403, 404):
         click.echo('Creating new device')
         r = session.post(device_base_url, data=json.dumps(payload))
     else:
