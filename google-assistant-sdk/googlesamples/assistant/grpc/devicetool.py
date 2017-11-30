@@ -253,12 +253,12 @@ def register_model(ctx, model, type, trait,
 
 @cli.command('register-device')
 @click.option('--device', required=True,
-              help='Enter an identifier for the device instance. This ID must '
-              'be unique within all of the devices registered under the same '
-              'Google Developer project.')
-@click.option('--device', required=True,
-              help='Enter the identifier for an existing device model. This '
-              'new device instance will be associated with this device model.')
+              help='Enter an identifier for a device instance. If the device '
+              'ID already exists, this command will update the device '
+              'instance. If it does not exist, this command will create '
+              'a new device instance. This ID must be unique within all '
+              'of the devices registered under the same Google Developer '
+              'project.')
 @click.option('--model', required=True,
               help='Enter the identifier for an existing device model. This '
               'new device instance will be associated with this device model.')
