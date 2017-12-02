@@ -265,7 +265,8 @@ def register_model(ctx, model, type, trait,
 @click.option('--nickname',
               help='Enter a nickname for the device. You can use this name '
               'when talking to your Assistant to refer to this device.')
-@click.option('--client-type', type=click.Choice(['SERVICE', 'LIBRARY']),
+@click.option('--client-type', required=True,
+              type=click.Choice(['SERVICE', 'LIBRARY']),
               help='Select the type of the client. Use SERVICE if using '
               'the Google Assistant Service or LIBRARY if using '
               'the Google Assistant Library.')
