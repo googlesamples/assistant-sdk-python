@@ -170,9 +170,14 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
              device, nickname, client_type):
     """Registers a device model and instance.
 
-    Device model and instance fields can only contain letters, numbers, and the
-    following symbols: period (.), hyphen (-), underscore (_), space ( ) and
-    plus (+). The first character of a field must be a letter or number.
+    Device model fields can only contain letters, numbers, and the following
+    symbols: period (.), hyphen (-), underscore (_), space ( ) and plus (+).
+    The first character of a field must be a letter or number.
+
+    Device instance fields must start with a letter or number. The device ID
+    can only contain letters, numbers, and the following symbols: period (.),
+    hyphen (-), underscore (_), and plus (+). The device nickname can only
+    contain numbers, letters, and the space ( ) symbol.
     """
     ctx.invoke(register_model,
                model=model, type=type, trait=trait,
@@ -214,9 +219,9 @@ def register_model(ctx, model, type, trait,
                    manufacturer, product_name, description):
     """Registers a device model.
 
-    Device model and instance fields can only contain letters, numbers, and the
-    following symbols: period (.), hyphen (-), underscore (_), space ( ) and
-    plus (+). The first character of a field must be a letter or number.
+    Device model fields can only contain letters, numbers, and the following
+    symbols: period (.), hyphen (-), underscore (_), space ( ) and plus (+).
+    The first character of a field must be a letter or number.
     """
     session = ctx.obj['SESSION']
 
@@ -274,9 +279,10 @@ def register_model(ctx, model, type, trait,
 def register_device(ctx, device, model, nickname, client_type):
     """Registers a device instance under an existing device model.
 
-    Device model and instance fields can only contain letters, numbers, and the
-    following symbols: period (.), hyphen (-), underscore (_), space ( ) and
-    plus (+). The first character of a field must be a letter or number.
+    Device instance fields must start with a letter or number. The device ID
+    can only contain letters, numbers, and the following symbols: period (.),
+    hyphen (-), underscore (_), and plus (+). The device nickname can only
+    contain numbers, letters, and the space ( ) symbol.
     """
     session = ctx.obj['SESSION']
 
