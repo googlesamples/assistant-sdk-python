@@ -97,7 +97,7 @@ message AssistConfig {
 
 // Specifies how to process the `audio_in` data that will be provided in
 // subsequent requests. For recommended settings, see the Google Assistant SDK
-// [best practices](https://developers.google.com/assistant/sdk/develop/grpc/best-practices/audio).
+// [best practices](https://developers.google.com/assistant/sdk/guides/service/python/best-practices/audio).
 message AudioInConfig {
   // Audio encoding of the data sent in the audio message.
   // Audio must be one-channel (mono). The only language supported is "en-US".
@@ -174,8 +174,11 @@ message DialogStateIn {
   // device after it was first setup and/or factory-default-reset.
   bytes conversation_state = 1;
 
-  // *Required* Language of the request in IETF BCP 47 syntax
-  // (https://tools.ietf.org/html/bcp47). For example: "en-US".
+  // *Required* Language of the request in
+  // [IETF BCP 47 syntax](https://tools.ietf.org/html/bcp47). For example:
+  // "en-US". If you have selected a language for this `device_id` using the
+  // Settings menu in your phone's Google Assistant app, that selection will
+  // override this value.
   string language_code = 2;
 
   // *Optional* Location of the device where the query originated.
@@ -317,6 +320,12 @@ message SpeechRecognitionResult {
 }
 
 // *Required* Fields that identify the device to the Assistant.
+//
+// See also:
+//
+// *   [Register a Device - REST API](https://developers.google.com/assistant/sdk/reference/device-registration/register-device-manual)
+// *   [Device Model and Instance Schemas](https://developers.google.com/assistant/sdk/reference/device-registration/model-and-instance-schemas)
+// *   [Device Proto](https://developers.google.com/assistant/sdk/reference/rpc/google.assistant.devices.v1alpha2#device)
 message DeviceConfig {
   // *Required* Unique identifier for the device. The id length must be 128
   // characters or less. Example: DBCDW098234. This MUST match the device_id
