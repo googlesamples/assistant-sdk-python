@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import os.path
+import sys
 import uuid
 
 import click
@@ -307,7 +308,7 @@ def main(api_endpoint, credentials, project,
         logging.error('Error loading credentials: %s', e)
         logging.error('Run google-oauthlib-tool to initialize '
                       'new OAuth 2.0 credentials.')
-        return
+        sys.exit(-1)
 
     # Create an authorized gRPC channel.
     grpc_channel = google.auth.transport.grpc.secure_authorized_channel(
@@ -370,12 +371,16 @@ def main(api_endpoint, credentials, project,
                 device_id = device['id']
                 device_model_id = device['model_id']
         except Exception as e:
-            logging.error('Error loading device config: %s' % e)
+            logging.warning('Device config not found: %s' % e)
             logging.info('Registering device')
             if not device_model_id:
-                logging.error('--device-model-id parameter required '
+                logging.error('Option --device-model-id required '
                               'when registrering a model.')
-                return
+                sys.exit(-1)
+            if not project:
+                logging.error('Option --project required '
+                              'when registrering a model.')
+                sys.exit(-1)
             device_base_url = (
                 'https://%s/v1alpha2/projects/%s/devices' % (api_endpoint,
                                                              project)
@@ -391,7 +396,8 @@ def main(api_endpoint, credentials, project,
             r = session.post(device_base_url, data=json.dumps(payload))
             if r.status_code != 200:
                 logging.error('Failed to register device: %s', r.text)
-                return
+                sys.exit(-1)
+            logging.info('Device registered: %s', device_id)
             os.makedirs(os.path.dirname(device_config), exist_ok=True)
             with open(device_config, 'w') as f:
                 json.dump(payload, f)
