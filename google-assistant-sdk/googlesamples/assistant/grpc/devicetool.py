@@ -52,7 +52,7 @@ def resolve_project_id(client_secrets, credentials):
         raise click.ClickException('Error loading client secret: %s.\n'
                                    'Run the device tool '
                                    'with --client-secrets '
-                                   'or --project option.\n'
+                                   'or --project-id option.\n'
                                    'Or copy the %s file '
                                    'in the current directory.'
                                    % (e, client_secrets))
@@ -65,7 +65,7 @@ def build_api_url(api_endpoint, api_version, project_id):
 
 
 def build_client_from_context(ctx):
-    project_id = (ctx.obj['PROJECT']
+    project_id = (ctx.obj['PROJECT_ID']
                   or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
                                         ctx.obj['CREDENTIALS']))
     api_url = build_api_url(ctx.obj['API_ENDPOINT'],
@@ -103,7 +103,7 @@ def pretty_print_device(device):
 
 
 @click.group()
-@click.option('--project',
+@click.option('--project-id',
               help='Enter the Google Developer Project ID that you want to '
               'use with the registration tool. If you don\'t use this flag, '
               'the tool will use the project listed in the '
@@ -113,8 +113,9 @@ def pretty_print_device(device):
               help='Enter the path and filename for the '
               '<client_secret_client-id.json> file you downloaded from your '
               'developer project. This file is used to infer the Google '
-              'Developer Project ID if it was not provided with the --project '
-              'flag. If the --project flag and this flag are not used, the '
+              'Developer Project ID if it was not provided with the '
+              '--project-id flag. '
+              'If the --project-id flag and this flag are not used, the '
               'tool will look for this file in the current directory (by '
               'searching for a file named after the client_id stored in the '
               'credentials file).')
@@ -134,7 +135,7 @@ def pretty_print_device(device):
               'API. You can use this flag if the credentials were generated '
               'in a location that is different than the default.')
 @click.pass_context
-def cli(ctx, project, client_secrets, verbose, api_endpoint, credentials):
+def cli(ctx, project_id, client_secrets, verbose, api_endpoint, credentials):
     try:
         with open(credentials, 'r') as f:
             c = google.oauth2.credentials.Credentials(token=None,
@@ -148,7 +149,7 @@ def cli(ctx, project, client_secrets, verbose, api_endpoint, credentials):
     ctx.obj['API_ENDPOINT'] = api_endpoint
     ctx.obj['API_VERSION'] = ASSISTANT_API_VERSION
     ctx.obj['SESSION'] = None
-    ctx.obj['PROJECT'] = project
+    ctx.obj['PROJECT_ID'] = project_id
     ctx.obj['CREDENTIALS'] = c
     ctx.obj['CLIENT_SECRETS'] = client_secrets
     logging.basicConfig(format='',
@@ -207,13 +208,14 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
     hyphen (-), underscore (_), and plus (+). The device nickname can only
     contain numbers, letters, and the space ( ) symbol.
     """
-    # cache SESSION and PROJECT so that we don't re-create them between request
+    # cache SESSION and PROJECT_ID
+    # so that we don't re-create them between commands
     ctx.obj['SESSION'] = google.auth.transport.requests.AuthorizedSession(
         ctx.obj['CREDENTIALS']
     )
-    ctx.obj['PROJECT'] = (ctx.obj['PROJECT']
-                          or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
-                                                ctx.obj['CREDENTIALS']))
+    ctx.obj['PROJECT_ID'] = (ctx.obj['PROJECT_ID']
+                             or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
+                                                   ctx.obj['CREDENTIALS']))
     ctx.invoke(register_model,
                model=model, type=type, trait=trait,
                manufacturer=manufacturer,
@@ -398,7 +400,7 @@ def delete(ctx, resource, id):
 def list(ctx, resource):
     """Lists all of the device models and/or instances associated with the
     current Google Developer project. To change the current project, use the
-    devicetool's --project flag.
+    devicetool's --project-id flag.
     """
     session, api_url, project_id = build_client_from_context(ctx)
     url = '/'.join([api_url, resource])
