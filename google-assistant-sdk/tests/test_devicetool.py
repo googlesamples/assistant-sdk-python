@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import tempfile
+
 from googlesamples.assistant.grpc import devicetool
 
 
@@ -25,3 +28,46 @@ def test_print_model_with_no_trait(caplog):
     assert 'model-id' in caplog.text
     assert 'project-id' in caplog.text
     assert 'device-type' in caplog.text
+
+
+def test_resolve_project_id():
+    with tempfile.NamedTemporaryFile(mode='w+') as f:
+        f.write(json.dumps({
+            'installed': {
+                'project_id': 'foo'
+            }
+        }))
+        f.flush()
+        assert 'foo' == devicetool.resolve_project_id(f.name, '42')
+
+
+def test_build_api_url():
+    assert ('https://myhostname/myversion/projects/myproject' ==
+            devicetool.build_api_url('myhostname', 'myversion', 'myproject'))
+
+
+class Context(object):
+    pass
+
+
+class Session(object):
+    pass
+
+
+def test_build_client():
+    my_session = Session()
+    my_context = Context()
+    my_context.obj = {
+        'PROJECT': 'myproject',
+        'API_ENDPOINT': 'myhostname',
+        'API_VERSION': 'myversion',
+        'SESSION': my_session
+    }
+    session, api_url, project = devicetool.build_client_from_context(
+        my_context
+    )
+    assert session is my_session
+    assert project == 'myproject'
+    assert 'myhostname' in api_url
+    assert 'myversion' in api_url
+    assert 'myproject' in api_url

@@ -23,6 +23,9 @@ import google.oauth2.credentials
 import google.auth.transport.requests
 
 
+ASSISTANT_API_VERSION = 'v1alpha2'
+
+
 def failed_request_exception(message, r):
     """Build ClickException from a failed request."""
     try:
@@ -37,8 +40,46 @@ def failed_request_exception(message, r):
                                                     r.text))
 
 
-# Prints out a device model in the terminal by parsing dict
+def resolve_project_id(client_secrets, credentials):
+    """Resolve project ID from client secrets."""
+    if client_secrets is None:
+        client_secrets = 'client_secret_%s.json' % credentials.client_id
+    try:
+        with open(client_secrets, 'r') as f:
+            secret = json.load(f)
+            return secret['installed']['project_id']
+    except Exception as e:
+        raise click.ClickException('Error loading client secret: %s.\n'
+                                   'Run the device tool '
+                                   'with --client-secrets '
+                                   'or --project option.\n'
+                                   'Or copy the %s file '
+                                   'in the current directory.'
+                                   % (e, client_secrets))
+
+
+def build_api_url(api_endpoint, api_version, project_id):
+    return 'https://%s/%s/projects/%s' % (api_endpoint,
+                                          api_version,
+                                          project_id)
+
+
+def build_client_from_context(ctx):
+    project_id = (ctx.obj['PROJECT']
+                  or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
+                                        ctx.obj['CREDENTIALS']))
+    api_url = build_api_url(ctx.obj['API_ENDPOINT'],
+                            ctx.obj['API_VERSION'],
+                            project_id)
+    session = (ctx.obj['SESSION'] or
+               google.auth.transport.requests.AuthorizedSession(
+                   ctx.obj['CREDENTIALS']
+               ))
+    return session, api_url, project_id
+
+
 def pretty_print_model(devicemodel):
+    """Prints out a device model in the terminal by parsing dict."""
     PRETTY_PRINT_MODEL = """Device Model Id: %(deviceModelId)s
         Project Id: %(projectId)s
         Device Type: %(deviceType)s"""
@@ -51,8 +92,8 @@ def pretty_print_model(devicemodel):
     logging.info('')  # Newline
 
 
-# Prints out a device instance in the terminal by parsing dict
 def pretty_print_device(device):
+    """Prints out a device instance in the terminal by parsing dict."""
     logging.info('Device Instance Id: %s' % device['id'])
     if 'nickname' in device:
         logging.info('    Nickname: %s' % device['nickname'])
@@ -67,8 +108,8 @@ def pretty_print_device(device):
               'use with the registration tool. If you don\'t use this flag, '
               'the tool will use the project listed in the '
               '<client_secret_client-id.json> file you specify with the '
-              '--client-secret flag.')
-@click.option('--client-secret',
+              '--client-secrets flag.')
+@click.option('--client-secrets',
               help='Enter the path and filename for the '
               '<client_secret_client-id.json> file you downloaded from your '
               'developer project. This file is used to infer the Google '
@@ -93,7 +134,7 @@ def pretty_print_device(device):
               'API. You can use this flag if the credentials were generated '
               'in a location that is different than the default.')
 @click.pass_context
-def cli(ctx, project, client_secret, verbose, api_endpoint, credentials):
+def cli(ctx, project, client_secrets, verbose, api_endpoint, credentials):
     try:
         with open(credentials, 'r') as f:
             c = google.oauth2.credentials.Credentials(token=None,
@@ -104,25 +145,12 @@ def cli(ctx, project, client_secret, verbose, api_endpoint, credentials):
         raise click.ClickException('Error loading credentials: %s.\n'
                                    'Run google-oauthlib-tool to initialize '
                                    'new OAuth 2.0 credentials.' % e)
-    if project is None:
-        if client_secret is None:
-            client_secret = 'client_secret_%s.json' % c.client_id
-        try:
-            with open(client_secret, 'r') as f:
-                secret = json.load(f)
-                project = secret['installed']['project_id']
-        except Exception as e:
-            raise click.ClickException('Error loading client secret: %s.\n'
-                                       'Run the register tool '
-                                       'with --client-secret '
-                                       'or --project option.\n'
-                                       'Or copy the %s file '
-                                       'in the current directory.'
-                                       % (e, client_secret))
-    ctx.obj['SESSION'] = google.auth.transport.requests.AuthorizedSession(c)
-    ctx.obj['API_URL'] = ('https://%s/v1alpha2/projects/%s'
-                          % (api_endpoint, project))
-    ctx.obj['PROJECT_ID'] = project
+    ctx.obj['API_ENDPOINT'] = api_endpoint
+    ctx.obj['API_VERSION'] = ASSISTANT_API_VERSION
+    ctx.obj['SESSION'] = None
+    ctx.obj['PROJECT'] = project
+    ctx.obj['CREDENTIALS'] = c
+    ctx.obj['CLIENT_SECRETS'] = client_secrets
     logging.basicConfig(format='',
                         level=logging.DEBUG if verbose else logging.INFO)
 
@@ -179,6 +207,13 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
     hyphen (-), underscore (_), and plus (+). The device nickname can only
     contain numbers, letters, and the space ( ) symbol.
     """
+    # cache SESSION and PROJECT so that we don't re-create them between request
+    ctx.obj['SESSION'] = google.auth.transport.requests.AuthorizedSession(
+        ctx.obj['CREDENTIALS']
+    )
+    ctx.obj['PROJECT'] = (ctx.obj['PROJECT']
+                          or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
+                                                ctx.obj['CREDENTIALS']))
     ctx.invoke(register_model,
                model=model, type=type, trait=trait,
                manufacturer=manufacturer,
@@ -223,13 +258,12 @@ def register_model(ctx, model, type, trait,
     symbols: period (.), hyphen (-), underscore (_), space ( ) and plus (+).
     The first character of a field must be a letter or number.
     """
-    session = ctx.obj['SESSION']
-
-    model_base_url = '/'.join([ctx.obj['API_URL'], 'deviceModels'])
+    session, api_url, project_id = build_client_from_context(ctx)
+    model_base_url = '/'.join([api_url, 'deviceModels'])
     model_url = '/'.join([model_base_url, model])
     payload = {
         'device_model_id': model,
-        'project_id': ctx.obj['PROJECT_ID'],
+        'project_id': project_id,
         'device_type': 'action.devices.types.' + type,
     }
     if trait:
@@ -246,11 +280,12 @@ def register_model(ctx, model, type, trait,
     if r.status_code == 200:
         click.echo('Updating existing device model: %s' % model)
         r = session.put(model_url, data=json.dumps(payload))
-    elif r.status_code in (400, 404):
+    elif r.status_code in (400, 403, 404):
         click.echo('Creating new device model')
         r = session.post(model_base_url, data=json.dumps(payload))
     else:
-        raise failed_request_exception('Unknown error occurred', r)
+        raise failed_request_exception('Failed to check existing device model',
+                                       r)
     if r.status_code != 200:
         raise failed_request_exception('Failed to register model', r)
     click.echo('Model %s successfully registered' % model)
@@ -284,9 +319,8 @@ def register_device(ctx, device, model, nickname, client_type):
     hyphen (-), underscore (_), and plus (+). The device nickname can only
     contain numbers, letters, and the space ( ) symbol.
     """
-    session = ctx.obj['SESSION']
-
-    device_base_url = '/'.join([ctx.obj['API_URL'], 'devices'])
+    session, api_url, project_id = build_client_from_context(ctx)
+    device_base_url = '/'.join([api_url, 'devices'])
     device_url = '/'.join([device_base_url, device])
     payload = {
         'id': device,
@@ -303,7 +337,7 @@ def register_device(ctx, device, model, nickname, client_type):
         click.echo('Updating existing device: %s' % device)
         session.delete(device_url)
         r = session.post(device_base_url, data=json.dumps(payload))
-    elif r.status_code in (400, 404):
+    elif r.status_code in (400, 403, 404):
         click.echo('Creating new device')
         r = session.post(device_base_url, data=json.dumps(payload))
     else:
@@ -325,9 +359,8 @@ def get(ctx, resource, id):
     """Gets all of the information (fields) for a given device model or
     instance.
     """
-    session = ctx.obj['SESSION']
-
-    url = '/'.join([ctx.obj['API_URL'], resource, id])
+    session, api_url, project_id = build_client_from_context(ctx)
+    url = '/'.join([api_url, resource, id])
     r = session.get(url)
     if r.status_code != 200:
         raise failed_request_exception('Failed to get resource', r)
@@ -350,8 +383,8 @@ def get(ctx, resource, id):
 def delete(ctx, resource, id):
     """Delete given device model or instance.
     """
-    session = ctx.obj['SESSION']
-    url = '/'.join([ctx.obj['API_URL'], resource, id])
+    session, api_url, project_id = build_client_from_context(ctx)
+    url = '/'.join([api_url, resource, id])
     r = session.delete(url)
     if r.status_code != 200:
         raise failed_request_exception('failed to delete resource', r)
@@ -367,9 +400,8 @@ def list(ctx, resource):
     current Google Developer project. To change the current project, use the
     devicetool's --project flag.
     """
-    session = ctx.obj['SESSION']
-
-    url = '/'.join([ctx.obj['API_URL'], resource])
+    session, api_url, project_id = build_client_from_context(ctx)
+    url = '/'.join([api_url, resource])
     r = session.get(url)
     if r.status_code != 200:
         raise failed_request_exception('Failed to list resources', r)
