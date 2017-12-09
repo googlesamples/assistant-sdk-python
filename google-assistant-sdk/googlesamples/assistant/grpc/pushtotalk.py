@@ -375,11 +375,11 @@ def main(api_endpoint, credentials, project_id,
             logging.info('Registering device')
             if not device_model_id:
                 logging.error('Option --device-model-id required '
-                              'when registrering a model.')
+                              'when registering a device instance.')
                 sys.exit(-1)
             if not project_id:
-                logging.error('Option --project required '
-                              'when registrering a model.')
+                logging.error('Option --project-id required '
+                              'when registering a device instance.')
                 sys.exit(-1)
             device_base_url = (
                 'https://%s/v1alpha2/projects/%s/devices' % (api_endpoint,
