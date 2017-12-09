@@ -212,8 +212,8 @@ class SampleAssistant(object):
               default=os.path.join(click.get_app_dir('google-oauthlib-tool'),
                                    'credentials.json'),
               help='Path to read OAuth2 credentials.')
-@click.option('--project',
-              metavar='<project>',
+@click.option('--project-id',
+              metavar='<project id>',
               help=('Google Developer Project ID used for registration '
                     'if --device-id is not specified'))
 @click.option('--device-model-id',
@@ -273,7 +273,7 @@ class SampleAssistant(object):
               help='gRPC deadline in seconds')
 @click.option('--once', default=False, is_flag=True,
               help='Force termination after a single conversation.')
-def main(api_endpoint, credentials, project,
+def main(api_endpoint, credentials, project_id,
          device_model_id, device_id, device_config, lang, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
@@ -377,13 +377,13 @@ def main(api_endpoint, credentials, project,
                 logging.error('Option --device-model-id required '
                               'when registrering a model.')
                 sys.exit(-1)
-            if not project:
+            if not project_id:
                 logging.error('Option --project required '
                               'when registrering a model.')
                 sys.exit(-1)
             device_base_url = (
                 'https://%s/v1alpha2/projects/%s/devices' % (api_endpoint,
-                                                             project)
+                                                             project_id)
             )
             device_id = str(uuid.uuid1())
             payload = {

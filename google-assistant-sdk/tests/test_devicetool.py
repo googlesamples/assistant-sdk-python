@@ -58,7 +58,7 @@ def test_build_client():
     my_session = Session()
     my_context = Context()
     my_context.obj = {
-        'PROJECT': 'myproject',
+        'PROJECT_ID': 'myproject',
         'API_ENDPOINT': 'myhostname',
         'API_VERSION': 'myversion',
         'SESSION': my_session
