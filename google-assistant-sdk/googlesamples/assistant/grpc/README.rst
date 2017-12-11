@@ -41,16 +41,17 @@ Setup
 Authorization
 -------------
 
-- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
+- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_.
 
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``::
+- Generate credentials using ``google-oauth-tool``::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
-Run the sample
---------------
+Run the samples
+---------------
 
 - Install the sample dependencies::
 
@@ -62,17 +63,37 @@ Run the sample
     # Record a 5 sec sample and play it back
     python -m audio_helpers
 
+- Register or overwrite the device model and device instance with the supported traits::
+
+    python -m devicetool register --model 'my-model-identifier' \
+                                  --type LIGHT --trait action.devices.traits.OnOff \
+                                  --manufacturer 'Assistant SDK developer' \
+                                  --product-name 'Assistant SDK light' \
+                                  --description 'Assistant SDK light device' \
+                                  --device 'my-device-identifier' \
+                                  --nickname 'My Assistant Light'
+
+*Note: The device model identifier must be globally unique, and device instance identifier must be unique within the Google Developer Project associated with the device.*
+
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
-    python -m pushtotalk
+    python -m pushtotalk --device-id 'my-device-identifier'
+
+- Try some Google Assistant voice query like "What time is it?" or "Who am I?".
+
+- Try a device action query like "Turn <nickname / model product name> on".
+
+- Run in verbose mode to see the gRPC communication with the Google Assistant API::
+
+    python -m pushtotalk --device-id 'my-device-identifier' -v
 
 - Send a pre-recorded request to the Assistant::
 
-    python -m pushtotalk -i in.wav
+    python -m pushtotalk --device-id 'my-device-identifier' -i in.wav
 
 - Save the Assistant response to a file::
 
-    python -m pushtotalk -o out.wav
+    python -m pushtotalk --device-id 'my-device-identifier' -o out.wav
 
 Troubleshooting
 ---------------
@@ -85,10 +106,6 @@ Troubleshooting
     # Record and play back some audio using ALSA command-line tools
     arecord --format=S16_LE --duration=5 --rate=16000 --file-type=raw out.raw
     aplay --format=S16_LE --rate=16000 --file-type=raw out.raw
-
-- Run the sample with verbose logging enabled::
-
-    python -m pushtotalk --verbose
 
 - If Assistant audio is choppy, try adjusting the sound device's block size::
 

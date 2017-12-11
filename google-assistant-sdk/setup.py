@@ -39,7 +39,7 @@ with io.open('README.rst', 'r') as fh:
 
 setup(
     name='google-assistant-sdk',
-    version='0.3.3',
+    version='0.4.0',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
     description='Samples and Tools the Google Assistant SDK',
@@ -58,6 +58,8 @@ setup(
         'console_scripts': [
             'googlesamples-assistant-audiotest'
             '=googlesamples.assistant.grpc.audio_helpers:main',
+            'googlesamples-assistant-devicetool'
+            '=googlesamples.assistant.grpc.devicetool:main',
             'googlesamples-assistant-pushtotalk'
             '=googlesamples.assistant.grpc.pushtotalk:main [samples]',
             'googlesamples-assistant-hotword'

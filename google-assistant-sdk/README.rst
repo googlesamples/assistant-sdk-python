@@ -9,7 +9,7 @@ Installing
 
 - You can install using `pip`_::
 
-    pip install --upgrade google-assistant-sdk
+    pip install --upgrade google-assistant-sdk[samples]
 
 Usage
 -----
@@ -20,12 +20,14 @@ google-oauthlib-tool
 This tool creates test credentials to authorize devices to call the
 Google Assistant API when prototyping.
 
-- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
+- `Follow the steps <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials::
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
+
+- Generate credentials using ``google-oauth-tool``::
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 googlesamples-assistant-audiotest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,6 +50,59 @@ This tool verifies device setup for audio recording and playback.
 The same ``--audio-block-size`` and ``--audio-flush-size`` options can
 be used on the ``gRPC`` samples included in the SDK.
 
+googlesamples-assistant-devicetool
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This tool allows you to register Google Assistant device models and
+instances and associate them with Device Actions traits.
+
+- Install the sample's dependencies::
+
+    sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade google-assistant-sdk[samples]
+
+- Show the CLI tool usage::
+
+    googlesamples-assistant-devicetool --help
+
+- Register a new device model and new device instance (after replacing the 'placeholder values' between quotes)::
+
+   googlesamples-assistant-devicetool register --model 'my-model-identifier' \
+                                               --type LIGHT --trait action.devices.traits.OnOff \
+                                               --manufacturer 'Assistant SDK developer' \
+                                               --product-name 'Assistant SDK light' \
+                                               --description 'Assistant SDK light device' \
+                                               --device 'my-device-identifier' \
+                                               --nickname 'My Assistant Light'
+
+- Register or overwrite the device model with the supported traits (after replacing the 'placeholder values' between quotes)::
+
+   googlesamples-assistant-devicetool register-model --model 'my-model-identifier' \
+                                                     --type LIGHT --trait action.devices.traits.OnOff \
+                                                     --manufacturer 'Assistant SDK developer' \
+                                                     --product-name 'Assistant SDK light' \
+                                                     --description 'Assistant SDK light device'
+
+*Note: The model identifier must be globally unique.*
+
+- Register or overwrite the device instance using the device model (after replacing the 'placeholder values' between quotes)::
+
+    googlesamples-assistant-devicetool register-device --device 'my-device-identifier' \
+                                                       --model 'my-model-identifier' \
+                                                       --nickname 'My Assistant Light'
+
+*Note: The device instance identifier should be unique within the Google Developer Project associated with the device.*
+
+- Verify that the device model and instance have been registered correctly::
+
+    googlesamples-assistant-devicetool get --model 'my-model-identifier'
+    googlesamples-assistant-devicetool get --device 'my-device-identifier'
+
+- List all device models and instances::
+
+    googlesamples-assistant-devicetool list --model
+    googlesamples-assistant-devicetool list --device
+
 googlesamples-assistant-pushtotalk
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -58,9 +113,17 @@ This reference sample implements a simple but functional client for the `Google 
     sudo apt-get install portaudio19-dev libffi-dev libssl-dev
     pip install --upgrade google-assistant-sdk[samples]
 
-- Try the push to talk sample::
+- Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
-    googlesamples-assistant-pushtotalk
+    googlesamples-assistant-pushtotalk --device-id 'my-device-identifier'
+
+- Try some Google Assistant voice query like "What time is it?" or "Who am I?".
+
+- Try a device action query like "Turn <nickname / model product name> on".
+
+- Run in verbose mode to see the gRPC communication with the Google Assistant API::
+
+    googlesamples-assistant-pushtotalk  --device-id 'my-device-identifier' -v
 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -114,5 +177,3 @@ the License.
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 .. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc
 .. _Google Assistant library: https://developers.google.com/assistant/sdk/reference/library/python
-.. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
-

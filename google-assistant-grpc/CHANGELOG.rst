@@ -1,5 +1,8 @@
 Changelog
 =========
+0.1.0
+-----
+- Adds Device Actions to gRPC protobuf
 
 0.0.2
 -----
