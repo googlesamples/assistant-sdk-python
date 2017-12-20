@@ -1,8 +1,9 @@
 Changelog
 =========
+
 0.1.0
 -----
-- Adds Device Actions to gRPC protobuf
+- Add ``v1alpha2`` gRPC service definition.
 
 0.0.2
 -----

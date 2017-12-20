@@ -1,21 +1,26 @@
 Changelog
 =========
+
 0.4.0
 -----
-- Adds Device Actions
+- Add Device actions handling to samples.
+- Update ``pushtotalk`` sample to ``v1alpha2`` of Google Assistant Service.
+- Add language selection to ``pushtotalk`` sample.
+- New ``textinput`` sample for the Google Assistant Service.
+- New ``devicetool`` tool for device registration.
 
 0.3.3
--------
+-----
 - Update Google Assistant Library from 0.0.2 to 0.0.3
 
 
 0.3.2
---------
+-----
 - Bump urllib3 dependency.
 
 
 0.3.1
---------
+-----
 - Bump dependencies to use new ``google-assistant-grpc`` package (faster install).
 
 
