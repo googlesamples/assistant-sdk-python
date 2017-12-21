@@ -411,11 +411,17 @@ def list(ctx, resource):
     response = json.loads(r.text)
     logging.debug(r.text)
     if resource == 'deviceModels':
-        for devicemodel in response['deviceModels']:
-            pretty_print_model(devicemodel)
+        if 'deviceModels' in response:
+            for devicemodel in response['deviceModels']:
+                pretty_print_model(devicemodel)
+        else:
+            logging.info('No device models found')
     elif resource == 'devices':
-        for device in response['devices']:
-            pretty_print_device(device)
+        if 'devices' in response:
+            for device in response['devices']:
+                pretty_print_device(device)
+        else:
+            logging.info('No devices found')
 
 
 def main():
