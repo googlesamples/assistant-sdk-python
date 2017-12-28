@@ -37,6 +37,7 @@ This tool verifies device setup for audio recording and playback.
 - Install the sample's dependencies::
 
     sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade setuptools
     pip install --upgrade google-assistant-sdk[samples]
 
 - Record 10 seconds of audio samples and play them back::
@@ -59,6 +60,7 @@ instances and associate them with Device Actions traits.
 - Install the sample's dependencies::
 
     sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade setuptools
     pip install --upgrade google-assistant-sdk[samples]
 
 - Show the CLI tool usage::
@@ -111,6 +113,7 @@ This reference sample implements a simple but functional client for the `Google 
 - Install the sample's dependencies::
 
     sudo apt-get install portaudio19-dev libffi-dev libssl-dev
+    pip install --upgrade setuptools
     pip install --upgrade google-assistant-sdk[samples]
 
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
