@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # Copyright (C) 2017 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +13,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
 from __future__ import print_function
+
 import argparse
 import os.path
 import json
+
 import google.auth.transport.requests
 import google.oauth2.credentials
+
 from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
+
+
 DEVICE_API_URL = 'https://embeddedassistant.googleapis.com/v1alpha2'
 
 
@@ -41,14 +49,18 @@ def process_device_actions(event, device_id):
 
 def process_event(event, device_id):
     """Pretty prints events.
+
     Prints all events that occur with two spaces between each new
     conversation and a single space between turns of a conversation.
+
     Args:
         event(event.Event): The current event to process.
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
         print()
+
     print(event)
+
     if (event.type == EventType.ON_CONVERSATION_TURN_FINISHED and
             event.args and not event.args['with_follow_on_turn']):
         print()
@@ -59,8 +71,10 @@ def process_event(event, device_id):
 
 def register_device(project_id, credentials, device_model_id, device_id):
     """Register the device if needed.
+
     Registers a new assistant device if an instance with the given id
     does not already exists for this model.
+
     Args:
        project_id(str): The project ID used to register device instance.
        credentials(google.oauth2.credentials.Credentials): The Google
@@ -79,6 +93,7 @@ def register_device(project_id, credentials, device_model_id, device_id):
         r = session.post(base_url, data=json.dumps({
             'id': device_id,
             'model_id': device_model_id,
+            'client_type': 'SDK_LIBRARY'
         }))
         if r.status_code != 200:
             raise Exception('failed to register device: ' + r.text)
@@ -98,22 +113,27 @@ def main():
                         help='Path to store and read OAuth2 credentials')
     parser.add_argument('--device_model_id', type=str,
                         metavar='DEVICE_MODEL_ID', required=True,
-                        help='The device model ID registered with Google.')
+                        help='The device model ID registered with Google')
     parser.add_argument('--project_id', type=str,
                         metavar='PROJECT_ID', required=False,
-                        help='The project ID used to register device '
-                        + 'instances.')
+                        help=('The project ID used to register'
+                              'device instances'))
+
     args = parser.parse_args()
     with open(args.credentials, 'r') as f:
         credentials = google.oauth2.credentials.Credentials(token=None,
                                                             **json.load(f))
+
     with Assistant(credentials, args.device_model_id) as assistant:
         events = assistant.start()
+
         print('device_model_id:', args.device_model_id + '\n' +
               'device_id:', assistant.device_id + '\n')
+
         if args.project_id:
             register_device(args.project_id, credentials,
                             args.device_model_id, assistant.device_id)
+
         for event in events:
             process_event(event, assistant.device_id)
 

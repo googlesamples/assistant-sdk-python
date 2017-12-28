@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.4.1
+-----
+- Update outdated `hotword` sample.
+
 0.4.0
 -----
 - Add Device actions handling to samples.
