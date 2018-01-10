@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.4.2
+-----
+- Add client type for pushtotalk registration.
+
 0.4.1
 -----
 - Update outdated `hotword` sample.

@@ -388,7 +388,8 @@ def main(api_endpoint, credentials, project_id,
             device_id = str(uuid.uuid1())
             payload = {
                 'id': device_id,
-                'model_id': device_model_id
+                'model_id': device_model_id,
+                'client_type': 'SDK_SERVICE'
             }
             session = google.auth.transport.requests.AuthorizedSession(
                 credentials
