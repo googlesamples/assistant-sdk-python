@@ -32,7 +32,7 @@ try:
     from . import (
         assistant_helpers,
     )
-except SystemError:
+except (SystemError, ImportError):
     import assistant_helpers
 
 

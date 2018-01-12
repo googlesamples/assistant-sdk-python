@@ -40,7 +40,7 @@ try:
         audio_helpers,
         device_helpers
     )
-except SystemError:
+except (SystemError, ImportError):
     import assistant_helpers
     import audio_helpers
     import device_helpers
