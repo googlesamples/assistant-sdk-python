@@ -14,7 +14,7 @@ It includes the following features:
 - Volume ducking and control
 - Conversation state management
 
-See `Getting Started with the Raspberry Pi and Python`_ for a step by step guide on how to get started with the library on Raspberry Pi 3.
+See `Introduction to the Google Assistant Library`_ for a step by step guide on how to get started with the library on the Raspberry Pi 3.
 
 Supported configuration
 -----------------------
@@ -63,10 +63,10 @@ See `LICENSE`_ and `LICENSE.third_party`_.
 .. _Python: https://www.python.org/
 .. _Google Assistant Library: https://developers.google.com/assistant/sdk/reference/library/python
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
-.. _Getting Started with the Raspberry Pi and Python: https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/
+.. _Introduction to the Google Assistant Library: https://developers.google.com/assistant/sdk/guides/library/python/
 .. _pip: https://pip.pypa.io/
 .. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
-.. _Follow the steps: https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account
+.. _Follow the steps: https://developers.google.com/assistant/sdk/guides/library/python/embed/config-dev-project-and-account
 .. _Google API Console Project credentials section: https://console.developers.google.com/apis/credentials
 .. _LICENSE: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE
 .. _LICENSE.third_party: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE.third_party

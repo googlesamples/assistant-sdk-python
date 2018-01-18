@@ -20,7 +20,7 @@ google-oauthlib-tool
 This tool creates test credentials to authorize devices to call the
 Google Assistant API when prototyping.
 
-- `Follow the steps <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
+- `Follow the steps <https://developers.google.com/assistant/sdk/guides/configure-developer-project>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
 - Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
 
@@ -106,7 +106,7 @@ instances and associate them with Device Actions traits.
 googlesamples-assistant-pushtotalk
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This reference sample implements a simple but functional client for the `Google Assistant gRPC API`_.
+This reference sample implements a simple but functional client for the `Google Assistant Service`_.
 
 - Install the sample's dependencies::
 
@@ -128,7 +128,7 @@ This reference sample implements a simple but functional client for the `Google 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This reference sample implements a simple but functional client for the `Google Assistant library`_ (``linux_arm7l`` and ``linux_x86_64``).
+This reference sample implements a simple but functional client for the `Google Assistant Library`_ (``linux_arm7l`` and ``linux_x86_64``).
 
 - Install the ``google-assistant-library`` package::
 
@@ -175,5 +175,5 @@ the License.
 .. _Python: https://python.org/
 .. _pip: https://pip.pypa.io/
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
-.. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc
-.. _Google Assistant library: https://developers.google.com/assistant/sdk/reference/library/python
+.. _Google Assistant Service: https://developers.google.com/assistant/sdk/reference/rpc
+.. _Google Assistant Library: https://developers.google.com/assistant/sdk/reference/library/python

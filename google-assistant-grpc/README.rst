@@ -1,14 +1,14 @@
-Google Assistant gRPC API Bindings for Python
+Google Assistant Service Bindings for Python
 =============================================
 
-This package contains the generated Python_ bindings for the `Google Assistant gRPC API`_.
+This package contains the generated Python_ bindings for the `Google Assistant Service`_.
 It is part of the `Google Assistant SDK`_.
 
 This package should be compatible with POSIX platforms supporting gRPC_ and Python_.
 
 .. _Python: https://www.python.org/
 .. _gRPC: https://www.grpc.io
-.. _Google Assistant gRPC API: https://developers.google.com/assistant/sdk/reference/rpc/
+.. _Google Assistant Service: https://developers.google.com/assistant/sdk/guides/service/python/
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 
 Installing
@@ -21,7 +21,7 @@ Installing
 Authorization
 -------------
 
-- `Follow the steps <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
+- `Follow the steps <https://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
 - Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``.::
 
@@ -98,7 +98,7 @@ Reference
 ---------
 
 - `gRPC reference sample <https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-sdk/googlesamples/assistant/grpc>`_.
-- `Google Assistant gRPC API reference <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
+- `Google Assistant Service reference <https://developers.google.com/assistant/sdk/reference/rpc/>`_.
 
 For Maintainers
 ---------------
