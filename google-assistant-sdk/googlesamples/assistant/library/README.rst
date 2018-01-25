@@ -56,7 +56,7 @@ Run the sample
 
 - Run the hotword sample. The sample waits for the "Ok Google" hotword, then records a voice query and plays back the Google Assistant's answer::
 
-    python -m hotword
+    python -m hotword --device_model_id 'my-model-identifier'
 
 Troubleshooting
 ---------------

@@ -115,7 +115,7 @@ This reference sample implements a simple but functional client for the `Google 
 
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
-    googlesamples-assistant-pushtotalk --device-id 'my-device-identifier'
+    googlesamples-assistant-pushtotalk --device-model-id 'my-device-model' --device-id 'my-device-identifier'
 
 - Try some Google Assistant voice query like "What time is it?" or "Who am I?".
 
@@ -123,7 +123,7 @@ This reference sample implements a simple but functional client for the `Google 
 
 - Run in verbose mode to see the gRPC communication with the Google Assistant API::
 
-    googlesamples-assistant-pushtotalk  --device-id 'my-device-identifier' -v
+    googlesamples-assistant-pushtotalk --device-model-id 'my-device-model' --device-id 'my-device-identifier' -v
 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,7 +137,7 @@ This reference sample implements a simple but functional client for the `Google 
 
 - Try the hotword sample::
 
-    googlesamples-assistant-hotword
+    googlesamples-assistant-hotword --device_model_id 'my-model-identifier'
 
 For Maintainers
 ---------------
