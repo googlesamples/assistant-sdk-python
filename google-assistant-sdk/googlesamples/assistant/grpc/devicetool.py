@@ -24,6 +24,7 @@ import google.auth.transport.requests
 
 
 ASSISTANT_API_VERSION = 'v1alpha2'
+logging.basicConfig(format='', level=logging.INFO)
 
 
 def failed_request_exception(message, r):
@@ -80,8 +81,8 @@ def build_client_from_context(ctx):
 
 def pretty_print_model(devicemodel):
     """Prints out a device model in the terminal by parsing dict."""
-    PRETTY_PRINT_MODEL = """Device Model Id: %(deviceModelId)s
-        Project Id: %(projectId)s
+    PRETTY_PRINT_MODEL = """Device Model ID: %(deviceModelId)s
+        Project ID: %(projectId)s
         Device Type: %(deviceType)s"""
     logging.info(PRETTY_PRINT_MODEL % devicemodel)
     if 'traits' in devicemodel:
@@ -94,7 +95,7 @@ def pretty_print_model(devicemodel):
 
 def pretty_print_device(device):
     """Prints out a device instance in the terminal by parsing dict."""
-    logging.info('Device Instance Id: %s' % device['id'])
+    logging.info('Device Instance ID: %s' % device['id'])
     if 'nickname' in device:
         logging.info('    Nickname: %s' % device['nickname'])
     if 'modelId' in device:
@@ -152,8 +153,8 @@ def cli(ctx, project_id, client_secrets, verbose, api_endpoint, credentials):
     ctx.obj['PROJECT_ID'] = project_id
     ctx.obj['CREDENTIALS'] = c
     ctx.obj['CLIENT_SECRETS'] = client_secrets
-    logging.basicConfig(format='',
-                        level=logging.DEBUG if verbose else logging.INFO)
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
 
 
 @cli.command()
