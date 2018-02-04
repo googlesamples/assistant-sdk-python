@@ -55,6 +55,7 @@ def process_event(event, device_id):
 
     Args:
         event(event.Event): The current event to process.
+        device_id: The device ID of the new instance.
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
         print()
