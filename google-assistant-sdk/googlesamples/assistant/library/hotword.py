@@ -55,7 +55,7 @@ def process_event(event, device_id):
 
     Args:
         event(event.Event): The current event to process.
-        device_id: The device ID of the new instance.
+        device_id(str): The device ID of the new instance.
     """
     if event.type == EventType.ON_CONVERSATION_TURN_STARTED:
         print()
@@ -81,8 +81,8 @@ def register_device(project_id, credentials, device_model_id, device_id):
        credentials(google.oauth2.credentials.Credentials): The Google
                 OAuth2 credentials of the user to associate the device
                 instance with.
-       device_model_id: The registered device model ID.
-       device_id: The device ID of the new instance.
+       device_model_id(str): The registered device model ID.
+       device_id(str): The device ID of the new instance.
     """
     base_url = '/'.join([DEVICE_API_URL, 'projects', project_id, 'devices'])
     device_url = '/'.join([base_url, device_id])
