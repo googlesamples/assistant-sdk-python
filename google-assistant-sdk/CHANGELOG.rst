@@ -1,13 +1,21 @@
 Changelog
 =========
 
+
+0.4.3
+-----
+- Fix Python 2.7/3.6 compatibility for ``pushtotalk`` and ``hotword`` sample.
+
+
 0.4.2
 -----
-- Add client type for pushtotalk registration.
+- Add client type for ``pushtotalk`` registration.
+
 
 0.4.1
 -----
-- Update outdated `hotword` sample.
+- Update outdated ``hotword`` sample.
+
 
 0.4.0
 -----
@@ -16,6 +24,7 @@ Changelog
 - Add language selection to ``pushtotalk`` sample.
 - New ``textinput`` sample for the Google Assistant Service.
 - New ``devicetool`` tool for device registration.
+
 
 0.3.3
 -----
