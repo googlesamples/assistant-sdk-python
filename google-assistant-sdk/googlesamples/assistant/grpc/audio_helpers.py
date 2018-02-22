@@ -210,12 +210,12 @@ class SoundDeviceStream(object):
         return len(buf)
 
     def flush(self):
-        if self._flush_size > 0:
+        if self._audio_stream.active and self._flush_size > 0:
             self._audio_stream.write(b'\x00' * self._flush_size)
 
     def start(self):
         """Start the underlying stream."""
-        if self._audio_stream.active and not self._audio_stream.active:
+        if not self._audio_stream.active:
             self._audio_stream.start()
 
     def stop(self):

@@ -133,6 +133,7 @@ class ConversationStreamTest(unittest.TestCase):
         self.assertEqual(b'foo\0', self.sink.getvalue())
 
     def test_sink_source_state(self):
+        self.assertEquals(False, self.source.started)
         self.stream.start_recording()
         self.assertEquals(True, self.source.started)
         self.stream.stop_recording()
