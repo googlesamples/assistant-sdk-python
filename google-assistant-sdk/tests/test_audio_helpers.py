@@ -88,11 +88,18 @@ class WaveSinkTest(unittest.TestCase):
 
 
 class DummyStream(BytesIO):
+    started = False
+    stopped = False
+    flushed = False
+
     def start(self):
-        pass
+        self.started = True
 
     def stop(self):
-        pass
+        self.stopped = True
+
+    def flush(self):
+        self.flushed = True
 
 
 class ConversationStreamTest(unittest.TestCase):
@@ -125,6 +132,18 @@ class ConversationStreamTest(unittest.TestCase):
         self.assertEqual(True, self.playback_started)
         self.assertEqual(b'foo\0', self.sink.getvalue())
 
+    def test_sink_source_state(self):
+        self.stream.start_recording()
+        self.assertEquals(True, self.source.started)
+        self.stream.stop_recording()
+        self.assertEquals(True, self.source.stopped)
+        
+        self.assertEquals(False, self.sink.started)
+        self.stream.start_playback()
+        self.assertEquals(True, self.sink.started)
+        self.stream.stop_playback()
+        self.assertEquals(True, self.sink.stopped)
+        
     def test_oneshot_conversation(self):
         self.assertEqual(b'audio', self.stream.read(5))
         self.stream.stop_recording()

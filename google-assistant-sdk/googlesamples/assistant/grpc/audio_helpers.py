@@ -165,6 +165,9 @@ class WaveSink(object):
     def stop(self):
         pass
 
+    def flush(self):
+        pass
+
 
 class SoundDeviceStream(object):
     """Audio stream based on an underlying sound device.
@@ -212,13 +215,12 @@ class SoundDeviceStream(object):
 
     def start(self):
         """Start the underlying stream."""
-        if not self._audio_stream.active:
+        if self._audio_stream.active and not self._audio_stream.active:
             self._audio_stream.start()
 
     def stop(self):
         """Stop the underlying stream."""
         if self._audio_stream.active:
-            self.flush()
             self._audio_stream.stop()
 
     def close(self):
@@ -272,20 +274,21 @@ class ConversationStream(object):
         """Start recording from the audio source."""
         self._stop_recording.clear()
         self._source.start()
-        self._sink.start()
 
     def stop_recording(self):
         """Stop recording from the audio source."""
         self._stop_recording.set()
+        self._source.stop()
 
     def start_playback(self):
         """Start playback to the audio sink."""
         self._start_playback.set()
+        self._sink.start()
 
     def stop_playback(self):
         """Stop playback from the audio sink."""
         self._start_playback.clear()
-        self._source.stop()
+        self._sink.flush()
         self._sink.stop()
 
     @property
