@@ -96,6 +96,10 @@ Run the samples
 
     python -m pushtotalk --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' -o out.wav
 
+- Send a text request to the Assistant::
+
+    python -m textinput --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' 
+
 Troubleshooting
 ---------------
 
