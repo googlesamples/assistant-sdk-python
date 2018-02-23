@@ -71,13 +71,14 @@ Run the samples
                                   --product-name 'Assistant SDK light' \
                                   --description 'Assistant SDK light device' \
                                   --device 'my-device-identifier' \
-                                  --nickname 'My Assistant Light'
+                                  --nickname 'My Assistant Light' \
+                                  --client-type SERVICE
 
 *Note: The device model identifier must be globally unique, and device instance identifier must be unique within the Google Developer Project associated with the device.*
 
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
-    python -m pushtotalk --device-id 'my-device-identifier'
+    python -m pushtotalk --device-id 'my-device-identifier' --device-model-id 'my-model-identifier'
 
 - Try some Google Assistant voice query like "What time is it?" or "Who am I?".
 
@@ -85,15 +86,19 @@ Run the samples
 
 - Run in verbose mode to see the gRPC communication with the Google Assistant API::
 
-    python -m pushtotalk --device-id 'my-device-identifier' -v
+    python -m pushtotalk --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' -v
 
 - Send a pre-recorded request to the Assistant::
 
-    python -m pushtotalk --device-id 'my-device-identifier' -i in.wav
+    python -m pushtotalk --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' -i in.wav
 
 - Save the Assistant response to a file::
 
-    python -m pushtotalk --device-id 'my-device-identifier' -o out.wav
+    python -m pushtotalk --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' -o out.wav
+
+- Send text requests to the Assistant::
+
+    python -m textinput --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' 
 
 Troubleshooting
 ---------------
