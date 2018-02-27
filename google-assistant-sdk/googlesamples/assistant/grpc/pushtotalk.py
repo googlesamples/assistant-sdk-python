@@ -371,6 +371,9 @@ def main(api_endpoint, credentials, project_id,
                 device = json.load(f)
                 device_id = device['id']
                 device_model_id = device['model_id']
+                logging.info("Using device model %s and device id %s",
+                             device_model_id,
+                             device_id)
         except Exception as e:
             logging.warning('Device config not found: %s' % e)
             logging.info('Registering device')
