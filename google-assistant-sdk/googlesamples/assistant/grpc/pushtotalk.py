@@ -356,15 +356,6 @@ def main(api_endpoint, credentials, project_id,
         sample_width=audio_sample_width,
     )
 
-    device_handler = device_helpers.DeviceRequestHandler(device_id)
-
-    @device_handler.command('action.devices.commands.OnOff')
-    def onoff(on):
-        if on:
-            logging.info('Turning device on')
-        else:
-            logging.info('Turning device off')
-
     if not device_id or not device_model_id:
         try:
             with open(device_config) as f:
@@ -406,6 +397,15 @@ def main(api_endpoint, credentials, project_id,
             pathlib.Path(os.path.dirname(device_config)).mkdir(exist_ok=True)
             with open(device_config, 'w') as f:
                 json.dump(payload, f)
+
+    device_handler = device_helpers.DeviceRequestHandler(device_id)
+
+    @device_handler.command('action.devices.commands.OnOff')
+    def onoff(on):
+        if on:
+            logging.info('Turning device on')
+        else:
+            logging.info('Turning device off')
 
     with SampleAssistant(lang, device_model_id, device_id,
                          conversation_stream,

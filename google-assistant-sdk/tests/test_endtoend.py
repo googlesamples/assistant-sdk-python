@@ -34,6 +34,7 @@ def device_model():
                            '--project-id', PROJECT_ID,
                            'register-model', '--model', device_model_id,
                            '--type', 'LIGHT',
+                           '--trait', 'action.devices.traits.OnOff',
                            '--manufacturer', 'assistant-sdk-test',
                            '--product-name', 'assistant-sdk-test'])
     yield device_model_id
@@ -123,3 +124,22 @@ def test_endtoend_textinput(device_model, device_instance):
     assert err is None
     assert 'grapefruit' in out
     assert 'pamplemousse' in out
+
+
+def test_onoff_device_action(device_model):
+    temp_dir = tempfile.mkdtemp()
+    audio_out_file = os.path.join(temp_dir, 'out.raw')
+    # Use an non-existing device config file intentionally
+    # to force device registration.
+    device_config = os.path.join(temp_dir, 'device_config.json')
+    out = subprocess.check_output(['python', '-m',
+                                   'googlesamples.assistant.grpc.pushtotalk',
+                                   '--verbose',
+                                   '--project-id', PROJECT_ID,
+                                   '--device-model-id', device_model,
+                                   '--device-config', device_config,
+                                   '-i', 'tests/data/turnon.riff',
+                                   '-o', audio_out_file],
+                                  stderr=subprocess.STDOUT)
+    assert 'turning device on' in builtins.str(out).lower()
+    assert os.path.getsize(audio_out_file) > 0
