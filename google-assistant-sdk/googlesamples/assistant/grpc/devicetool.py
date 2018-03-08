@@ -41,24 +41,6 @@ def failed_request_exception(message, r):
                                                     r.text))
 
 
-def resolve_project_id(client_secrets, credentials):
-    """Resolve project ID from client secrets."""
-    if client_secrets is None:
-        client_secrets = 'client_secret_%s.json' % credentials.client_id
-    try:
-        with open(client_secrets, 'r') as f:
-            secret = json.load(f)
-            return secret['installed']['project_id']
-    except Exception as e:
-        raise click.ClickException('Error loading client secret: %s.\n'
-                                   'Run the device tool '
-                                   'with --client-secrets '
-                                   'or --project-id option.\n'
-                                   'Or copy the %s file '
-                                   'in the current directory.'
-                                   % (e, client_secrets))
-
-
 def build_api_url(api_endpoint, api_version, project_id):
     return 'https://%s/%s/projects/%s' % (api_endpoint,
                                           api_version,
@@ -66,9 +48,7 @@ def build_api_url(api_endpoint, api_version, project_id):
 
 
 def build_client_from_context(ctx):
-    project_id = (ctx.obj['PROJECT_ID']
-                  or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
-                                        ctx.obj['CREDENTIALS']))
+    project_id = ctx.obj['PROJECT_ID']
     api_url = build_api_url(ctx.obj['API_ENDPOINT'],
                             ctx.obj['API_VERSION'],
                             project_id)
@@ -104,22 +84,12 @@ def pretty_print_device(device):
 
 
 @click.group()
-@click.option('--project-id',
+@click.option('--project-id', required=True,
               help='Enter the Google Developer Project ID that you want to '
               'use with the registration tool. If you don\'t use this flag, '
               'the tool will use the project listed in the '
               '<client_secret_client-id.json> file you specify with the '
               '--client-secrets flag.')
-@click.option('--client-secrets',
-              help='Enter the path and filename for the '
-              '<client_secret_client-id.json> file you downloaded from your '
-              'developer project. This file is used to infer the Google '
-              'Developer Project ID if it was not provided with the '
-              '--project-id flag. '
-              'If the --project-id flag and this flag are not used, the '
-              'tool will look for this file in the current directory (by '
-              'searching for a file named after the client_id stored in the '
-              'credentials file).')
 @click.option('--verbose', flag_value=True,
               help='Shows detailed JSON response')
 @click.option('--api-endpoint', default='embeddedassistant.googleapis.com',
@@ -136,7 +106,7 @@ def pretty_print_device(device):
               'API. You can use this flag if the credentials were generated '
               'in a location that is different than the default.')
 @click.pass_context
-def cli(ctx, project_id, client_secrets, verbose, api_endpoint, credentials):
+def cli(ctx, project_id, verbose, api_endpoint, credentials):
     try:
         with open(credentials, 'r') as f:
             c = google.oauth2.credentials.Credentials(token=None,
@@ -152,7 +122,6 @@ def cli(ctx, project_id, client_secrets, verbose, api_endpoint, credentials):
     ctx.obj['SESSION'] = None
     ctx.obj['PROJECT_ID'] = project_id
     ctx.obj['CREDENTIALS'] = c
-    ctx.obj['CLIENT_SECRETS'] = client_secrets
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -214,9 +183,6 @@ def register(ctx, model, type, trait, manufacturer, product_name, description,
     ctx.obj['SESSION'] = google.auth.transport.requests.AuthorizedSession(
         ctx.obj['CREDENTIALS']
     )
-    ctx.obj['PROJECT_ID'] = (ctx.obj['PROJECT_ID']
-                             or resolve_project_id(ctx.obj['CLIENT_SECRETS'],
-                                                   ctx.obj['CREDENTIALS']))
     ctx.invoke(register_model,
                model=model, type=type, trait=trait,
                manufacturer=manufacturer,

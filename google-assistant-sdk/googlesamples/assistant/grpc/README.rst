@@ -43,7 +43,7 @@ Authorization
 
 - Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_.
 
 - Generate credentials using ``google-oauth-tool``::
 
@@ -65,14 +65,14 @@ Run the samples
 
 - Register or overwrite the device model and device instance with the supported traits::
 
-    python -m devicetool register --model 'my-model-identifier' \
-                                  --type LIGHT --trait action.devices.traits.OnOff \
-                                  --manufacturer 'Assistant SDK developer' \
-                                  --product-name 'Assistant SDK light' \
-                                  --description 'Assistant SDK light device' \
-                                  --device 'my-device-identifier' \
-                                  --nickname 'My Assistant Light' \
-                                  --client-type SERVICE
+    python -m devicetool --project-id PROJECT_ID register --model 'my-model-identifier' \
+                                                          --type LIGHT --trait action.devices.traits.OnOff \
+                                                          --manufacturer 'Assistant SDK developer' \
+                                                          --product-name 'Assistant SDK light' \
+                                                          --description 'Assistant SDK light device' \
+                                                          --device 'my-device-identifier' \
+                                                          --nickname 'My Assistant Light' \
+                                                          --client-type SERVICE
 
 *Note: The device model identifier must be globally unique, and device instance identifier must be unique within the Google Developer Project associated with the device.*
 

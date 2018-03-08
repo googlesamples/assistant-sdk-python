@@ -22,7 +22,7 @@ Google Assistant API when prototyping.
 
 - `Follow the steps <https://developers.google.com/assistant/sdk/guides/configure-developer-project>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
 
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ in the current directory.
+- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_.
 
 - Generate credentials using ``google-oauth-tool``::
 
@@ -67,41 +67,41 @@ instances and associate them with Device Actions traits.
 
 - Register a new device model and new device instance (after replacing the 'placeholder values' between quotes)::
 
-   googlesamples-assistant-devicetool register --model 'my-model-identifier' \
-                                               --type LIGHT --trait action.devices.traits.OnOff \
-                                               --manufacturer 'Assistant SDK developer' \
-                                               --product-name 'Assistant SDK light' \
-                                               --description 'Assistant SDK light device' \
-                                               --device 'my-device-identifier' \
-                                               --nickname 'My Assistant Light'
+   googlesamples-assistant-devicetool --project-id PROJECT_ID register --model 'my-model-identifier' \
+                                                                       --type LIGHT --trait action.devices.traits.OnOff \
+                                                                       --manufacturer 'Assistant SDK developer' \
+                                                                       --product-name 'Assistant SDK light' \
+                                                                       --description 'Assistant SDK light device' \
+                                                                       --device 'my-device-identifier' \
+                                                                       --nickname 'My Assistant Light'
 
 - Register or overwrite the device model with the supported traits (after replacing the 'placeholder values' between quotes)::
 
-   googlesamples-assistant-devicetool register-model --model 'my-model-identifier' \
-                                                     --type LIGHT --trait action.devices.traits.OnOff \
-                                                     --manufacturer 'Assistant SDK developer' \
-                                                     --product-name 'Assistant SDK light' \
-                                                     --description 'Assistant SDK light device'
+   googlesamples-assistant-devicetool --project-id PROJECT_ID register-model --model 'my-model-identifier' \
+                                                                             --type LIGHT --trait action.devices.traits.OnOff \
+                                                                             --manufacturer 'Assistant SDK developer' \
+                                                                             --product-name 'Assistant SDK light' \
+                                                                             --description 'Assistant SDK light device'
 
 *Note: The model identifier must be globally unique.*
 
 - Register or overwrite the device instance using the device model (after replacing the 'placeholder values' between quotes)::
 
-    googlesamples-assistant-devicetool register-device --device 'my-device-identifier' \
-                                                       --model 'my-model-identifier' \
-                                                       --nickname 'My Assistant Light'
+    googlesamples-assistant-devicetool --project-id PROJECT_ID register-device --device 'my-device-identifier' \
+                                                                               --model 'my-model-identifier' \
+                                                                               --nickname 'My Assistant Light'
 
 *Note: The device instance identifier should be unique within the Google Developer Project associated with the device.*
 
 - Verify that the device model and instance have been registered correctly::
 
-    googlesamples-assistant-devicetool get --model 'my-model-identifier'
-    googlesamples-assistant-devicetool get --device 'my-device-identifier'
+    googlesamples-assistant-devicetool --project-id PROJECT_ID get --model 'my-model-identifier'
+    googlesamples-assistant-devicetool --project-id PROJECT_ID get --device 'my-device-identifier'
 
 - List all device models and instances::
 
-    googlesamples-assistant-devicetool list --model
-    googlesamples-assistant-devicetool list --device
+    googlesamples-assistant-devicetool --project-id PROJECT_ID list --model
+    googlesamples-assistant-devicetool --project-id PROJECT_ID list --device
 
 googlesamples-assistant-pushtotalk
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

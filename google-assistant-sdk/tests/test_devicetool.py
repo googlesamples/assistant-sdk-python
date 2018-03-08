@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import tempfile
-
 from googlesamples.assistant.grpc import devicetool
 
 
@@ -28,17 +25,6 @@ def test_print_model_with_no_trait(caplog):
     assert 'model-id' in caplog.text
     assert 'project-id' in caplog.text
     assert 'device-type' in caplog.text
-
-
-def test_resolve_project_id():
-    with tempfile.NamedTemporaryFile(mode='w+') as f:
-        f.write(json.dumps({
-            'installed': {
-                'project_id': 'foo'
-            }
-        }))
-        f.flush()
-        assert 'foo' == devicetool.resolve_project_id(f.name, '42')
 
 
 def test_build_api_url():
