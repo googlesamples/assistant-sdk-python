@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.4.4
+-----
+- Fix DeviceHandler initialization issue.
+- Add example action packages for custom device actions.
+- Better feedback on device registration.
+
 
 0.4.3
 -----
