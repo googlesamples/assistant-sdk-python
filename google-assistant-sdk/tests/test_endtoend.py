@@ -15,6 +15,7 @@
 
 import json
 import tempfile
+import time
 import os
 import os.path
 import pytest
@@ -37,6 +38,9 @@ def device_model():
                            '--trait', 'action.devices.traits.OnOff',
                            '--manufacturer', 'assistant-sdk-test',
                            '--product-name', 'assistant-sdk-test'])
+    # Wait 10s for model registration to be consistent
+    # on the Device Registration API.
+    time.sleep(10)
     yield device_model_id
     subprocess.check_call(['python', '-m',
                            'googlesamples.assistant.grpc.devicetool',
@@ -53,6 +57,9 @@ def device_instance(device_model):
                            'register-device', '--model', device_model,
                            '--client-type', 'SERVICE',
                            '--device', device_instance_id])
+    # Wait 30s for device registration to be consistent
+    # on the Device Registration API.
+    time.sleep(30)
     yield device_instance_id
     subprocess.check_call(['python', '-m',
                            'googlesamples.assistant.grpc.devicetool',
@@ -71,6 +78,7 @@ def test_endtoend_pushtotalk():
                                    '-i', 'tests/data/whattimeisit.riff',
                                    '-o', audio_out_file],
                                   stderr=subprocess.STDOUT)
+    print(out)
     assert 'what time is it' in builtins.str(out).lower()
     assert os.path.getsize(audio_out_file) > 0
 
@@ -103,6 +111,7 @@ def test_registration_pushtotalk(device_model):
              'get', '--device', config['id']],
             stderr=subprocess.STDOUT
         )
+        print(out)
         assert ('device instance id: %s' % config['id']
                 in builtins.str(out).lower())
         subprocess.check_call(['python', '-m',
@@ -120,26 +129,25 @@ def test_endtoend_textinput(device_model, device_instance):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE)
     out, err = p.communicate(b'how do you say grapefruit in French?')
+    print(out)
     out = builtins.str(out).lower()
     assert err is None
     assert 'grapefruit' in out
     assert 'pamplemousse' in out
 
 
-def test_onoff_device_action(device_model):
+def test_onoff_device_action(device_model, device_instance):
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
-    # Use an non-existing device config file intentionally
-    # to force device registration.
-    device_config = os.path.join(temp_dir, 'device_config.json')
     out = subprocess.check_output(['python', '-m',
                                    'googlesamples.assistant.grpc.pushtotalk',
                                    '--verbose',
                                    '--project-id', PROJECT_ID,
                                    '--device-model-id', device_model,
-                                   '--device-config', device_config,
+                                   '--device-id', device_instance,
                                    '-i', 'tests/data/turnon.riff',
                                    '-o', audio_out_file],
                                   stderr=subprocess.STDOUT)
+    print(out)
     assert 'turning device on' in builtins.str(out).lower()
     assert os.path.getsize(audio_out_file) > 0
