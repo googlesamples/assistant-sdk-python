@@ -1,0 +1,75 @@
+{
+    "manifest": {
+        "displayName": "Blinky light",
+        "invocationName": "Blinky light",
+        "category": "PRODUCTIVITY"
+    },
+    "actions": [
+        {
+            "name": "com.acme.actions.blink_light",
+            "availability": {
+                "deviceClasses": [
+                    {
+                        "assistantSdkDevice": {}
+                    }
+                ]
+            },
+            "intent": {
+                "name": "com.acme.intents.blink_light",
+                "parameters": [
+                    {
+                        "name": "number",
+                        "type": "SchemaOrg_Number"
+                    },
+                    {
+                        "name": "light_target",
+                        "type": "LightType"
+                    }
+                ],
+                "trigger": {
+                    "queryPatterns": [
+                        "blink the $LightType:light_target $SchemaOrg_Number:number times"
+                    ]
+                }
+            },
+            "fulfillment": {
+                "staticFulfillment": {
+                    "templatedResponse": {
+                        "items": [
+                            {
+                                "simpleResponse": {
+                                    "textToSpeech": "Blinking the $light_target.raw $number times"
+                                }
+                            },
+                            {
+                                "deviceExecution": {
+                                    "command": "com.acme.commands.blink_light",
+                                    "params": {
+                                        "lightKey": "$light_target",
+                                        "number": "$number"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ],
+    "types": [
+        {
+            "name": "$LightType",
+            "entities": [
+                {
+                    "key": "LIGHT",
+                    "synonyms": [
+                        "LED",
+                        "light",
+                        "bulb",
+                        "light bulb"
+                    ]
+                }
+            ]
+        }
+    ]
+}

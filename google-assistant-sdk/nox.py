@@ -26,6 +26,7 @@ def lint(session):
                 'nox.py', 'setup.py')
     session.run('python', 'setup.py', 'check',
                 '--restructuredtext', '--strict')
+    session.run('python', '-m', 'json.tool', 'actions.json')
 
 
 @nox.session
