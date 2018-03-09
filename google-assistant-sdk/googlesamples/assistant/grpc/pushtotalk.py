@@ -21,6 +21,7 @@ import os
 import os.path
 import pathlib2 as pathlib
 import sys
+import time
 import uuid
 
 import click
@@ -406,6 +407,18 @@ def main(api_endpoint, credentials, project_id,
             logging.info('Turning device on')
         else:
             logging.info('Turning device off')
+
+    @device_handler.command('com.example.commands.BlinkLight')
+    def blink(speed, number):
+        logging.info('Blinking device %s times.' % number)
+        delay = 1
+        if speed == "slowly":
+            delay = 2
+        elif speed == "quickly":
+            delay = 0.5
+        for i in range(int(number)):
+            logging.info('Device is blinking.')
+            time.sleep(delay)
 
     with SampleAssistant(lang, device_model_id, device_id,
                          conversation_stream,

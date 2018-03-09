@@ -6,7 +6,7 @@
     },
     "actions": [
         {
-            "name": "com.acme.actions.blink_light",
+            "name": "com.example.actions.BlinkLight",
             "availability": {
                 "deviceClasses": [
                     {
@@ -15,20 +15,21 @@
                 ]
             },
             "intent": {
-                "name": "com.acme.intents.blink_light",
+                "name": "com.example.intents.BlinkLight",
                 "parameters": [
                     {
                         "name": "number",
                         "type": "SchemaOrg_Number"
                     },
                     {
-                        "name": "light_target",
-                        "type": "LightType"
+                        "name": "speed",
+                        "type": "Speed"
                     }
                 ],
                 "trigger": {
                     "queryPatterns": [
-                        "blink the $LightType:light_target $SchemaOrg_Number:number times"
+                        "blink ($Speed:speed)? $SchemaOrg_Number:number times",
+                        "blink $SchemaOrg_Number:number times ($Speed:speed)?"
                     ]
                 }
             },
@@ -38,14 +39,14 @@
                         "items": [
                             {
                                 "simpleResponse": {
-                                    "textToSpeech": "Blinking the $light_target.raw $number times"
+                                    "textToSpeech": "Blinking $speed.raw $number times"
                                 }
                             },
                             {
                                 "deviceExecution": {
-                                    "command": "com.acme.commands.blink_light",
+                                    "command": "com.example.commands.BlinkLight",
                                     "params": {
-                                        "lightKey": "$light_target",
+                                        "speed": "$speed",
                                         "number": "$number"
                                     }
                                 }
@@ -58,15 +59,25 @@
     ],
     "types": [
         {
-            "name": "$LightType",
+            "name": "$Speed",
             "entities": [
                 {
-                    "key": "LIGHT",
+                    "key": "slowly",
                     "synonyms": [
-                        "LED",
-                        "light",
-                        "bulb",
-                        "light bulb"
+                        "slow"
+                    ]
+                },
+                {
+                    "key": "normally",
+                    "synonyms": [
+                        "regular"
+                    ]
+                },
+                {
+                    "key": "quickly",
+                    "synonyms": [
+                        "fast",
+                        "quick"
                     ]
                 }
             ]
