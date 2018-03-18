@@ -123,8 +123,7 @@ class SampleAssistant(object):
         def iter_assist_requests():
             for c in self.gen_assist_requests():
                 assistant_helpers.log_assist_request_without_audio(c)
-                yield c
-            self.conversation_stream.start_playback()
+                yield c                   
 
         # This generator yields AssistResponse proto messages
         # received from the gRPC Google Assistant API.
@@ -138,6 +137,7 @@ class SampleAssistant(object):
                 logging.info('Transcript of user request: "%s".',
                              ' '.join(r.transcript
                                       for r in resp.speech_results))
+                self.conversation_stream.start_playback()
                 logging.info('Playing assistant response.')
             if len(resp.audio_out.audio_data) > 0:
                 self.conversation_stream.write(resp.audio_out.audio_data)
@@ -317,7 +317,6 @@ def main(api_endpoint, credentials, project_id,
     logging.info('Connecting to %s', api_endpoint)
 
     # Configure audio source and sink.
-    audio_device = None
     if input_audio_file:
         audio_source = audio_helpers.WaveSource(
             open(input_audio_file, 'rb'),
@@ -325,13 +324,11 @@ def main(api_endpoint, credentials, project_id,
             sample_width=audio_sample_width
         )
     else:
-        audio_source = audio_device = (
-            audio_device or audio_helpers.SoundDeviceStream(
+        audio_source = audio_helpers.SoundDeviceStream(
                 sample_rate=audio_sample_rate,
                 sample_width=audio_sample_width,
                 block_size=audio_block_size,
                 flush_size=audio_flush_size
-            )
         )
     if output_audio_file:
         audio_sink = audio_helpers.WaveSink(
@@ -340,13 +337,11 @@ def main(api_endpoint, credentials, project_id,
             sample_width=audio_sample_width
         )
     else:
-        audio_sink = audio_device = (
-            audio_device or audio_helpers.SoundDeviceStream(
+        audio_sink = audio_helpers.SoundDeviceStream(
                 sample_rate=audio_sample_rate,
                 sample_width=audio_sample_width,
                 block_size=audio_block_size,
                 flush_size=audio_flush_size
-            )
         )
     # Create conversation stream with the given audio source and sink.
     conversation_stream = audio_helpers.ConversationStream(
