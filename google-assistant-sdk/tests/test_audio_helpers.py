@@ -16,7 +16,6 @@
 import unittest
 
 import time
-import threading
 import wave
 
 from googlesamples.assistant.grpc import audio_helpers
@@ -87,7 +86,7 @@ class WaveSinkTest(unittest.TestCase):
         self.assertEqual(b'RIFF', self.stream.getvalue()[:4])
 
 
-class DummyStream(BytesIO):
+class DummyStream(BytesIO, object):
     started = False
     stopped = False
     flushed = False
@@ -97,6 +96,16 @@ class DummyStream(BytesIO):
 
     def stop(self):
         self.stopped = True
+
+    def read(self, *args):
+        if self.stopped:
+            return b''
+        return super(DummyStream, self).read(*args)
+
+    def write(self, *args):
+        if not self.started:
+            return
+        return super(DummyStream, self).write(*args)
 
     def flush(self):
         self.flushed = True
@@ -121,15 +130,10 @@ class ConversationStreamTest(unittest.TestCase):
 
     def test_start_playback(self):
         self.playback_started = False
-
-        def start_playback():
-            self.playback_started = True
-            self.stream.start_playback()
-        t = threading.Timer(0.1, start_playback)
-        t.start()
-        # write will block until start_playback is called.
         self.stream.write(b'foo')
-        self.assertEqual(True, self.playback_started)
+        self.assertEqual(b'', self.sink.getvalue())
+        self.stream.start_playback()
+        self.stream.write(b'foo')
         self.assertEqual(b'foo\0', self.sink.getvalue())
 
     def test_sink_source_state(self):
@@ -138,13 +142,13 @@ class ConversationStreamTest(unittest.TestCase):
         self.assertEquals(True, self.source.started)
         self.stream.stop_recording()
         self.assertEquals(True, self.source.stopped)
-        
+
         self.assertEquals(False, self.sink.started)
         self.stream.start_playback()
         self.assertEquals(True, self.sink.started)
         self.stream.stop_playback()
         self.assertEquals(True, self.sink.stopped)
-        
+
     def test_oneshot_conversation(self):
         self.assertEqual(b'audio', self.stream.read(5))
         self.stream.stop_recording()

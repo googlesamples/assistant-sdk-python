@@ -123,7 +123,8 @@ class SampleAssistant(object):
         def iter_assist_requests():
             for c in self.gen_assist_requests():
                 assistant_helpers.log_assist_request_without_audio(c)
-                yield c                   
+                yield c
+            self.conversation_stream.stop_recording()
 
         # This generator yields AssistResponse proto messages
         # received from the gRPC Google Assistant API.
@@ -132,7 +133,6 @@ class SampleAssistant(object):
             assistant_helpers.log_assist_response_without_audio(resp)
             if resp.event_type == END_OF_UTTERANCE:
                 logging.info('End of audio request detected')
-                self.conversation_stream.stop_recording()
             if resp.speech_results:
                 logging.info('Transcript of user request: "%s".',
                              ' '.join(r.transcript
