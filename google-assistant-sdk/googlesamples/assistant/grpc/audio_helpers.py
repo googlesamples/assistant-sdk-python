@@ -14,11 +14,12 @@
 
 """Helper functions for audio streams."""
 
-import logging
-import time
-import wave
-import math
 import array
+import logging
+import math
+import time
+import threading
+import wave
 
 import click
 import sounddevice as sd
@@ -266,9 +267,11 @@ class ConversationStream(object):
         self._iter_size = iter_size
         self._sample_width = sample_width
         self._volume_percentage = 50
+        self._end_of_utterance = threading.Event()
 
     def start_recording(self):
         """Start recording from the audio source."""
+        self._end_of_utterance.clear()
         self._source.start()
 
     def stop_recording(self):
@@ -283,6 +286,9 @@ class ConversationStream(object):
         """Stop playback from the audio sink."""
         self._sink.flush()
         self._sink.stop()
+
+    def end_of_utterance(self):
+        self._end_of_utterance.set()
 
     @property
     def volume_percentage(self):
@@ -312,7 +318,10 @@ class ConversationStream(object):
 
     def __iter__(self):
         """Returns a generator reading data from the stream."""
-        return iter(lambda: self.read(self._iter_size), b'')
+        while True:
+            if self._end_of_utterance.is_set():
+                raise StopIteration
+            yield self.read(self._iter_size)
 
     @property
     def sample_rate(self):

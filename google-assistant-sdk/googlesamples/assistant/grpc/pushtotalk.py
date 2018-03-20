@@ -21,6 +21,7 @@ import os
 import os.path
 import pathlib2 as pathlib
 import sys
+import threading
 import uuid
 
 import click
@@ -133,6 +134,7 @@ class SampleAssistant(object):
             assistant_helpers.log_assist_response_without_audio(resp)
             if resp.event_type == END_OF_UTTERANCE:
                 logging.info('End of audio request detected')
+                self.conversation_stream.end_of_utterance()
             if resp.speech_results:
                 logging.info('Transcript of user request: "%s".',
                              ' '.join(r.transcript
