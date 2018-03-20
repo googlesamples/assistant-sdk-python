@@ -17,7 +17,7 @@ Prerequisites
 -------------
 
 - `Python <https://www.python.org/>`_ (>= 3.4 recommended)
-- A `Google API Console Project <https://console.developers.google.com>`_
+- An `Actions Console Project <https://console.actions.google.com/>`_
 - A `Google account <https://myaccount.google.com/>`_
 
 Setup
@@ -35,20 +35,18 @@ Setup
 - Create a new virtual environment (recommended)::
 
     python3 -m venv env
-    env/bin/python -m pip install --upgrade pip setuptools
+    env/bin/python -m pip install --upgrade pip setuptools wheel
     source env/bin/activate
 
 Authorization
 -------------
 
-- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/develop/grpc/config-dev-project-and-account>`_.
-
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_.
-
-- Generate credentials using ``google-oauth-tool``::
+- Follow the steps to `configure the Actions Console project and the Google account <httpsb://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account>`_.
+- Follow the steps to `register a new device model and download the client secrets file <https://developers.google.com/assistant/sdk/guides/service/python/embed/register-device>`_.
+- Generate device credentials using ``google-oauthlib-tool``:
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets path/to/credentials.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 Run the samples
 ---------------
@@ -63,26 +61,13 @@ Run the samples
     # Record a 5 sec sample and play it back
     python -m audio_helpers
 
-- Register or overwrite the device model and device instance with the supported traits::
-
-    python -m devicetool --project-id PROJECT_ID register --model 'my-model-identifier' \
-                                                          --type LIGHT --trait action.devices.traits.OnOff \
-                                                          --manufacturer 'Assistant SDK developer' \
-                                                          --product-name 'Assistant SDK light' \
-                                                          --description 'Assistant SDK light device' \
-                                                          --device 'my-device-identifier' \
-                                                          --nickname 'My Assistant Light' \
-                                                          --client-type SERVICE
-
-*Note: The device model identifier must be globally unique, and device instance identifier must be unique within the Google Developer Project associated with the device.*
-
 - Run the push to talk sample. The sample records a voice query after a key press and plays back the Google Assistant's answer::
 
     python -m pushtotalk --device-id 'my-device-identifier' --device-model-id 'my-model-identifier'
 
 - Try some Google Assistant voice query like "What time is it?" or "Who am I?".
 
-- Try a device action query like "Turn <nickname / model product name> on".
+- Try a device action query like "Turn on".
 
 - Run in verbose mode to see the gRPC communication with the Google Assistant API::
 
@@ -130,6 +115,8 @@ Troubleshooting
     # Set flush size to a value larger than the audio block size. You can
     # run the sample using the --audio-flush-size flag as well.
     python -m audio_helpers --audio-block-size=3200 --audio-flush-size=6400
+
+See also the `troubleshooting section <https://developers.google.com/assistant/sdk/guides/service/troubleshooting>`_ of the official documentation.
 
 License
 -------

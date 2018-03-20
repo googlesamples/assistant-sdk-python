@@ -12,9 +12,9 @@ It demonstrates:
 Prerequisites
 -------------
 
-- `Python <https://www.python.org/>`_ >= 3.4
-- SBC with ``linux-arm7l`` (eg: Rasbperry Pi 3) or ``linux-x86`` architecture.
-- A `Google API Console Project <https://console.developers.google.com>`_
+- `Python <https://www.python.org/>`_ >= 2.7
+- SBC with ``linux-arm7l`` (eg: Rasbperry Pi 3) or ``linux-x86-64`` architecture.
+- An `Actions Console Project <https://console.actions.google.com/>`_
 - A `Google account <https://myaccount.google.com/>`_
 
 Setup
@@ -30,19 +30,18 @@ Setup
 - Create a new virtual environment (recommended)::
 
     python3 -m venv env
-    env/bin/python -m pip install --upgrade pip setuptools
+    env/bin/python -m pip install --upgrade pip setuptools wheel
     source env/bin/activate
 
 Authorization
 -------------
 
-- Follow `the steps to configure the project and the Google account <https://developers.google.com/assistant/sdk/prototype/getting-started-other-platforms/config-dev-project-and-account>`_.
-
-
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_ and generate credentials using ``google-oauth-tool``::
+- Follow the steps to `configure the Actions Console project and the Google account <httpsb://developers.google.com/assistant/sdk/guides/library/python/embed/config-dev-project-and-account>`_.
+- Follow the steps to `register a new device model and download the client secrets file <https://developers.google.com/assistant/sdk/guides/library/python/embed/register-device>`_.
+- Generate device credentials using ``google-oauthlib-tool``:
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets path/to/credentials.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 Run the sample
 --------------
@@ -70,7 +69,7 @@ Troubleshooting
     arecord --format=S16_LE --duration=5 --rate=16000 --file-type=raw out.raw
     aplay --format=S16_LE --rate=16000 --file-type=raw out.raw
 
-See also the `troubleshooting section <https://developers.google.com/assistant/sdk/prototype/getting-started-pi-python/troubleshooting>`_ of the official documentation.
+See also the `troubleshooting section <https://developers.google.com/assistant/sdk/guides/library/troubleshooting>`_ of the official documentation.
 
 License
 -------

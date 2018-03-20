@@ -19,7 +19,7 @@ See `Introduction to the Google Assistant Library`_ for a step by step guide on 
 Supported configuration
 -----------------------
 
-- Python ``>= 3.4``
+- Python ``>= 2.7``
 - Architecture: ``linux-arm7l`` and ``linux-x86_64``
 
 Installing
@@ -32,19 +32,19 @@ Installing
 Authorization
 -------------
 
-- `Follow the steps`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
-
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section`_ and generate credentials using ``google-oauth-tool``.::
+- Follow the steps to `configure the Actions Console project and the Google account <httpsb://developers.google.com/assistant/sdk/guides/library/python/embed/config-dev-project-and-account>`_.
+- Follow the steps to `register a new device model and download the client secrets file <https://developers.google.com/assistant/sdk/guides/library/python/embed/register-device>`_.
+- Generate device credentials using ``google-oauthlib-tool``:
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets path/to/credentials.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 Usage
 -----
 
 - Run the demo::
 
-    google-assistant-demo
+    google-assistant-demo --device_model_id 'my-model-identifier'
 
 - Say "Ok Google" or "Hey Google" followed by a voice query. The demo should
   play back the Assistant's response and log events to the screen.
@@ -66,7 +66,6 @@ See `LICENSE`_ and `LICENSE.third_party`_.
 .. _Introduction to the Google Assistant Library: https://developers.google.com/assistant/sdk/guides/library/python/
 .. _pip: https://pip.pypa.io/
 .. _GitHub releases page: https://github.com/googlesamples/assistant-sdk-python/releases
-.. _Follow the steps: https://developers.google.com/assistant/sdk/guides/library/python/embed/config-dev-project-and-account
 .. _Google API Console Project credentials section: https://console.developers.google.com/apis/credentials
 .. _LICENSE: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE
 .. _LICENSE.third_party: https://github.com/googlesamples/assistant-sdk-python/tree/master/google-assistant-library/LICENSE.third_party

@@ -20,14 +20,12 @@ google-oauthlib-tool
 This tool creates test credentials to authorize devices to call the
 Google Assistant API when prototyping.
 
-- `Follow the steps <https://developers.google.com/assistant/sdk/guides/configure-developer-project>`_ to configure a Google API Console Project and a Google account to use with the Google Assistant SDK.
-
-- Download the ``client_secret_XXXXX.json`` file from the `Google API Console Project credentials section <https://console.developers.google.com/apis/credentials>`_.
-
-- Generate credentials using ``google-oauth-tool``::
+- Follow the steps to `configure the Actions Console project and the Google account <httpsb://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account>`_.
+- Follow the steps to `register a new device model and download the client secrets file <https://developers.google.com/assistant/sdk/guides/service/python/embed/register-device>`_.
+- Generate device credentials using ``google-oauthlib-tool``:
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets client_secret_XXXXX.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets path/to/credentials.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 googlesamples-assistant-audiotest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,6 +123,8 @@ This reference sample implements a simple but functional client for the `Google 
 
     googlesamples-assistant-pushtotalk --device-model-id 'my-device-model' --device-id 'my-device-identifier' -v
 
+Also see sample `README <googlesamples/assistant/grpc/README.rst`_.
+
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -138,6 +138,8 @@ This reference sample implements a simple but functional client for the `Google 
 - Try the hotword sample::
 
     googlesamples-assistant-hotword --device_model_id 'my-model-identifier'
+
+Also see sample `README <googlesamples/assistant/library/README.rst`_.
 
 For Maintainers
 ---------------
