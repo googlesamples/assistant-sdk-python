@@ -21,7 +21,6 @@ import os
 import os.path
 import pathlib2 as pathlib
 import sys
-import threading
 import uuid
 
 import click
@@ -121,20 +120,21 @@ class SampleAssistant(object):
         self.conversation_stream.start_recording()
         logging.info('Recording audio request.')
 
-        def iter_assist_requests():
+        def iter_log_assist_requests():
             for c in self.gen_assist_requests():
                 assistant_helpers.log_assist_request_without_audio(c)
                 yield c
-            self.conversation_stream.stop_recording()
+            logging.debug('Reached end of AssistRequest iteration.')
 
         # This generator yields AssistResponse proto messages
         # received from the gRPC Google Assistant API.
-        for resp in self.assistant.Assist(iter_assist_requests(),
+        for resp in self.assistant.Assist(iter_log_assist_requests(),
                                           self.deadline):
             assistant_helpers.log_assist_response_without_audio(resp)
             if resp.event_type == END_OF_UTTERANCE:
-                logging.info('End of audio request detected')
-                self.conversation_stream.end_of_utterance()
+                logging.info('End of audio request detected.')
+                logging.info('Stopping recording.')
+                self.conversation_stream.stop_recording()
             if resp.speech_results:
                 logging.info('Transcript of user request: "%s".',
                              ' '.join(r.transcript

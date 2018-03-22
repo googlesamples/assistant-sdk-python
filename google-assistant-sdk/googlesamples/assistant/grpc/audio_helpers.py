@@ -267,16 +267,19 @@ class ConversationStream(object):
         self._iter_size = iter_size
         self._sample_width = sample_width
         self._volume_percentage = 50
-        self._end_of_utterance = threading.Event()
+        self._stop_recording = threading.Event()
+        self._source_lock = threading.RLock()
 
     def start_recording(self):
         """Start recording from the audio source."""
-        self._end_of_utterance.clear()
+        self._stop_recording.clear()
         self._source.start()
 
     def stop_recording(self):
         """Stop recording from the audio source."""
-        self._source.stop()
+        self._stop_recording.set()
+        with self._source_lock:
+            self._source.stop()
 
     def start_playback(self):
         """Start playback to the audio sink."""
@@ -286,9 +289,6 @@ class ConversationStream(object):
         """Stop playback from the audio sink."""
         self._sink.flush()
         self._sink.stop()
-
-    def end_of_utterance(self):
-        self._end_of_utterance.set()
 
     @property
     def volume_percentage(self):
@@ -302,7 +302,8 @@ class ConversationStream(object):
     def read(self, size):
         """Read bytes from the source (if currently recording).
         """
-        return self._source.read(size)
+        with self._source_lock:
+            return self._source.read(size)
 
     def write(self, buf):
         """Write bytes to the sink (if currently playing).
@@ -319,7 +320,7 @@ class ConversationStream(object):
     def __iter__(self):
         """Returns a generator reading data from the stream."""
         while True:
-            if self._end_of_utterance.is_set():
+            if self._stop_recording.is_set():
                 raise StopIteration
             yield self.read(self._iter_size)
 
