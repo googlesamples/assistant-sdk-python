@@ -269,9 +269,12 @@ class ConversationStream(object):
         self._volume_percentage = 50
         self._stop_recording = threading.Event()
         self._source_lock = threading.RLock()
+        self._recording = False
+        self._playing = False
 
     def start_recording(self):
         """Start recording from the audio source."""
+        self._recording = True
         self._stop_recording.clear()
         self._source.start()
 
@@ -280,15 +283,26 @@ class ConversationStream(object):
         self._stop_recording.set()
         with self._source_lock:
             self._source.stop()
+        self._recording = False
 
     def start_playback(self):
         """Start playback to the audio sink."""
+        self._playing = True
         self._sink.start()
 
     def stop_playback(self):
         """Stop playback from the audio sink."""
         self._sink.flush()
         self._sink.stop()
+        self._playing = False
+
+    @property
+    def recording(self):
+        return self._recording
+
+    @property
+    def playing(self):
+        return self._playing
 
     @property
     def volume_percentage(self):
