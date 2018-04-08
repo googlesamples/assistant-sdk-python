@@ -23,7 +23,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to get starte
 
 ## License
 
-Copyright (C) 2017 Google Inc.
+Copyright (C) 2018 Google Inc.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
 license agreements.  See the NOTICE file distributed with this work for
