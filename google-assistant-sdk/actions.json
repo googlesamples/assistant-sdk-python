@@ -39,7 +39,7 @@
                         "items": [
                             {
                                 "simpleResponse": {
-                                    "textToSpeech": "Blinking $speed.raw $number times"
+                                    "textToSpeech": "Blinking $number times"
                                 }
                             },
                             {
@@ -64,18 +64,21 @@
                 {
                     "key": "slowly",
                     "synonyms": [
+                        "slowly",
                         "slow"
                     ]
                 },
                 {
                     "key": "normally",
                     "synonyms": [
+                        "normally",
                         "regular"
                     ]
                 },
                 {
                     "key": "quickly",
                     "synonyms": [
+                        "quickly",
                         "fast",
                         "quick"
                     ]
