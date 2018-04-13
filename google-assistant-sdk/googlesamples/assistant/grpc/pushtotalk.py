@@ -320,6 +320,7 @@ def main(api_endpoint, credentials, project_id,
     logging.info('Connecting to %s', api_endpoint)
 
     # Configure audio source and sink.
+    audio_device = None
     if input_audio_file:
         audio_source = audio_helpers.WaveSource(
             open(input_audio_file, 'rb'),
@@ -327,11 +328,13 @@ def main(api_endpoint, credentials, project_id,
             sample_width=audio_sample_width
         )
     else:
-        audio_source = audio_helpers.SoundDeviceStream(
+        audio_source = audio_device = (
+            audio_device or audio_helpers.SoundDeviceStream(
                 sample_rate=audio_sample_rate,
                 sample_width=audio_sample_width,
                 block_size=audio_block_size,
                 flush_size=audio_flush_size
+            )
         )
     if output_audio_file:
         audio_sink = audio_helpers.WaveSink(
@@ -340,11 +343,13 @@ def main(api_endpoint, credentials, project_id,
             sample_width=audio_sample_width
         )
     else:
-        audio_sink = audio_helpers.SoundDeviceStream(
+        audio_sink = audio_device = (
+            audio_device or audio_helpers.SoundDeviceStream(
                 sample_rate=audio_sample_rate,
                 sample_width=audio_sample_width,
                 block_size=audio_block_size,
                 flush_size=audio_flush_size
+            )
         )
     # Create conversation stream with the given audio source and sink.
     conversation_stream = audio_helpers.ConversationStream(
