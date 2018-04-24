@@ -37,8 +37,6 @@ def protoc(session):
                     '--proto_path=googleapis',
                     '--python_out=.',
                     '--grpc_python_out=.',
-                    'proto/google/assistant/embedded/v1alpha1/'
-                    'embedded_assistant.proto',
                     'proto/google/assistant/embedded/v1alpha2/'
                     'embedded_assistant.proto',)
     else:
@@ -46,9 +44,7 @@ def protoc(session):
                     '--proto_path=googleapis',
                     '--python_out=.',
                     '--grpc_python_out=.',
-                    'googleapis/google/assistant/embedded/v1alpha1/'
-                    'embedded_assistant.proto',
-                    'proto/google/assistant/embedded/v1alpha2/'
+                    'googleapis/google/assistant/embedded/v1alpha2/'
                     'embedded_assistant.proto')
 
 

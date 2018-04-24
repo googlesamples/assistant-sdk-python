@@ -5,7 +5,7 @@ from google.assistant.embedded.v1alpha2 import embedded_assistant_pb2 as google_
 
 
 class EmbeddedAssistantStub(object):
-  """Service that implements Google Assistant API.
+  """Service that implements the Google Assistant API.
   """
 
   def __init__(self, channel):
@@ -22,18 +22,18 @@ class EmbeddedAssistantStub(object):
 
 
 class EmbeddedAssistantServicer(object):
-  """Service that implements Google Assistant API.
+  """Service that implements the Google Assistant API.
   """
 
   def Assist(self, request_iterator, context):
-    """Initiates or continues a conversation with the embedded assistant service.
+    """Initiates or continues a conversation with the embedded Assistant Service.
     Each call performs one round-trip, sending an audio request to the service
     and receiving the audio response. Uses bidirectional streaming to receive
     results, such as the `END_OF_UTTERANCE` event, while sending audio.
 
     A conversation is one or more gRPC connections, each consisting of several
     streamed requests and responses.
-    For example, the user says *Add to my shopping list* and the assistant
+    For example, the user says *Add to my shopping list* and the Assistant
     responds *What do you want to add?*. The sequence of streamed requests and
     responses in the first gRPC message could be:
 
@@ -50,7 +50,7 @@ class EmbeddedAssistantServicer(object):
     *   AssistResponse.audio_out
 
 
-    The user then says *bagels* and the assistant responds
+    The user then says *bagels* and the Assistant responds
     *OK, I've added bagels to your shopping list*. This is sent as another gRPC
     connection call to the `Assist` method, again with streamed requests and
     responses, such as:
@@ -67,7 +67,7 @@ class EmbeddedAssistantServicer(object):
     *   AssistResponse.audio_out
 
     Although the precise order of responses is not guaranteed, sequential
-    AssistResponse.audio_out messages will always contain sequential portions
+    `AssistResponse.audio_out` messages will always contain sequential portions
     of audio.
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
