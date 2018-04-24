@@ -136,6 +136,23 @@ def test_endtoend_textinput(device_model, device_instance):
     assert 'pamplemousse' in out
 
 
+def test_endtoend_audiofileinput(device_model, device_instance):
+    temp_dir = tempfile.mkdtemp()
+    audio_out_file = os.path.join(temp_dir, 'out.raw')
+    out = subprocess.check_output(
+        ['python', '-m',
+         'googlesamples.assistant.grpc.audiofileinput',
+         '--verbose',
+         '--device-model-id', device_model,
+         '--device-id', device_instance,
+         '-i', 'tests/data/whattimeisit.riff',
+         '-o', audio_out_file],
+        stderr=subprocess.STDOUT)
+    print(out)
+    assert 'what time is it' in builtins.str(out).lower()
+    assert os.path.getsize(audio_out_file) > 0
+
+
 def test_onoff_device_action(device_model, device_instance):
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')

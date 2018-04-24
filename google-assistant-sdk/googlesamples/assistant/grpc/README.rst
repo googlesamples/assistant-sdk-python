@@ -83,7 +83,11 @@ Run the samples
 
 - Send text requests to the Assistant::
 
-    python -m textinput --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' 
+    python -m textinput --device-id 'my-device-identifier' --device-model-id 'my-model-identifier'
+
+- Send a request to the Assistant from a local audio file and write the Assistant audio response to another file::
+
+    python -m audiofileinput --device-id 'my-device-identifier' --device-model-id 'my-model-identifier' -i in.wav -o out.wav
 
 Troubleshooting
 ---------------
