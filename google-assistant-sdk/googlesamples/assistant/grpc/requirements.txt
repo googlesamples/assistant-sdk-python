@@ -1,4 +1,4 @@
-google-assistant-grpc==0.1.0
+google-assistant-grpc==0.2.0
 google-auth-oauthlib>=0.1.0,<0.3
 urllib3[secure]>=1.21,<2
 sounddevice>=0.3.7,<0.4

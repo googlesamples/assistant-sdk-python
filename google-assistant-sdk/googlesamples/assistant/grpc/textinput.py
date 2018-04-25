@@ -17,6 +17,7 @@
 import os
 import logging
 import json
+import webbrowser
 
 import click
 import google.auth.transport.grpc
@@ -31,13 +32,16 @@ from google.assistant.embedded.v1alpha2 import (
 try:
     from . import (
         assistant_helpers,
+        browser_helpers,
     )
 except (SystemError, ImportError):
     import assistant_helpers
+    import browser_helpers
 
 
 ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
+PLAYING = embedded_assistant_pb2.ScreenOutConfig.PLAYING
 
 
 class SampleTextAssistant(object):
@@ -47,17 +51,19 @@ class SampleTextAssistant(object):
       language_code: language for the conversation.
       device_model_id: identifier of the device model.
       device_id: identifier of the registered device instance.
+      display: enable visual display of assistant response.
       channel: authorized gRPC channel for connection to the
         Google Assistant API.
       deadline_sec: gRPC deadline in seconds for Google Assistant API call.
     """
 
     def __init__(self, language_code, device_model_id, device_id,
-                 channel, deadline_sec):
+                 display, channel, deadline_sec):
         self.language_code = language_code
         self.device_model_id = device_model_id
         self.device_id = device_id
         self.conversation_state = None
+        self.display = display
         self.assistant = embedded_assistant_pb2_grpc.EmbeddedAssistantStub(
             channel
         )
@@ -93,20 +99,25 @@ class SampleTextAssistant(object):
                 ),
                 text_query=text_query,
             )
+            if self.display:
+                config.screen_out_config.screen_mode = PLAYING
             req = embedded_assistant_pb2.AssistRequest(config=config)
             assistant_helpers.log_assist_request_without_audio(req)
             yield req
 
-        display_text = None
+        text_response = None
+        html_response = None
         for resp in self.assistant.Assist(iter_assist_requests(),
                                           self.deadline):
             assistant_helpers.log_assist_response_without_audio(resp)
+            if resp.screen_out.data:
+                html_response = resp.screen_out.data
             if resp.dialog_state_out.conversation_state:
                 conversation_state = resp.dialog_state_out.conversation_state
                 self.conversation_state = conversation_state
             if resp.dialog_state_out.supplemental_display_text:
-                display_text = resp.dialog_state_out.supplemental_display_text
-        return display_text
+                text_response = resp.dialog_state_out.supplemental_display_text
+        return text_response, html_response
 
 
 @click.command()
@@ -120,10 +131,12 @@ class SampleTextAssistant(object):
               help='Path to read OAuth2 credentials.')
 @click.option('--device-model-id',
               metavar='<device model id>',
+              required=True,
               help=(('Unique device model identifier, '
                      'if not specifed, it is read from --device-config')))
 @click.option('--device-id',
               metavar='<device id>',
+              required=True,
               help=(('Unique registered device instance identifier, '
                      'if not specified, it is read from --device-config, '
                      'if no device_config found: a new device is registered '
@@ -132,13 +145,15 @@ class SampleTextAssistant(object):
               metavar='<language code>',
               default='en-US',
               help='Language code of the Assistant')
+@click.option('--display', is_flag=True, default=False,
+              help='Enable visual display of Assistant Response.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--grpc-deadline', default=DEFAULT_GRPC_DEADLINE,
               metavar='<grpc deadline>', show_default=True,
               help='gRPC deadline in seconds')
 def main(api_endpoint, credentials,
-         device_model_id, device_id, lang, verbose,
+         device_model_id, device_id, lang, display, verbose,
          grpc_deadline, *args, **kwargs):
     # Setup logging.
     logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
@@ -161,13 +176,16 @@ def main(api_endpoint, credentials,
         credentials, http_request, api_endpoint)
     logging.info('Connecting to %s', api_endpoint)
 
-    with SampleTextAssistant(lang, device_model_id, device_id,
+    with SampleTextAssistant(lang, device_model_id, device_id, display,
                              grpc_channel, grpc_deadline) as assistant:
         while True:
-            text_query = click.prompt('')
-            click.echo('<you> %s' % text_query)
-            display_text = assistant.assist(text_query=text_query)
-            click.echo('<@assistant> %s' % display_text)
+            query = click.prompt('')
+            click.echo('<you> %s' % query)
+            response_text, response_html = assistant.assist(text_query=query)
+            if display and response_html:
+                webbrowser.open(browser_helpers.to_data_uri(response_html))
+            if response_text:
+                click.echo('<@assistant> %s' % response_text)
 
 
 if __name__ == '__main__':
