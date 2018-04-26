@@ -14,12 +14,12 @@
 
 """Helper functions for audio streams."""
 
-import logging
-import threading
-import time
-import wave
-import math
 import array
+import logging
+import math
+import time
+import threading
+import wave
 
 import click
 import sounddevice as sd
@@ -165,6 +165,9 @@ class WaveSink(object):
     def stop(self):
         pass
 
+    def flush(self):
+        pass
+
 
 class SoundDeviceStream(object):
     """Audio stream based on an underlying sound device.
@@ -207,7 +210,7 @@ class SoundDeviceStream(object):
         return len(buf)
 
     def flush(self):
-        if self._flush_size > 0:
+        if self._audio_stream.active and self._flush_size > 0:
             self._audio_stream.write(b'\x00' * self._flush_size)
 
     def start(self):
@@ -218,7 +221,6 @@ class SoundDeviceStream(object):
     def stop(self):
         """Stop the underlying stream."""
         if self._audio_stream.active:
-            self.flush()
             self._audio_stream.stop()
 
     def close(self):
@@ -264,29 +266,43 @@ class ConversationStream(object):
         self._sink = sink
         self._iter_size = iter_size
         self._sample_width = sample_width
-        self._stop_recording = threading.Event()
-        self._start_playback = threading.Event()
         self._volume_percentage = 50
+        self._stop_recording = threading.Event()
+        self._source_lock = threading.RLock()
+        self._recording = False
+        self._playing = False
 
     def start_recording(self):
         """Start recording from the audio source."""
+        self._recording = True
         self._stop_recording.clear()
         self._source.start()
-        self._sink.start()
 
     def stop_recording(self):
         """Stop recording from the audio source."""
         self._stop_recording.set()
+        with self._source_lock:
+            self._source.stop()
+        self._recording = False
 
     def start_playback(self):
         """Start playback to the audio sink."""
-        self._start_playback.set()
+        self._playing = True
+        self._sink.start()
 
     def stop_playback(self):
         """Stop playback from the audio sink."""
-        self._start_playback.clear()
-        self._source.stop()
+        self._sink.flush()
         self._sink.stop()
+        self._playing = False
+
+    @property
+    def recording(self):
+        return self._recording
+
+    @property
+    def playing(self):
+        return self._playing
 
     @property
     def volume_percentage(self):
@@ -299,19 +315,13 @@ class ConversationStream(object):
 
     def read(self, size):
         """Read bytes from the source (if currently recording).
-
-        Will returns an empty byte string, if stop_recording() was called.
         """
-        if self._stop_recording.is_set():
-            return b''
-        return self._source.read(size)
+        with self._source_lock:
+            return self._source.read(size)
 
     def write(self, buf):
         """Write bytes to the sink (if currently playing).
-
-        Will block until start_playback() is called.
         """
-        self._start_playback.wait()
         buf = align_buf(buf, self._sample_width)
         buf = normalize_audio_buffer(buf, self.volume_percentage)
         return self._sink.write(buf)
@@ -323,7 +333,10 @@ class ConversationStream(object):
 
     def __iter__(self):
         """Returns a generator reading data from the stream."""
-        return iter(lambda: self.read(self._iter_size), b'')
+        while True:
+            if self._stop_recording.is_set():
+                raise StopIteration
+            yield self.read(self._iter_size)
 
     @property
     def sample_rate(self):
