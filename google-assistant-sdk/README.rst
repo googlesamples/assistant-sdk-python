@@ -1,5 +1,5 @@
-Google Assistant SDK for Python
-===============================
+Google Assistant SDK for devices - Python
+=========================================
 
 This package contains a collection of samples and tools to help you
 get started with the `Google Assistant SDK`_ using `Python`_.

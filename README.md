@@ -1,4 +1,4 @@
-# Google Assistant SDK for Python
+# Google Assistant SDK for devices - Python
 
 This repository contains the [Python][python] packages for the [Google Assistant SDK][google-assistant-sdk].
 
