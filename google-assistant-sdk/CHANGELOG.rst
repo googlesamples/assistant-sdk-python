@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.5.0
+-----
+- Add HTML output.
+- Add simpler file i/o sample.
+- Fix crash with empty audio query.
+
+
 0.4.4
 -----
 - Fix DeviceHandler initialization issue.
