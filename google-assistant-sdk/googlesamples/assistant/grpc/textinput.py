@@ -62,6 +62,8 @@ class SampleTextAssistant(object):
         self.device_model_id = device_model_id
         self.device_id = device_id
         self.conversation_state = None
+        # Force reset of first conversation.
+        self.is_new_conversation = True
         self.display = display
         self.assistant = embedded_assistant_pb2_grpc.EmbeddedAssistantStub(
             channel
@@ -79,25 +81,25 @@ class SampleTextAssistant(object):
         """Send a text request to the Assistant and playback the response.
         """
         def iter_assist_requests():
-            dialog_state_in = embedded_assistant_pb2.DialogStateIn(
-                language_code=self.language_code,
-                conversation_state=b''
-            )
-            if self.conversation_state:
-                dialog_state_in.conversation_state = self.conversation_state
             config = embedded_assistant_pb2.AssistConfig(
                 audio_out_config=embedded_assistant_pb2.AudioOutConfig(
                     encoding='LINEAR16',
                     sample_rate_hertz=16000,
                     volume_percentage=0,
                 ),
-                dialog_state_in=dialog_state_in,
+                dialog_state_in=embedded_assistant_pb2.DialogStateIn(
+                    language_code=self.language_code,
+                    conversation_state=self.conversation_state,
+                    is_new_conversation=self.is_new_conversation,
+                ),
                 device_config=embedded_assistant_pb2.DeviceConfig(
                     device_id=self.device_id,
                     device_model_id=self.device_model_id,
                 ),
                 text_query=text_query,
             )
+            # Continue current conversation with later requests.
+            self.is_new_conversation = False
             if self.display:
                 config.screen_out_config.screen_mode = PLAYING
             req = embedded_assistant_pb2.AssistRequest(config=config)

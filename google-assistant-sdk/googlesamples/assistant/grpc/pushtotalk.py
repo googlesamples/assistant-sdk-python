@@ -88,6 +88,8 @@ class SampleAssistant(object):
         # This value, along with MicrophoneMode, supports a more natural
         # "conversation" with the Assistant.
         self.conversation_state = None
+        # Force reset of first conversation.
+        self.is_new_conversation = True
 
         # Create Google Assistant API gRPC client.
         self.assistant = embedded_assistant_pb2_grpc.EmbeddedAssistantStub(
@@ -185,13 +187,6 @@ class SampleAssistant(object):
     def gen_assist_requests(self):
         """Yields: AssistRequest messages to send to the API."""
 
-        dialog_state_in = embedded_assistant_pb2.DialogStateIn(
-                language_code=self.language_code,
-                conversation_state=b''
-            )
-        if self.conversation_state:
-            logging.debug('Sending conversation state.')
-            dialog_state_in.conversation_state = self.conversation_state
         config = embedded_assistant_pb2.AssistConfig(
             audio_in_config=embedded_assistant_pb2.AudioInConfig(
                 encoding='LINEAR16',
@@ -202,7 +197,11 @@ class SampleAssistant(object):
                 sample_rate_hertz=self.conversation_stream.sample_rate,
                 volume_percentage=self.conversation_stream.volume_percentage,
             ),
-            dialog_state_in=dialog_state_in,
+            dialog_state_in=embedded_assistant_pb2.DialogStateIn(
+                language_code=self.language_code,
+                conversation_state=self.conversation_state,
+                is_new_conversation=self.is_new_conversation,
+            ),
             device_config=embedded_assistant_pb2.DeviceConfig(
                 device_id=self.device_id,
                 device_model_id=self.device_model_id,
@@ -210,7 +209,8 @@ class SampleAssistant(object):
         )
         if self.display:
             config.screen_out_config.screen_mode = PLAYING
-
+        # Continue current conversation with later requests.
+        self.is_new_conversation = False
         # The first AssistRequest must contain the AssistConfig
         # and no audio data.
         yield embedded_assistant_pb2.AssistRequest(config=config)
