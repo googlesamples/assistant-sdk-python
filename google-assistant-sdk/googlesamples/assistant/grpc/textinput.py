@@ -17,7 +17,6 @@
 import os
 import logging
 import json
-import webbrowser
 
 import click
 import google.auth.transport.grpc
@@ -146,7 +145,8 @@ class SampleTextAssistant(object):
               default='en-US',
               help='Language code of the Assistant')
 @click.option('--display', is_flag=True, default=False,
-              help='Enable visual display of Assistant Response.')
+              help='Enable visual display of Assistant '
+                   'rich media responses (for certain queries).')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--grpc-deadline', default=DEFAULT_GRPC_DEADLINE,
@@ -183,7 +183,8 @@ def main(api_endpoint, credentials,
             click.echo('<you> %s' % query)
             response_text, response_html = assistant.assist(text_query=query)
             if display and response_html:
-                webbrowser.open(browser_helpers.to_data_uri(response_html))
+                system_browser = browser_helpers.system_browser
+                system_browser.display(response_html)
             if response_text:
                 click.echo('<@assistant> %s' % response_text)
 

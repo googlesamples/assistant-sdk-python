@@ -136,6 +136,32 @@ def test_endtoend_textinput(device_model, device_instance):
     assert 'pamplemousse' in out
 
 
+def test_endtoend_htmloutput(device_model, device_instance):
+    temp_dir = tempfile.mkdtemp()
+    env = os.environ.copy()
+    env['TMPDIR'] = temp_dir
+    p = subprocess.Popen(['python', '-m',
+                          'googlesamples.assistant.grpc.textinput',
+                          '--verbose',
+                          '--device-model-id', device_model,
+                          '--device-id', device_instance,
+                          '--display'],
+                         stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         env=env)
+    out, err = p.communicate(b'how do you say grapefruit in French?')
+    print(out)
+    out = builtins.str(out).lower()
+    assert err is None
+    assert 'grapefruit' in out
+    files = [os.path.join(path, f)
+             for path, _, fs in os.walk(temp_dir) for f in fs]
+    assert len(files) == 1
+    assert os.path.basename(files[0]) == 'google-assistant-sdk-screen-out.html'
+    with open(files[0], 'r') as f:
+        assert 'pamplemousse' in f.read()
+
+
 def test_endtoend_audiofileinput(device_model, device_instance):
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
