@@ -40,11 +40,13 @@ try:
     from . import (
         assistant_helpers,
         audio_helpers,
+        browser_helpers,
         device_helpers
     )
 except (SystemError, ImportError):
     import assistant_helpers
     import audio_helpers
+    import browser_helpers
     import device_helpers
 
 
@@ -52,6 +54,7 @@ ASSISTANT_API_ENDPOINT = 'embeddedassistant.googleapis.com'
 END_OF_UTTERANCE = embedded_assistant_pb2.AssistResponse.END_OF_UTTERANCE
 DIALOG_FOLLOW_ON = embedded_assistant_pb2.DialogStateOut.DIALOG_FOLLOW_ON
 CLOSE_MICROPHONE = embedded_assistant_pb2.DialogStateOut.CLOSE_MICROPHONE
+PLAYING = embedded_assistant_pb2.ScreenOutConfig.PLAYING
 DEFAULT_GRPC_DEADLINE = 60 * 3 + 5
 
 
@@ -70,12 +73,13 @@ class SampleAssistant(object):
     """
 
     def __init__(self, language_code, device_model_id, device_id,
-                 conversation_stream,
+                 conversation_stream, display,
                  channel, deadline_sec, device_handler):
         self.language_code = language_code
         self.device_model_id = device_model_id
         self.device_id = device_id
         self.conversation_stream = conversation_stream
+        self.display = display
 
         # Opaque blob provided in AssistResponse that,
         # when provided in a follow-up AssistRequest,
@@ -142,6 +146,7 @@ class SampleAssistant(object):
                                       for r in resp.speech_results))
             if len(resp.audio_out.audio_data) > 0:
                 if not self.conversation_stream.playing:
+                    self.conversation_stream.stop_recording()
                     self.conversation_stream.start_playback()
                     logging.info('Playing assistant response.')
                 self.conversation_stream.write(resp.audio_out.audio_data)
@@ -165,6 +170,9 @@ class SampleAssistant(object):
                 fs = self.device_handler(device_request)
                 if fs:
                     device_actions_futures.extend(fs)
+            if self.display and resp.screen_out.data:
+                system_browser = browser_helpers.system_browser
+                system_browser.display(resp.screen_out.data)
 
         if len(device_actions_futures):
             logging.info('Waiting for device executions to complete.')
@@ -200,6 +208,9 @@ class SampleAssistant(object):
                 device_model_id=self.device_model_id,
             )
         )
+        if self.display:
+            config.screen_out_config.screen_mode = PLAYING
+
         # The first AssistRequest must contain the AssistConfig
         # and no audio data.
         yield embedded_assistant_pb2.AssistRequest(config=config)
@@ -241,6 +252,9 @@ class SampleAssistant(object):
               metavar='<language code>',
               default='en-US',
               help='Language code of the Assistant')
+@click.option('--display', is_flag=True, default=False,
+              help='Enable visual display of Assistant '
+                   'rich media responses (for certain queries).')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--input-audio-file', '-i',
@@ -279,7 +293,8 @@ class SampleAssistant(object):
 @click.option('--once', default=False, is_flag=True,
               help='Force termination after a single conversation.')
 def main(api_endpoint, credentials, project_id,
-         device_model_id, device_id, device_config, lang, verbose,
+         device_model_id, device_id, device_config,
+         lang, display, verbose,
          input_audio_file, output_audio_file,
          audio_sample_rate, audio_sample_width,
          audio_iter_size, audio_block_size, audio_flush_size,
@@ -424,7 +439,7 @@ def main(api_endpoint, credentials, project_id,
             time.sleep(delay)
 
     with SampleAssistant(lang, device_model_id, device_id,
-                         conversation_stream,
+                         conversation_stream, display,
                          grpc_channel, grpc_deadline,
                          device_handler) as assistant:
         # If file arguments are supplied:

@@ -83,6 +83,35 @@ def test_endtoend_pushtotalk():
     assert os.path.getsize(audio_out_file) > 0
 
 
+def test_endtoend_pushtotalk_htmloutput(device_model, device_instance):
+    temp_dir = tempfile.mkdtemp()
+    audio_out_file = os.path.join(temp_dir, 'out.raw')
+    env = os.environ.copy()
+    env['TMPDIR'] = temp_dir
+    out = subprocess.check_output(['python', '-m',
+                                   'googlesamples.assistant.grpc.pushtotalk',
+                                   '--verbose',
+                                   '--device-model-id', device_model,
+                                   '--device-id', device_instance,
+                                   '-i', 'tests/data/grapefruit.riff',
+                                   '--display',
+                                   '-o', audio_out_file],
+                                  stderr=subprocess.STDOUT, env=env)
+    print(out)
+    assert 'grapefruit' in builtins.str(out).lower()
+    assert os.path.getsize(audio_out_file) > 0
+    files = [os.path.join(path, f)
+             for path, _, fs in os.walk(temp_dir) for f in fs]
+    assert len(files) > 0
+    screen_out = None
+    for f in files:
+        if os.path.basename(f) == 'google-assistant-sdk-screen-out.html':
+            screen_out = f
+    assert screen_out is not None
+    with open(screen_out, 'r') as f:
+        assert 'pamplemousse' in f.read()
+
+
 def test_registration_pushtotalk(device_model):
     temp_dir = tempfile.mkdtemp()
     audio_out_file = os.path.join(temp_dir, 'out.raw')
@@ -136,7 +165,7 @@ def test_endtoend_textinput(device_model, device_instance):
     assert 'pamplemousse' in out
 
 
-def test_endtoend_htmloutput(device_model, device_instance):
+def test_endtoend_textinput_htmloutput(device_model, device_instance):
     temp_dir = tempfile.mkdtemp()
     env = os.environ.copy()
     env['TMPDIR'] = temp_dir
