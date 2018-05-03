@@ -253,8 +253,7 @@ class SampleAssistant(object):
               default='en-US',
               help='Language code of the Assistant')
 @click.option('--display', is_flag=True, default=False,
-              help='Enable visual display of Assistant '
-                   'rich media responses (for certain queries).')
+              help='Enable visual display of Assistant responses in HTML.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
 @click.option('--input-audio-file', '-i',
