@@ -21,7 +21,7 @@ import nox
 def lint(session):
     session.interpreter = 'python3'
     session.install('pip', 'setuptools')
-    session.install('docutils', 'flake8')
+    session.install('docutils', 'flake8', 'readme_renderer')
     session.run('flake8', 'nox.py', 'setup.py')
     session.run('python', 'setup.py', 'check',
                 '--restructuredtext', '--strict')

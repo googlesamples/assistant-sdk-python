@@ -123,7 +123,7 @@ This reference sample implements a simple but functional client for the `Google 
 
     googlesamples-assistant-pushtotalk --device-model-id 'my-device-model' --device-id 'my-device-identifier' -v
 
-Also see sample `README <googlesamples/assistant/grpc/README.rst`_.
+Also see the `grpc sample README <googlesamples/assistant/grpc/README.rst>`_.
 
 googlesamples-assistant-hotword
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,7 +139,7 @@ This reference sample implements a simple but functional client for the `Google 
 
     googlesamples-assistant-hotword --device_model_id 'my-model-identifier'
 
-Also see sample `README <googlesamples/assistant/library/README.rst`_.
+Also see the sample `library sample README <googlesamples/assistant/library/README.rst>`_.
 
 For Maintainers
 ---------------
