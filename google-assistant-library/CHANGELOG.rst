@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.0.0
+-----
+- Support for additional languages. This includes hotword models, queries, and responses.
+- Support for playing news and podcasts.
+- Support for broadcasting voice messages.
 
 0.1.1
 -----
