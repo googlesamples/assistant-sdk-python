@@ -62,21 +62,21 @@
             "name": "$Speed",
             "entities": [
                 {
-                    "key": "slowly",
+                    "key": "SLOWLY",
                     "synonyms": [
                         "slowly",
                         "slow"
                     ]
                 },
                 {
-                    "key": "normally",
+                    "key": "NORMALLY",
                     "synonyms": [
                         "normally",
                         "regular"
                     ]
                 },
                 {
-                    "key": "quickly",
+                    "key": "QUICKLY",
                     "synonyms": [
                         "quickly",
                         "fast",
