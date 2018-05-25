@@ -415,9 +415,9 @@ def main(api_endpoint, credentials, project_id,
     def blink(speed, number):
         logging.info('Blinking device %s times.' % number)
         delay = 1
-        if speed == "slowly":
+        if speed == "SLOWLY":
             delay = 2
-        elif speed == "quickly":
+        elif speed == "QUICKLY":
             delay = 0.5
         for i in range(int(number)):
             logging.info('Device is blinking.')
