@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import builtins
 import json
 import tempfile
 import time
@@ -23,7 +24,10 @@ import subprocess
 import uuid
 
 
-import builtins
+# Propagation delays for Device Registration API resource creation.
+DEVICE_MODEL_PROPAGATION_DELAY_S = 30
+DEVICE_INSTANCE_PROPAGATION_DELAY_S = 60
+
 PROJECT_ID = os.environ.get('PROJECT_ID', 'dummy-project-id')
 
 
@@ -38,9 +42,9 @@ def device_model():
                            '--trait', 'action.devices.traits.OnOff',
                            '--manufacturer', 'assistant-sdk-test',
                            '--product-name', 'assistant-sdk-test'])
-    # Wait 10s for model registration to be consistent
+    # Wait for model registration to be consistent
     # on the Device Registration API.
-    time.sleep(10)
+    time.sleep(DEVICE_MODEL_PROPAGATION_DELAY_S)
     yield device_model_id
     subprocess.check_call(['python', '-m',
                            'googlesamples.assistant.grpc.devicetool',
@@ -57,9 +61,9 @@ def device_instance(device_model):
                            'register-device', '--model', device_model,
                            '--client-type', 'SERVICE',
                            '--device', device_instance_id])
-    # Wait 30s for device registration to be consistent
+    # Wait for device registration to be consistent
     # on the Device Registration API.
-    time.sleep(30)
+    time.sleep(DEVICE_INSTANCE_PROPAGATION_DELAY_S)
     yield device_instance_id
     subprocess.check_call(['python', '-m',
                            'googlesamples.assistant.grpc.devicetool',
