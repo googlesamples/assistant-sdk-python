@@ -1,11 +1,18 @@
 Changelog
 =========
 
+0.2.1
+-----
+- Update ``v1alpha2`` gRPC service definition:
+  - Add new fields for AoG testing/debugging.
+
+
 0.2.0
 -----
 - Update ``v1alpha2`` gRPC service definition:
   - Add ScreenOut/ScreenOutConfig message.
   - Add is_new_conversation field.
+
 
 0.1.0
 -----

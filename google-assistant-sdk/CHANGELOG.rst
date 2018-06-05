@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.5.1
+-----
+- Lint/Fix README.rst.
+- Make device action keys uppercase.
+
+
 0.5.0
 -----
 - Add HTML output.
