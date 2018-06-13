@@ -75,6 +75,9 @@ def main():
     parser.add_argument('--project-id', '--project_id', type=str,
                         metavar='PROJECT_ID', required=False,
                         help='the project ID used to register this device')
+    parser.add_argument('--nickname', type=str,
+                        metavar='NICKNAME', required=False,
+                        help='the nickname used to register this device')
     parser.add_argument('--device-config', type=str,
                         metavar='DEVICE_CONFIG_FILE',
                         default=os.path.join(
@@ -91,6 +94,9 @@ def main():
                             'credentials.json'
                         ),
                         help='path to store and read OAuth2 credentials')
+    parser.add_argument('--query', type=str,
+                        metavar='QUERY',
+                        help='query to send as soon as the Assistant starts')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s ' + Assistant.__version_str__())
 
@@ -130,7 +136,7 @@ def main():
         if should_register or (device_id != last_device_id):
             if args.project_id:
                 register_device(args.project_id, credentials,
-                                device_model_id, device_id)
+                                device_model_id, device_id, args.nickname)
                 pathlib.Path(os.path.dirname(args.device_config)).mkdir(
                     exist_ok=True)
                 with open(args.device_config, 'w') as f:
@@ -142,6 +148,9 @@ def main():
                 print(WARNING_NOT_REGISTERED)
 
         for event in events:
+            if event.type == EventType.ON_START_FINISHED and args.query:
+                assistant.send_text_query(args.query)
+
             process_event(event)
 
 
