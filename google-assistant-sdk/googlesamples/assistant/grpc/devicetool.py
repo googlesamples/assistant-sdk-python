@@ -88,7 +88,7 @@ def pretty_print_device(device):
               help='Enter the Google Developer Project ID that you want to '
               'use with the registration tool. If you don\'t use this flag, '
               'the tool will use the project listed in the '
-              '<client_secret_client-id.json> file you specify with the '
+              'client_secret_<client-id>.json file you specify with the '
               '--client-secrets flag.')
 @click.option('--verbose', flag_value=True,
               help='Shows detailed JSON response')
@@ -101,7 +101,7 @@ def pretty_print_device(device):
                                    'credentials.json'),
               help='File location of the generated credentials file. The '
               'google-oauthlib-tool generates this file after authorizing '
-              'the user with the <client_secret_client-id.json> file. This '
+              'the user with the client_secret_<client-id>.json file. This '
               'credentials file authorizes access to the Google Assistant '
               'API. You can use this flag if the credentials were generated '
               'in a location that is different than the default.')

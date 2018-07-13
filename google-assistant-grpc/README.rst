@@ -26,7 +26,7 @@ Authorization
 - Generate device credentials using ``google-oauthlib-tool``:
 
     pip install --upgrade google-auth-oauthlib[tool]
-    google-oauthlib-tool --client-secrets path/to/credentials.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
+    google-oauthlib-tool --client-secrets path/to/client_secret_<client-id>.json --scope https://www.googleapis.com/auth/assistant-sdk-prototype --save --headless
 
 - Load the device credentials using `google.oauth2.credentials <https://google-auth.readthedocs.io/en/latest/reference/google.oauth2.credentials.html>`_.::
 
