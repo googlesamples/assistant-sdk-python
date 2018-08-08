@@ -335,7 +335,7 @@ class ConversationStream(object):
         """Returns a generator reading data from the stream."""
         while True:
             if self._stop_recording.is_set():
-                raise StopIteration
+                return
             yield self.read(self._iter_size)
 
     @property
