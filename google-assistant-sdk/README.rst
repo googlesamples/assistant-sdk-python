@@ -20,7 +20,7 @@ google-oauthlib-tool
 This tool creates test credentials to authorize devices to call the
 Google Assistant API when prototyping.
 
-- Follow the steps to `configure the Actions Console project and the Google account <httpsb://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account>`_.
+- Follow the steps to `configure the Actions Console project and the Google account <https://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account>`_.
 - Follow the steps to `register a new device model and download the client secrets file <https://developers.google.com/assistant/sdk/guides/service/python/embed/register-device>`_.
 - Generate device credentials using ``google-oauthlib-tool``:
 
