@@ -25,7 +25,7 @@ with io.open('README.rst', 'r') as fh:
 
 setup(
     name='google-assistant-grpc',
-    version='0.2.1.dev1',
+    version='0.2.1',
     author='Google Assistant SDK team',
     author_email='proppy+assistant-sdk@google.com',
     description='Google Assistant API gRPC bindings',

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.0.1
+-----
+- Limited support with no hotwording for ARMv6 architecture (Raspberry Pi Zero).
+- Many improvements to media playback for better performance.
+- Fixed issues with registration.
+- Ensure clean shutdown when Python exception is raised.
+
 1.0.0
 -----
 - Support for additional languages. This includes hotword models, queries, and responses.

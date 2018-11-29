@@ -3,8 +3,10 @@ Changelog
 
 0.5.1
 -----
+- Fix Python generator termination.
 - Lint/Fix README.rst.
 - Make device action keys uppercase.
+- Add `query` and `nickname` flag to library sample.
 
 
 0.5.0
