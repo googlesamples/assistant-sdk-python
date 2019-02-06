@@ -16,7 +16,8 @@
 
 
 from __future__ import print_function
-
+import faulthandler
+faulthandler.enable()
 import argparse
 import json
 import os.path
