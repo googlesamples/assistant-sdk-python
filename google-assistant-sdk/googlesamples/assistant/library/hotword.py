@@ -16,8 +16,6 @@
 
 
 from __future__ import print_function
-import faulthandler
-faulthandler.enable()
 import argparse
 import json
 import os.path
@@ -29,6 +27,9 @@ from google.assistant.library import Assistant
 from google.assistant.library.event import EventType
 from google.assistant.library.file_helpers import existing_file
 from google.assistant.library.device_helpers import register_device
+
+import faulthandler
+faulthandler.enable()
 
 try:
     FileNotFoundError
