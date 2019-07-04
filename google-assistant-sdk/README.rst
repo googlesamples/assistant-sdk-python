@@ -125,22 +125,6 @@ This reference sample implements a simple but functional client for the `Google 
 
 Also see the `grpc sample README <googlesamples/assistant/grpc/README.rst>`_.
 
-googlesamples-assistant-hotword
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This reference sample implements a simple but functional client for the `Google Assistant Library`_ (``linux_arm7l`` and ``linux_x86_64``).
-
-- Install the ``google-assistant-library`` package::
-
-    pip install --upgrade google-assistant-library
-    pip install --upgrade google-assistant-sdk[samples]
-
-- Try the hotword sample::
-
-    googlesamples-assistant-hotword --device_model_id 'my-model-identifier'
-
-Also see the sample `library sample README <googlesamples/assistant/library/README.rst>`_.
-
 For Maintainers
 ---------------
 
@@ -178,4 +162,3 @@ the License.
 .. _pip: https://pip.pypa.io/
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
 .. _Google Assistant Service: https://developers.google.com/assistant/sdk/reference/rpc
-.. _Google Assistant Library: https://developers.google.com/assistant/sdk/reference/library/python

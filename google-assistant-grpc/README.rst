@@ -6,10 +6,13 @@ It is part of the `Google Assistant SDK`_.
 
 This package should be compatible with POSIX platforms supporting gRPC_ and Python_.
 
+.. note::  The Google Assistant Service is available for `non-commercial use`_.
+
 .. _Python: https://www.python.org/
 .. _gRPC: https://www.grpc.io
 .. _Google Assistant Service: https://developers.google.com/assistant/sdk/guides/service/python/
 .. _Google Assistant SDK: https://developers.google.com/assistant/sdk
+.. _non-commercial use: https://developers.google.com/assistant/sdk/terms-of-service
 
 Installing
 ----------
