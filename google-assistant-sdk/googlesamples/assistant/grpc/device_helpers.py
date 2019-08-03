@@ -91,7 +91,10 @@ class DeviceRequestHandler(object):
         """Dispatch device commands to the appropriate handler."""
         try:
             if command in self.handlers:
-                self.handlers[command](**params)
+                if params:
+                    self.handlers[command](**params)
+                else:
+                    self.handlers[command]()
             else:
                 logging.warning('Unsupported command: %s: %s',
                                 command, params)
