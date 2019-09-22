@@ -252,7 +252,7 @@ class SampleAssistant(object):
               metavar='<language code>',
               default='en-US',
               help='Language code of the Assistant')
-@click.option('--display', is_flag=True, default=False,
+@click.option('--display', is_flag=True, default=True,
               help='Enable visual display of Assistant responses in HTML.')
 @click.option('--verbose', '-v', is_flag=True, default=False,
               help='Verbose logging.')
