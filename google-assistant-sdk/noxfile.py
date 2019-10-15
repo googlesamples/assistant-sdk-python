@@ -16,9 +16,8 @@
 import nox
 
 
-@nox.session
+@nox.session(python=["3"])
 def lint(session):
-    session.interpreter = 'python3'
     session.install('pip', 'setuptools')
     session.install('docutils', 'flake8', 'readme_renderer')
     session.run('flake8',
@@ -29,10 +28,8 @@ def lint(session):
     session.run('python', '-m', 'json.tool', 'actions.json')
 
 
-@nox.session
-@nox.parametrize('python_version', ['2.7', '3'])
-def unittest(session, python_version):
-    session.interpreter = 'python' + python_version
+@nox.session(python=['2.7', '3'])
+def unittest(session):
     session.install('pip', 'setuptools')
     session.install('pytest', 'future')
     session.install('../google-assistant-grpc/')
@@ -40,10 +37,8 @@ def unittest(session, python_version):
     session.run('py.test', '-k', 'not test_endtoend', 'tests')
 
 
-@nox.session
-@nox.parametrize('python_version', ['2.7', '3'])
-def endtoend_test(session, python_version):
-    session.interpreter = 'python' + python_version
+@nox.session(python=['2.7', '3'])
+def endtoend_test(session):
     session.install('pip', 'setuptools')
     session.install('pytest', 'future')
     session.install('../google-assistant-grpc/')
