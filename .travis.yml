@@ -5,7 +5,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y portaudio19-dev libffi-dev libssl-dev
 install:
-  - pip install nox-automation
+  - pip install nox
 script:
-  - nox -f google-assistant-grpc/nox.py -s lint
-  - nox -f google-assistant-sdk/nox.py -s lint unittest  
+  - nox -f google-assistant-grpc/noxfile.py -s lint
+  - nox -f google-assistant-sdk/noxfile.py -s lint unittest  
