@@ -210,20 +210,3 @@ def test_endtoend_audiofileinput(device_model, device_instance):
     print(out)
     assert 'what time is it' in builtins.str(out).lower()
     assert os.path.getsize(audio_out_file) > 0
-
-
-def test_onoff_device_action(device_model, device_instance):
-    temp_dir = tempfile.mkdtemp()
-    audio_out_file = os.path.join(temp_dir, 'out.raw')
-    out = subprocess.check_output(['python', '-m',
-                                   'googlesamples.assistant.grpc.pushtotalk',
-                                   '--verbose',
-                                   '--project-id', PROJECT_ID,
-                                   '--device-model-id', device_model,
-                                   '--device-id', device_instance,
-                                   '-i', 'tests/data/turnon.riff',
-                                   '-o', audio_out_file],
-                                  stderr=subprocess.STDOUT)
-    print(out)
-    assert 'turning device on' in builtins.str(out).lower()
-    assert os.path.getsize(audio_out_file) > 0

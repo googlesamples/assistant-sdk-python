@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.3.0
+-----
+- Update Google Assistant Service usage restriction: non-commercial use.
+
+
 0.2.1
 -----
 - Update ``v1alpha2`` gRPC service definition:

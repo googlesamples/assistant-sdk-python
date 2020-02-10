@@ -18,7 +18,7 @@ google-oauthlib-tool
 ~~~~~~~~~~~~~~~~~~~~
 
 This tool creates test credentials to authorize devices to call the
-Google Assistant API when prototyping.
+Google Assistant Service when prototyping.
 
 - Follow the steps to `configure the Actions Console project and the Google account <https://developers.google.com/assistant/sdk/guides/service/python/embed/config-dev-project-and-account>`_.
 - Follow the steps to `register a new device model and download the client secrets file <https://developers.google.com/assistant/sdk/guides/service/python/embed/register-device>`_.
@@ -119,7 +119,7 @@ This reference sample implements a simple but functional client for the `Google 
 
 - Try a device action query like "Turn <nickname / model product name> on".
 
-- Run in verbose mode to see the gRPC communication with the Google Assistant API::
+- Run in verbose mode to see the gRPC communication with the Google Assistant Service::
 
     googlesamples-assistant-pushtotalk --device-model-id 'my-device-model' --device-id 'my-device-identifier' -v
 

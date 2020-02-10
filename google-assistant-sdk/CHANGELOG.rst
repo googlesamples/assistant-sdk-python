@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.6.0
+-----
+- Deprecate Google Assistant Library.
+- Update Google Assistant Service usage restriction: non-commercial use.
+
+
 0.5.1
 -----
 - Fix Python generator termination.
