@@ -54,7 +54,7 @@ def normalize_audio_buffer(buf, volume_percentage, sample_width=2):
     arr = array.array('h', buf)
     for idx in range(0, len(arr)):
         arr[idx] = int(arr[idx]*scale)
-    buf = arr.tostring()
+    buf = arr.tobytes()
     return buf
 
 
