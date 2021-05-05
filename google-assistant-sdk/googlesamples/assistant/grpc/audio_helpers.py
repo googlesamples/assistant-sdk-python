@@ -20,6 +20,7 @@ import math
 import time
 import threading
 import wave
+import sys
 
 import click
 import sounddevice as sd
@@ -54,7 +55,8 @@ def normalize_audio_buffer(buf, volume_percentage, sample_width=2):
     arr = array.array('h', buf)
     for idx in range(0, len(arr)):
         arr[idx] = int(arr[idx]*scale)
-    buf = arr.tostring()
+    # for python >= 3.2 use 'tobytes', otherwise 'tostring'
+    buf = arr.tobytes() if sys.version_info[0] >= 3 and sys.version_info[1] >= 2 else arr.tostring()
     return buf
 
 
