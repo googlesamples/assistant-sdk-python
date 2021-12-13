@@ -453,17 +453,7 @@ def main(api_endpoint, credentials, project_id,
         # When the once flag is set, don't wait for a trigger. Otherwise, wait.
         wait_for_user_trigger = not once
         while True:
-            if wait_for_user_trigger:
-                click.pause(info='Press Enter to send a new request...')
-            continue_conversation = assistant.assist()
-            # wait for user trigger if there is no follow-up turn in
-            # the conversation.
-            wait_for_user_trigger = not continue_conversation
-
-            # If we only want one conversation, break.
-            if once and (not continue_conversation):
-                break
-
+            
 
 if __name__ == '__main__':
     main()
